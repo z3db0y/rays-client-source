@@ -11,7 +11,7 @@
     "build": "npx electron-builder",
     "dist": "npx electron-builder --publish always"
   },
-  "author": "",
+  "author": "z3db0y",
   "license": "ISC",
   "devDependencies": {
     "electron": "^10.4.7",
