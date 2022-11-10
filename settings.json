@@ -1,0 +1,101 @@
+[
+    {
+        "name": "Uncap FPS",
+        "description": "Allows you to play the game at more FPS than your screen refresh rate, which is usually 60 FPS. (Requires client restart)",
+        "id": "uncapFrames",
+        "category": "Utility",
+        "type": "toggle"
+    },
+    {
+        "name": "Resource Swapper",
+        "description": "Enables the resource swapper, an addon used to load custom textures, models, css into clients.",
+        "id": "resourceSwapper",
+        "category": "Utility",
+        "type": "toggle"
+    },
+    {
+        "name": "Updates",
+        "description": "Enables the update checker, which checks for client updates on startup.",
+        "id": "update",
+        "category": "Utility",
+        "type": "toggle"
+    },
+    {
+        "name": "FPS Multiplier",
+        "description": "Flex on your friends with a fake FPS boost.",
+        "id": "fpsMult",
+        "category": "Utility",
+        "type": "slider",
+        "min": 1,
+        "max": 5,
+        "step": 0.1
+    },
+    {
+        "name": "Client Version",
+        "type": "custom",
+        "category": "Utility",
+        "customHTML": "<span id='clientVersion' style='color: white'></span>"
+    },
+    {
+        "name": "Changelog",
+        "type": "button",
+        "label": "Open",
+        "category": "Utility",
+        "onclick": "closWind(); document.getElementById('clientPopupCont').style.display = 'flex'; open_client_changelog()"
+    },
+    {
+        "name": "Client CSS",
+        "description": "Changes the way the UI looks.",
+        "id": "clientStyle",
+        "category": "Style",
+        "type": "toggle"
+    },
+    {
+        "name": "Replace \"CLICK TO PLAY\" with timer",
+        "description": "Replaces the \"CLICK TO PLAY\" text with the time of game remaining.",
+        "id": "clickToPlayReplacer",
+        "category": "Style",
+        "type": "toggle"
+    },
+    {
+        "name": "Sky Image",
+        "description": "Replaces the sky with a custom image.",
+        "id": "skyImage",
+        "category": "Style",
+        "type": "input",
+        "placeholder": "Custom Image URL"
+    },
+    {
+        "name": "Fast Classes",
+        "description": "Shows comp class selector for fast class switching.",
+        "id": "fastClasses",
+        "category": "Style",
+        "type": "toggle"
+    },
+    {
+        "name": "Discord Rich Presence",
+        "description": "Enables the Discord Rich Presence, which shows what you're doing in the game on Discord.",
+        "id": "rpc",
+        "category": "Social",
+        "type": "select",
+        "options": [
+            { "name": "All", "value": "all" },
+            { "name": "Anonymous", "value": "anon" },
+            { "name": "None", "value": "off" }
+        ]
+    },
+    {
+        "name": "Twitch Integration",
+        "category": "Twitch Integration",
+        "label": "Manage",
+        "type": "button",
+        "onclick": "closWind(); document.getElementById('clientPopupCont').style.display = 'flex'; open_twitch_settings()"
+    },
+    {
+        "name": "Show player ping",
+        "description": "Replaces the WiFi icon in the player list with the player's ping.",
+        "id": "kpd_ping_addon",
+        "category": "KPD",
+        "type": "toggle"
+    }
+]

@@ -1,0 +1,39 @@
+<h1 style="text-decoration: underline">Twitch Settings</h1>
+
+<div class="twitchInfo" style="margin-bottom: 0.67em;">
+    <img style="display: none" width="10%" height="auto" id="twitchAvatar">
+    <div class="clientItemMod clientItem">
+        <span id="twitchInfo">Fetching info...</span>
+        <button onmouseenter="playTick()" onclick="playSelect()" id="twitchLogin"></button>
+    </div>
+</div>
+
+<div class="clientItem">Stream title <input type="text" id="twitchStreamTitle" style="width: 50%;"></div>
+<div class="clientItem">Stream category <span id="twitchCategoryError" class="material-icons" style="margin-right: 2px; color: #f00; visibility: hidden;">error</span><input type="text" id="twitchStreamCategory" style="width: 50%;"></div>
+<div class="clientItem"><button id="twitchUpdateStreamInfo" onmouseenter="playTick()" onclick="playSelect()">Update</button><span id="twitchInfoUpdateError" class="material-icons" style="color: #f00; display: none;">error</span><span id="twitchInfoUpdateSuccess" class="material-icons" style="color: #0f0; display: none;">check_circle</span></div>
+<!-- <div class="clientItem">Chat addons <select id="twitch_chat_addons" onmouseenter="playTick()" onchange="playSelect(); setClientSetting(this.id, this.value)">
+    <option value="">None</option>
+    <option value="bttv">BetterTTV</option>
+    <option value="ffz">FrankerFaceZ</option>
+    <option value="bttv_ffz">BetterTTV & FrankerFaceZ</option>
+</select></div> -->
+<div class="clientItem">Chat Addons 
+    <label class="toggle" onmouseenter="playTick()"><input type="checkbox" id="7tvA" onclick="playSelect(); twitchAddonTog(0)"><span class="stv"></span></label>
+    <label style="margin-left: 15px" class="toggle" onmouseenter="playTick()"><input type="checkbox" id="bttvA" onclick="playSelect(); twitchAddonTog(1)"><span class="bttv"></span></label>
+    <label style="margin-left: 20px" class="toggle" onmouseenter="playTick()"><input type="checkbox" id="ffzA" onclick="playSelect(); twitchAddonTog(2)"><span class="ffz"></span></label>
+</div>
+
+
+<h2>Commands</h2>
+
+<span class="twitchCommandVariables">
+    Variables:<br>
+    $link - Link to the game<br>
+    $username - Username of the player<br>
+    $timer - Game timer<br>
+</span>
+
+<table id="twitchCommands">
+    <tr><th>Name</th><th>Response</th><th>Actions</th></tr>
+</table>
+<div class="clientItem" style="margin-top: 10px;"><button onmouseenter="playTick()" id="addTwitchCommand">Add</button></div>

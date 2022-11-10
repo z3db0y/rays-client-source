@@ -1,0 +1,41 @@
+appId: com.rays.client
+productName: '[RAYS] Client'
+icon: assets/icon.png
+
+win:
+  artifactName: ${name}-${os}-portable-${version}.${ext}
+  target:
+    - target: nsis
+      arch:
+        - x64
+        - ia32
+    - target: portable
+      arch:
+        - x64
+        - ia32
+
+linux:
+  artifactName: ${name}-${os}-portable-${version}.${ext}
+  target:
+    - target: AppImage
+      # arch:
+      #   - x64
+      #   - ia32
+  category: Game
+
+nsis:
+  artifactName: ${name}-${os}-setup-${version}.${ext}
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+
+publish:
+  provider: github
+  repo: rays-client
+  owner: z3db0y
+
+afterPack: 'compile.js'
+
+files:
+  - "**/*"
+  - "LICENSE.md"

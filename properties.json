@@ -1,0 +1,31 @@
+{
+    "defaultSettings": {
+        "update": true,
+        "uncapFrames": false,
+        "resourceSwapper": true,
+        "clientStyle": false,
+        "clickToPlayReplacer": false,
+        "skyImage": "",
+        "fastClasses": false,
+        "fpsMult": 1,
+        "rpc": "all",
+        "twitch_oauth_token": "",
+        "twitch_show_chat": false,
+        "twitch_chat_addons": 0,
+        "kpd_ping_addon": false,
+        "twitch_commands": [],
+        "alts": [],
+        "draggables": {},
+        "chatCategories": {
+            "messages": true,
+            "unboxings": true,
+            "kills": true,
+            "twitch": false,
+            "other": true
+        }
+    },
+    "windowOpts": {
+        "autoHideMenuBar": true,
+        "show": false
+    }
+}

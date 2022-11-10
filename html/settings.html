@@ -1,0 +1,16 @@
+<h1 style="text-decoration: underline; margin-bottom: 0;">Client Settings</h1>
+<span style="margin-bottom: 0.67em">*Some settings require a restart to take effect.</span>
+
+<div class="clientItem">Unlimited FPS* <label class="toggle" onmouseenter="playTick()"><input type="checkbox" onclick="playSelect(); setClientSetting(this.id, this.checked)" id="uncapFrames"><span></span></label></div>
+<div class="clientItem">ResourceSwapper* <label class="toggle" onmouseenter="playTick()"><input type="checkbox" id="resourceSwapper" onclick="playSelect(); setClientSetting(this.id, this.checked)"><span></span></label></div>
+<div class="clientItem">Check for updates on startup <label class="toggle" onmouseenter="playTick()"><input type="checkbox" id="update" onclick="playSelect(); setClientSetting(this.id, this.checked)"><span></span></label></div>
+<div class="clientItem">Client CSS <label class="toggle" onmouseenter="playTick()"><input type="checkbox" id="clientStyle" onclick="playSelect(); setClientSetting(this.id, this.checked)"><span></span></label></div>
+<div class="clientItem">Replace "CLICK TO PLAY" with timer <label class="toggle" onmouseenter="playTick()"><input type="checkbox" id="clickToPlayReplacer" onclick="playSelect(); setClientSetting(this.id, this.checked)"><span></span></label></div>
+<div class="clientItem">Discord Activity <select id="rpc" onmouseenter="playTick()" onchange="playSelect(); setClientSetting(this.id, this.value)">
+    <option value="all">Normal</option>
+    <option value="anon">Anonymous</option>
+    <option value="off">Off</option>
+</select></div>
+<div class="clientItem">Twitch Integration <button onmouseenter="playTick()" onclick="playSelect(); open_twitch_settings()">Manage</button></div>
+
+<div id="clientInfo" style="position: fixed; bottom: 5px; right: 5px; text-align: right;"></div>

@@ -1,0 +1,407 @@
+@font-face {
+    font-family: 'Orbitron';
+    src: url('client-asset://font.ttf');
+}
+
+@font-face {
+    font-family: 'bullet';
+    src: url('client-asset://bullet.ttf');
+}
+
+#exitClient { border-color: #0a0 !important; }
+#exitClient:hover { border-color: #fff !important; }
+
+body.kpdPingAddon .pListPing {
+    visibility: hidden;
+    height: 0;
+    width: 30%;
+}
+
+body.clientStyle.kpdPingAddon .pListPing::before { font-family: Orbitron !important; }
+
+body.kpdPingAddon .pListPing::before {
+    visibility: visible;
+    font-family: gamefont;
+    content: attr(title);
+    font-size: 20px;
+    margin: 2px 10px;
+    vertical-align: top;
+}
+
+body.clientStyle *, #clientPopup * {
+    font-family: 'Orbitron';
+    text-shadow: none !important;
+}
+
+body.clientStyle .material-icons, body.clientStyle .material-icons-outlined {
+    font-family: 'Material Icons' !important;
+}
+
+body.clientStyle #aHider, body.clientStyle #adCon {
+    display: none !important;
+}
+
+body.clientStyle #subLogoButtons {
+    bottom: 0;
+}
+
+body.clientStyle #lC-cont {
+    visibility: hidden;
+}
+
+body.clientStyle #lC-cont::before {
+    visibility: visible;
+    content: url('client-asset://icon.png');
+    width: 100%;
+    height: 100%;
+    animation: spin 1.5s infinite;
+    display: block;
+    transform-origin: center !important;
+}
+
+@keyframes spin {
+    0% { transform: scale(0.5); }
+    100% { transform: scale(0.5) rotateZ(360deg); }
+}
+
+body.clientStyle #windowHolder {
+    backdrop-filter: blur(10px);
+}
+
+#setHed_dev, #setBod_dev, #setBod_dev .settName {
+    display: block !important;
+}
+
+.clientSett *:last-child {
+    margin-left: auto !important;    
+}
+
+#clientPopupCont {
+    width: 100%;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    backdrop-filter: blur(10px);
+    z-index: 1;
+    align-items: center;
+    justify-content: center;
+}
+
+#clientPopup, #clientPopupCont {
+    display: flex;
+    flex-direction: column;
+}
+
+#clientPopup {
+    min-height: 50%;
+    min-width: 50%;
+    overflow-y: scroll;
+}
+
+#clientPopup::-webkit-scrollbar { display: none; }
+
+#clientPopup * {
+    color: #fff;
+}
+
+.clientItem {
+    width: 100%;
+    font-size: 120%;
+    margin-bottom: 3px;
+    display: flex;
+    justify-self: flex-start;
+    align-items: center;
+}
+
+.clientItem *:first-child { margin-left: auto !important; }
+.clientItem * {
+    font-size: 100%;
+}
+
+.clientItem button {
+    background: none;
+    cursor: pointer;
+    position: relative;
+    outline: none;
+    border: none;
+    transition: .3s;
+    padding: 0;
+    padding-bottom: 2px;
+    margin: auto 5px;
+    height: 100%;
+}
+
+.clientItem button:active {
+    color: #0f0 !important;
+}
+
+.clientItem button::after {
+    position: absolute;
+    transition: .3s;
+    width: 0;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: #fff;
+    content: "";
+}
+
+.clientItem button:hover::after {
+    width: 100%;
+}
+
+.clientItem button:active::after {
+    background: #0f0 !important;
+}
+
+.clientItem .toggle {
+    width: 5%;
+    height: 100%;
+    position: relative;
+}
+
+.clientItem .toggle input {
+    display: none;
+}
+
+.clientItem .toggle span, .clientItem .toggle span::before {
+    width: 100%;
+    height: 100%;
+}
+
+.clientItem .toggle span {
+    padding-bottom: 2px;
+    cursor: pointer;
+}
+
+.clientItem .toggle span::before {
+    content: 'OFF';
+    color: #f00;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition: .3s;
+}
+
+.clientItem .toggle input:checked + span::before {
+    content: 'ON';
+    color: #0f0 !important;
+}
+
+.clientItem .toggle span.stv::before {
+    content: '7TV' !important;
+}
+
+.clientItem .toggle span.bttv::before {
+    content: 'BTTV' !important;
+}
+
+.clientItem .toggle span.ffz::before {
+    content: 'FFZ' !important;
+}
+
+.clientItem .toggle input:checked + span::after {
+    background: #0f0;
+}
+
+.clientItem .toggle span::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    width: 0;
+    background: #f00;
+    transition: .3s;
+}
+
+.clientItem .toggle span:hover::after {
+    width: 100%;
+}
+
+.clientItem .toggle input:disabled + span {
+    cursor: not-allowed;
+}
+
+.clientItem input[type="text"], .clientItem input[type="password"] {
+    background: none;
+    border: none;
+    border-bottom: 2px solid #fff;
+    font-family: bullet, 'Orbitron' !important;
+    letter-spacing: 0.2em;
+}
+
+.clientItem select {
+    background: none;
+    border: none;
+    outline: none;
+    border-bottom: 2px solid #fff;
+    cursor: pointer;
+}
+
+.clientItem select:hover::after {
+    width: 100%;
+}
+
+.clientItem select option {
+    color: #000 !important;
+    background: #fff;
+}
+
+#twitchAvatar {
+    border-radius: 50%;
+    margin-right: 20px;
+}
+
+.twitchInfo {
+    display: flex;
+    justify-content: space-around;
+}
+
+.clientItemMod *:first-child {
+    margin-left: 0 !important;
+}
+
+.clientItemMod {
+    display: flex;
+}
+
+#twitchLogin {
+    height: auto;
+    margin-left: auto;
+}
+
+#twitchInfo {
+    white-space: pre-line;
+}
+
+@keyframes fade {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+.draggable::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #ffffff50;
+    border-radius: inherit;
+    clip-path: inherit;
+}
+
+#chatCategorySelector {
+    height: 40px;
+    background: rgba(0,0,0,.4);
+    border-radius: 5px;
+    margin-bottom: 6px;
+    pointer-events: all;
+    display: flex;
+    width: fit-content;
+}
+
+#chatCategorySelector button {
+    background: none;
+    border: none;
+    outline: none;
+    padding: 6px;
+    color: #fff;
+    transition: .3s;
+    border: 2px solid transparent;
+    cursor: pointer;
+}
+
+#chatCategorySelector button:hover {
+    border-color: #fff;
+}
+
+#chatCategorySelector button:first-of-type {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+
+#chatCategorySelector button:last-of-type {
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+#chatList {
+    direction: ltr;
+}
+
+.twitchMsg { display: inline-flex; width: 100%; }
+
+.twitchMsg * {
+    vertical-align: middle;
+}
+
+.twitchMsg img {
+    margin-right: 0.3rem;
+    height: 18px !important;
+}
+
+.twitchMsg .emote {
+    height: 28px !important;
+}
+
+#chatList { display: none !important; }
+#chatList_custom {
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 999999;
+    border-radius: 5px;
+    background-color: rgba(0,0,0,.4);
+    pointer-events: all;
+    opacity: 1;
+    max-height: 250px;
+}
+
+#chatList_custom::-webkit-scrollbar {
+    width: 6px;
+}
+
+#chatList_custom::-webkit-scrollbar-track {
+    background: none;
+    box-shadow: none;
+    border-radius: unset;
+}
+
+#chatList_custom::-webkit-scrollbar-thumb {
+    border-radius: 2px;
+}
+
+#twitchCommands th {
+    font-size: 100%;
+}
+
+#twitchCommands td.clientItem {
+    display: table-cell;
+}
+
+#twitchCommands td.clientItem input {
+    width: 100%;
+}
+
+#twitchCommands td.clientItem:last-child *:first-child {
+    margin-left: auto !important;
+}
+
+#twitchCommands .material-icons {
+    vertical-align: middle;
+    color: inherit;
+}
+
+#twitchCommands td:first-child {
+    width: 25%;
+}
+
+#twitchCommands button {
+    height: auto;
+}
+
+#twitchCommands td.clientItem *:first-child {
+    margin-left: 0 !important;
+}
