@@ -4,12 +4,9 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "npx electron .",
-    "build:win": "npx electron-builder --win",
-    "build:linux": "wsl npx electron-builder --linux",
-    "build:mac": "npx electron-builder --mac",
-    "build": "npx electron-builder",
-    "dist": "npx electron-builder --publish always"
+    "start": "npm exec electron .",
+    "build": "npm exec electron-builder",
+    "dist": "npm exec electron-builder --publish always"
   },
   "author": "z3db0y",
   "license": "ISC",
