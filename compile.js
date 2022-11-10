@@ -9,14 +9,14 @@ module.exports = async function (ctx) {
     if(!app && !!ctx) {
         const asar = require('asar');
         console.log(p, 'compiler called...');
-        if(ctx.packager.platform.nodeName == 'darwin') return console.log(p, 'COMPILER NOT SUPPORTED ON MACOS');
+        // if(ctx.packager.platform.nodeName == 'darwin') return console.log(p, 'COMPILER NOT SUPPORTED ON MACOS');
         var outDir = ctx.appOutDir;
         let execName = ctx.packager.executableName || ctx.packager.appInfo.productFilename;
         let execPath = path.join(outDir, execName);
         if(ctx.packager.platform.nodeName === 'win32') execPath += '.exe';
         if(ctx.packager.platform.nodeName === 'darwin') execPath += '.app';
 
-        let asarPath = path.join(outDir, 'resources/app.asar');
+        let asarPath = ctx.packager.platform.nodeName !== 'darwin' ? path.join(outDir, 'resources/app.asar') : path.join(outDir, 'Contents/Resources/app.asar');
         let isPackaged = fs.existsSync(asarPath);
         console.log(p, 'isPackaged:', isPackaged);
         await new Promise((resolve, reject) => {

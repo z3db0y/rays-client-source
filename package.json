@@ -5,14 +5,16 @@
   "main": "app.js",
   "scripts": {
     "start": "npx electron .",
-    "build": "npx electron-builder --win && wsl npx electron-builder --linux",
     "build:win": "npx electron-builder --win",
-    "build:linux": "wsl npx electron-builder --linux"
+    "build:linux": "wsl npx electron-builder --linux",
+    "build:mac": "npx electron-builder --mac",
+    "build": "npx electron-builder",
+    "dist": "npx electron-builder --publish always"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^9.4.4",
+    "electron": "^10.4.7",
     "electron-builder": "^22.11.3"
   },
   "dependencies": {
