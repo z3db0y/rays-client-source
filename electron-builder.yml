@@ -35,6 +35,7 @@ publish:
   owner: z3db0y
 
 afterPack: 'compile.js'
+npmRebuild: false
 
 files:
   - "**/*"
