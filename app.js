@@ -53,7 +53,12 @@ function launchKrunker() {
 
 async function init() {
     console.log('argv: ', process.argv);
-    if((process.argv[1] == 'run-compile' || (process.platform === 'darwin' && process.argv[2] == 'run-compile')) && fs.existsSync(path.join(__dirname, '/compile.js'))) {
+    // if((process.argv[1] == 'run-compile' || (process.platform === 'darwin' && process.argv[2] == 'run-compile')) && fs.existsSync(path.join(__dirname, '/compile.js'))) {
+    //     await require(path.join(__dirname, '/compile.js'))();
+    //     return app.quit();
+    // }
+
+    if(process.env.ELECTRON_RUN_AS_NODE && fs.existsSync(path.join(__dirname, '/compile.js'))) {
         await require(path.join(__dirname, '/compile.js'))();
         return app.quit();
     }
