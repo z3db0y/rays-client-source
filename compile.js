@@ -18,7 +18,7 @@ console.error = new Proxy(console.error, {
     }
 });
 
-module.exports = (context) => {
+module.exports = async (context) => {
     if(!app || context) {
         console.log('Running in builder');
         let outDir = context.appOutDir;
@@ -43,9 +43,10 @@ module.exports = (context) => {
             child.kill();
         })});
 
-        child.on('close', code => {
-            console.log('child process exited with code', code);
+        let exitCode = await new Promise(resolve => {
+            child.on('close', resolve);
         });
+        console.log('child exited with code', exitCode);
     } else {
         console.log('Running in Electron');
     }
