@@ -53,7 +53,7 @@ function launchKrunker() {
 }
 
 async function init() {
-    if(process.argv.includes('--run-compile') && fs.existsSync(path.join(__dirname, '/compile.js'))) {
+    if(process.argv.includes('run-compile') && fs.existsSync(path.join(__dirname, '/compile.js'))) {
         await require(path.join(__dirname, '/compile.js'))();
         return app.quit();
     }
