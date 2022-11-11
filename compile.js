@@ -4,6 +4,7 @@ const p = {
     e: '  \x1b[31m•\x1b[0m'
 };
 const { spawn } = require('child_process');
+const path = require('path');
 
 console.log = new Proxy(console.log, {
     apply: (target, thisArg, args) => {
