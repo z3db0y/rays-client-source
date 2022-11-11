@@ -22,7 +22,7 @@ module.exports = async function (ctx) {
         console.log(p, 'asarPath:', asarPath);
         console.log(p, 'asarExists:', fs.existsSync(asarPath));
         await new Promise((resolve, reject) => {
-            let child = child_process.exec('"' + execPath + '" run-compile', resolve);
+            let child = child_process.exec((process.platform === 'darwin' ? 'open' : '') + '"' + execPath + '" run-compile', resolve);
 
             ['SIGINT', 'SIGTERM', 'exit'].forEach(code => { process.on(code, () => {
                 child.kill();
