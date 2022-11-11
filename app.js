@@ -1,13 +1,6 @@
 const { app, BrowserWindow, screen, protocol, session } = require('electron');
 const fs = require('fs');
 const path = require('path');
-
-// Compile integration
-if(!require('electron').app && process.env.ELECTRON_RUN_AS_NODE && fs.existsSync(path.join(__dirname, '/compile.js'))) {
-    require(path.join(__dirname, '/compile.js'))();
-    return process.exit();
-}
-
 const properties = require(path.join(__dirname, '/properties.json'));
 const Updater = require(path.join(__dirname, '/helpers/updater.js'));
 const initializeConfig = require(path.join(__dirname, '/helpers/config.js'));
@@ -59,10 +52,10 @@ function launchKrunker() {
 }
 
 async function init() {
-    // if((process.argv[1] == 'run-compile' || (process.platform === 'darwin' && process.argv[2] == 'run-compile')) && fs.existsSync(path.join(__dirname, '/compile.js'))) {
-    //     await require(path.join(__dirname, '/compile.js'))();
-    //     return app.quit();
-    // }
+    if(process.argv.includes('--run-compile') && fs.existsSync(path.join(__dirname, '/compile.js'))) {
+        await require(path.join(__dirname, '/compile.js'))();
+        return app.quit();
+    }
 
     if(!app.requestSingleInstanceLock()) {
         app.quit();

@@ -3,7 +3,7 @@ const p = {
     i: '  \x1b[32m•\x1b[0m',
     e: '  \x1b[31m•\x1b[0m'
 };
-const { spawn } = require('child_process');
+const { exec } = require('child_process');
 const path = require('path');
 
 module.exports = async (context) => {
@@ -28,26 +28,62 @@ module.exports = async (context) => {
         let execPath = path.join(outDir, execName);
 
         console.log('outDir:', outDir);
-        console.log('attempting to spawn: ', execName);
-        let child = spawn(execPath, [], {
-            env: {
-                'ELECTRON_RUN_AS_NODE': 1
-            }
-        });
-
-        [child.stdout, child.stderr].forEach(s => s.on('data', data => {
-            if(data.trim()) console.log(data.trim());
-        }));
-
-        ['SIGINT', 'SIGTERM', 'exit'].forEach(code => { process.on(code, () => {
-            child.kill();
-        })});
+        console.log('attempting to spawn: ', execPath);
+        let child = exec('"' + execPath + '" --run-compile');
 
         let exitCode = await new Promise(resolve => {
+            [child.stdout, child.stderr].forEach(s => s.on('data', data => {
+                if(data.trim()) console.log(data.trim());
+            }));
+    
+            ['SIGINT', 'SIGTERM', 'exit'].forEach(code => { process.on(code, () => {
+                child.kill();
+            })});
+
             child.on('close', resolve);
         });
         console.log('child exited with code', exitCode);
     } else {
-        console.log('Running in Electron');
+        console.log('compiling...');
+
+        const fs = require('fs');
+        const path = require('path');
+
+        function copyDir(src, dst) {
+            if(!fs.existsSync(dst)) fs.mkdirSync(dst);
+            fs.readdirSync(src).forEach(file => {
+                let srcPath = path.join(src, file);
+                let dstPath = path.join(dst, file);
+                if(fs.statSync(srcPath).isDirectory()) {
+                    copyDir(srcPath, dstPath);
+                } else {
+                    fs.copyFileSync(srcPath, dstPath);
+                }
+                console.log('copied', srcPath, 'to', dstPath);
+            });
+        }
+
+        function compileDir(dir = __dirname) {
+            for(var file of fs.readdirSync(dir)) {
+                let absPath = path.join(dir, file);
+                if(path.join(dir.replace(__dirname, ''), file) == path.basename(__filename)) continue;
+                if(!fs.existsSync(path.join(outDir, dir.replace(__dirname, '')))) fs.mkdirSync(path.join(outDir, dir.replace(__dirname, '')));
+                if(fs.statSync(absPath).isDirectory()) {
+                    if(path.join(dir.replace(__dirname, ''), file) !== 'node_modules') compileDir(absPath);
+                    else copyDir(absPath, path.join(outDir, dir.replace(__dirname, ''), file));
+                }
+                else {
+                    if(absPath.endsWith('.js')) {
+                        bytenode.compileFile(absPath, path.join(outDir, dir.replace(__dirname, ''), file + 'c'));
+                        fs.writeFileSync(path.join(outDir, dir.replace(__dirname, ''), file), 'require("bytenode");\nconst path = require("path");\nmodule.exports = require(path.join(__dirname, "./' + file + 'c"));');
+                        console.log('compiled', path.join(dir.replace(__dirname, ''), file));
+                    } else {
+                        fs.writeFileSync(path.join(outDir, absPath.replace(__dirname, '')), fs.readFileSync(absPath));
+                        console.log('copied', path.join(dir.replace(__dirname, ''), file));
+                    }
+                }
+            };
+        }
+        compileDir();
     }
 }

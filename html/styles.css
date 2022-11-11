@@ -60,8 +60,8 @@ body.clientStyle #lC-cont::before {
 }
 
 @keyframes spin {
-    0% { transform: scale(0.5); }
-    100% { transform: scale(0.5) rotateZ(360deg); }
+    0% { transform: scale(0.25); }
+    100% { transform: scale(0.25) rotateZ(360deg); }
 }
 
 body.clientStyle #windowHolder {
