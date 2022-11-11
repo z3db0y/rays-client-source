@@ -6,20 +6,20 @@ const p = {
 const { spawn } = require('child_process');
 const path = require('path');
 
-console.log = new Proxy(console.log, {
-    apply: (target, thisArg, args) => {
-        target.apply(thisArg, [p.i, ...args]);
-    }
-});
-
-console.error = new Proxy(console.error, {
-    apply: (target, thisArg, args) => {
-        target.apply(thisArg, [p.e, ...args]);
-    }
-});
-
 module.exports = async (context) => {
-    if(!app || context) {
+    if(context) {
+        console.log = new Proxy(console.log, {
+            apply: (target, thisArg, args) => {
+                target.apply(thisArg, [p.i, ...args]);
+            }
+        });
+        
+        console.error = new Proxy(console.error, {
+            apply: (target, thisArg, args) => {
+                target.apply(thisArg, [p.e, ...args]);
+            }
+        });
+
         console.log('Running in builder');
         let outDir = context.appOutDir;
         let execName = context.packager.executableName || context.packager.appInfo.productFilename;
