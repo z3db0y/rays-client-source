@@ -48,7 +48,7 @@ module.exports = async (context) => {
         });
         console.log('child exited with code', exitCode);
 
-        if(exitCode !== 0) {
+        if(exitCode) {
             console.error('failed to compile');
             process.exit(exitCode);
         }
