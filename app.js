@@ -1,3 +1,4 @@
+console.log('Actually executed');
 const { app, BrowserWindow, screen, protocol, session } = require('electron');
 const fs = require('fs');
 const path = require('path');
