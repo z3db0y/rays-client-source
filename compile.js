@@ -1,13 +1,14 @@
-const { app } = require('electron');
 const p = {
     i: '  \x1b[32m•\x1b[0m',
     e: '  \x1b[31m•\x1b[0m'
 };
 const { exec } = require('child_process');
 const path = require('path');
+const fs = require('fs');
 
 module.exports = async (context) => {
     if(context) {
+        const asar = require('asar');
         console.log = new Proxy(console.log, {
             apply: (target, thisArg, args) => {
                 target.apply(thisArg, [p.i, ...args]);
@@ -26,8 +27,11 @@ module.exports = async (context) => {
         if(context.packager.platform.nodeName === 'win32') execName += '.exe';
         if(context.packager.platform.nodeName === 'darwin') execName += '.app';
         let execPath = path.join(outDir, execName);
+        let asarPath = context.packager.platform.nodeName === 'darwin' ? path.join(outDir, 'Contents', 'Resources', 'app.asar') : path.join(outDir, 'resources', 'app.asar');
+        let isPackaged = context.packager.platform.nodeName === 'darwin' ? path.join(execPath, 'Contents', 'Resources', 'app') : path.join(execPath, 'resources', 'app');
 
         console.log('outDir:', outDir);
+        console.log('asarPath:', asarPath);
         console.log('attempting to spawn: ', execPath);
         let child = exec('"' + execPath + '" --run-compile');
 
@@ -43,11 +47,24 @@ module.exports = async (context) => {
             child.on('close', resolve);
         });
         console.log('child exited with code', exitCode);
+
+        if(exitCode !== 0) {
+            console.error('failed to compile');
+            process.exit(exitCode);
+        }
+
+        fs.renameSync(path.join(asarPath, '../compiled'), path.join(asarPath, '../app'));
+        if(isPackaged) {
+            console.log('packing asar...');
+            asar.createPackage(path.join(asarPath, '../app'), asarPath);
+        }
+
+        console.log('done compiling');
     } else {
         console.log('compiling...');
 
-        const fs = require('fs');
-        const path = require('path');
+        var outDir = __dirname.endsWith('.asar') ? path.join(__dirname, '../compiled') : path.join(__dirname, 'compiled');
+        const bytenode = require('bytenode');
 
         function copyDir(src, dst) {
             if(!fs.existsSync(dst)) fs.mkdirSync(dst);
