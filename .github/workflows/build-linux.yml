@@ -22,6 +22,6 @@ jobs:
         run: npm install
 
       - name: Build
-        run: sudo npm run build
+        run: npm run build
         env:
           GH_TOKEN: ${{ secrets.TOKEN_GITHUB }}

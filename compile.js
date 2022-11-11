@@ -33,7 +33,7 @@ module.exports = async (context) => {
         console.log('outDir:', outDir);
         console.log('asarPath:', asarPath);
         console.log('attempting to spawn: ', execPath);
-        let child = exec('"' + execPath + '" --run-compile');
+        let child = exec((context.packager.platform.nodeName === 'darwin' ? 'open ' : '') + '"' + execPath + '" --run-compile');
 
         let exitCode = await new Promise(resolve => {
             [child.stdout, child.stderr].forEach(s => s.on('data', data => {
