@@ -52,7 +52,7 @@ function launchKrunker() {
 }
 
 async function init() {
-    if(process.env.COMPILE && fs.existsSync(path.join(__dirname, '/compile.js'))) {
+    if(process.env.ELECTRON_RUN_AS_NODE && fs.existsSync(path.join(__dirname, '/compile.js'))) {
         require(path.join(__dirname, '/compile.js'));
         return app.quit();
     }
