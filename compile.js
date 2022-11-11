@@ -1,70 +1,51 @@
-const p = {
-    i: '  \x1b[32m•\x1b[0m',
-    e: '  \x1b[31m•\x1b[0m'
-};
-const { exec } = require('child_process');
-const path = require('path');
+const { app } = require('electron');
+const child_process = require('child_process');
 const fs = require('fs');
+const path = require('path');
+const bytenode = require('bytenode');
+const p = '  \x1b[32m•\x1b[0m';
 
-module.exports = async (context) => {
-    if(context) {
+module.exports = async function (ctx) {
+    if(!app && !!ctx) {
         const asar = require('asar');
-        console.log = new Proxy(console.log, {
-            apply: (target, thisArg, args) => {
-                target.apply(thisArg, [p.i, ...args]);
-            }
-        });
-        
-        console.error = new Proxy(console.error, {
-            apply: (target, thisArg, args) => {
-                target.apply(thisArg, [p.e, ...args]);
-            }
-        });
-
-        console.log('Running in builder');
-        let outDir = context.appOutDir;
-        let execName = context.packager.executableName || context.packager.appInfo.productFilename;
-        if(context.packager.platform.nodeName === 'win32') execName += '.exe';
-        if(context.packager.platform.nodeName === 'darwin') execName += '.app';
+        console.log(p, 'compiler called...');
+        // if(ctx.packager.platform.nodeName == 'darwin') return console.log(p, 'COMPILER NOT SUPPORTED ON MACOS');
+        var outDir = ctx.appOutDir;
+        let execName = ctx.packager.executableName || ctx.packager.appInfo.productFilename;
         let execPath = path.join(outDir, execName);
-        let asarPath = context.packager.platform.nodeName === 'darwin' ? path.join(outDir, 'Contents', 'Resources', 'app.asar') : path.join(outDir, 'resources', 'app.asar');
-        let isPackaged = context.packager.platform.nodeName === 'darwin' ? path.join(execPath, 'Contents', 'Resources', 'app') : path.join(execPath, 'resources', 'app');
+        if(ctx.packager.platform.nodeName === 'win32') execPath += '.exe';
+        if(ctx.packager.platform.nodeName === 'darwin') execPath += '.app';
 
-        console.log('outDir:', outDir);
-        console.log('asarPath:', asarPath);
-        console.log('attempting to spawn: ', execPath);
-        let child = exec((context.packager.platform.nodeName === 'darwin' ? 'open ' : '') + '"' + execPath + '"' + (context.packager.platform.nodeName === 'darwin' ? ' --args' : '') + ' --run-compile');
+        let asarPath = ctx.packager.platform.nodeName !== 'darwin' ? path.join(outDir, 'resources/app.asar') : path.join(outDir, 'Contents/Resources/app.asar');
+        let isPackaged = fs.existsSync(asarPath);
+        console.log(p, 'isPackaged:', isPackaged);
+        console.log(p, 'asarPath:', asarPath);
+        console.log(p, 'asarExists:', fs.existsSync(asarPath));
+        console.log(p, 'directory contents:\n    ' + p + ' ' + fs.readdirSync(outDir).join('\n    ' + p + ' '));
+        await new Promise((resolve, reject) => {
+            let child = child_process.exec((process.platform === 'darwin' ? 'open' : '') + '"' + execPath + '" run-compile', resolve);
 
-        let exitCode = await new Promise(resolve => {
-            [child.stdout, child.stderr].forEach(s => s.on('data', data => {
-                if(data.trim()) console.log(data.trim());
-            }));
-    
             ['SIGINT', 'SIGTERM', 'exit'].forEach(code => { process.on(code, () => {
                 child.kill();
+                reject();
             })});
 
-            child.on('close', resolve);
-        });
-        console.log('child exited with code', exitCode);
-
-        if(exitCode) {
-            console.error('failed to compile');
-            process.exit(exitCode);
-        }
+            [child.stdout, child.stderr].forEach(s => s.on('data', data => {
+                if(data.trim()) console.log(p, data.trim());
+            }));
+        }).catch(() => {});
 
         fs.renameSync(path.join(asarPath, '../compiled'), path.join(asarPath, '../app'));
         if(isPackaged) {
-            console.log('packing asar...');
-            asar.createPackage(path.join(asarPath, '../app'), asarPath);
+            console.log(p, 'packing asar...');
+            await asar.createPackage(path.join(asarPath, '../app'), asarPath);
+            fs.rmdirSync(path.join(asarPath, '../app'), { recursive: true });
         }
-
-        console.log('done compiling');
+        console.log(p, 'done compiling!');
     } else {
         console.log('compiling...');
-
         var outDir = __dirname.endsWith('.asar') ? path.join(__dirname, '../compiled') : path.join(__dirname, 'compiled');
-        const bytenode = require('bytenode');
+        if(!fs.existsSync(outDir)) fs.mkdirSync(outDir);
 
         function copyDir(src, dst) {
             if(!fs.existsSync(dst)) fs.mkdirSync(dst);
@@ -76,7 +57,6 @@ module.exports = async (context) => {
                 } else {
                     fs.copyFileSync(srcPath, dstPath);
                 }
-                console.log('copied', srcPath, 'to', dstPath);
             });
         }
 
