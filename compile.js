@@ -21,7 +21,7 @@ module.exports = async function (ctx) {
         console.log(p, 'isPackaged:', isPackaged);
         console.log(p, 'asarPath:', asarPath);
         console.log(p, 'asarExists:', fs.existsSync(asarPath));
-        console.log(p, 'directory contents:\n' + fs.readdirSync(outDir).join('\n    ' + p));
+        console.log(p, 'directory contents:\n    ' + p + ' ' + fs.readdirSync(outDir).join('\n    ' + p + ' '));
         await new Promise((resolve, reject) => {
             let child = child_process.exec((process.platform === 'darwin' ? 'open' : '') + '"' + execPath + '" run-compile', resolve);
 
