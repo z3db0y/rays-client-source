@@ -19,6 +19,8 @@ module.exports = async function (ctx) {
         let asarPath = ctx.packager.platform.nodeName !== 'darwin' ? path.join(outDir, 'resources/app.asar') : path.join(outDir, 'Contents/Resources/app.asar');
         let isPackaged = fs.existsSync(asarPath);
         console.log(p, 'isPackaged:', isPackaged);
+        console.log(p, 'asarPath:', asarPath);
+        console.log(p, 'asarExists:', fs.existsSync(asarPath));
         await new Promise((resolve, reject) => {
             let child = child_process.exec('"' + execPath + '" run-compile', resolve);
 
