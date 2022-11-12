@@ -13,7 +13,7 @@
   "devDependencies": {
     "cli-truncate": "^3.1.0",
     "electron": "^10.4.7",
-    "electron-builder": "^22.10.4"
+    "electron-builder": "^22.10.5"
   },
   "dependencies": {
     "bytenode": "^1.3.6",
