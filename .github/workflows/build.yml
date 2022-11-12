@@ -1,4 +1,4 @@
-name: Build RAYS Client (Ubuntu)
+name: Build RAYS Client
 
 on: push
 
