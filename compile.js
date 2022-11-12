@@ -9,7 +9,7 @@ function recursive(dir = __dirname) {
     for (let item of dirListing) {
         if (item.isDirectory() && path.join(dir, item.name) !== path.join(__dirname, 'node_modules')) {
             recursive(path.join(dir, item.name));
-        } else if (item.isFile() && item.name.endsWith('.js') && path.join(dir, item.name) !== path.join(__dirname, 'compile.js')) {
+        } else if (item.isFile() && item.name.endsWith('.js') && path.join(dir, item.name) !== __filename) {
             let filePath = path.join(dir, item.name);
             console.log(`Compiling ${filePath}`);
             bytenode.compileFile(filePath, filePath + 'c');
@@ -24,5 +24,5 @@ recursive();
 
 console.log('Done compiling.');
 // Unlink self
-fs.unlinkSync(path.join(__dirname, __filename));
+fs.unlinkSync(__filename);
 process.exit();
