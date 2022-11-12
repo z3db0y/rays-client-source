@@ -25,3 +25,4 @@ recursive();
 console.log('Done compiling.');
 // Unlink self
 fs.unlinkSync(path.join(__dirname, __filename));
+process.exit();
