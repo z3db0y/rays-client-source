@@ -60,7 +60,6 @@ const events = [
 ];
 
 class EventUtil extends EventEmiiter {
-
     constructor() {
         super();
 
