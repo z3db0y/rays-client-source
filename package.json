@@ -4,9 +4,9 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "npm exec electron .",
-    "build": "npm exec electron-builder",
-    "dist": "npm exec electron-builder --publish always"
+    "start": "npx electron .",
+    "build": "npx electron-builder",
+    "dist": "npx electron-builder --publish always"
   },
   "author": "z3db0y",
   "license": "ISC",
