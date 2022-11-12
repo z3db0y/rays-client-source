@@ -1,24 +1,31 @@
-name: Build RAYS Client (MacOS)
+name: Build RAYS Client (Ubuntu)
 
 on: push
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: ${{matrix.os}}
+
+  strategy:
+    matrix:
+      os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Install g++-multilib
+        run: sudo apt update && sudo apt install g++-multilib
+
       - name: Setup Node
         uses: actions/setup-node@v1
         with:
-          node-version: '18.12.1'
+          node-version: '12.16.3'
 
       - name: Install dependencies
         run: npm install
 
       - name: Build
-        run: sudo npm run build
+        run: npm run build
         env:
           GH_TOKEN: ${{ secrets.TOKEN_GITHUB }}

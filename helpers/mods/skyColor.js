@@ -34,7 +34,7 @@ module.exports = props => {
     }
     let originalMaterial = null;
     RENDER.updateEnvironment = function() {
-        if(!img.src && !vid.src) return ue.apply(this, arguments);
+        if((!img.src && !vid.src) || !RENDER.skyDome) return ue.apply(this, arguments);
         let _r1 = ue.apply(RENDER, arguments);
         if(RENDER.skyDome && !RENDER.skyDome.baseMesh.material.map) {
             originalMaterial = RENDER.skyDome.baseMesh.material;

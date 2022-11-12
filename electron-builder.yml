@@ -34,7 +34,6 @@ publish:
   repo: rays-client
   owner: z3db0y
 
-afterPack: 'compile.js'
 npmRebuild: false
 
 files:
