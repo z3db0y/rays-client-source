@@ -22,7 +22,7 @@ jobs:
         if: matrix.os == 'macos-latest' || matrix.os == 'ubuntu-latest'
         uses: actions/setup-python@v2
         with:
-          python-version: '3.8'
+          python-version: '2.7'
 
       - name: Setup Node
         uses: actions/setup-node@v1
