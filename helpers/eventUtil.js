@@ -75,8 +75,8 @@ class EventUtil extends EventEmiiter {
     }
 }
 
-if(global._eventUtilInstance) {
-    module.exports = global._eventUtilInstance;
+if(globalThis._eventUtilInstance) {
+    module.exports = globalThis._eventUtilInstance;
 } else {
-    module.exports = global._eventUtilInstance = new EventUtil();
+    module.exports = globalThis._eventUtilInstance = new EventUtil();
 }

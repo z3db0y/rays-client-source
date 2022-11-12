@@ -18,6 +18,12 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: sudo apt update && sudo apt install g++-multilib
 
+      - name: Install python
+        if: matrix.os == 'macos-latest' || matrix.os == 'ubuntu-latest'
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+
       - name: Setup Node
         uses: actions/setup-node@v1
         with:
