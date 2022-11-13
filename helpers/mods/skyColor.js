@@ -36,7 +36,7 @@ module.exports = props => {
     RENDER.updateEnvironment = function() {
         if((!img.src && !vid.src) || !RENDER.skyDome) return ue.apply(this, arguments);
         let _r1 = ue.apply(RENDER, arguments);
-        if(RENDER.skyDome && !RENDER.skyDome.baseMesh.material.map) {
+        if(RENDER.skyDome && (!RENDER.skyDome.baseMesh.material.map || !(RENDER.skyDome.baseMesh.material.map instanceof RENDER.THREE.CanvasTexture))) {
             originalMaterial = RENDER.skyDome.baseMesh.material;
             RENDER.skyDome.baseMesh.material = new RENDER.THREE.MeshBasicMaterial({ map: new RENDER.THREE.CanvasTexture(canvas), side: 1 });
         }
