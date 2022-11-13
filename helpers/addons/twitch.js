@@ -243,7 +243,8 @@ async function initTMIClient() {
                     tmi_client.say(channel, cmd.response.parse({
                         link: window.location.href,
                         username: document.getElementById('menuAccountUsername').innerHTML,
-                        timer: document.getElementById('timerVal').innerHTML || '00:00'
+                        timer: document.getElementById('timerVal').innerHTML || '00:00',
+                        sky: config.get('skyImage', '')
                     }));
                 }
             }
