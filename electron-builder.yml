@@ -29,7 +29,6 @@ mac:
     - target: dmg
       arch:
         - x64
-        - ia32
 
 nsis:
   artifactName: ${name}-${os}-setup-${version}.${ext}
