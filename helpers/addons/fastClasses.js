@@ -35,10 +35,3 @@ updateState(config.get('fastClasses', false));
 window.updateFastClasses = () => updateState(config.get('fastClasses', false));
 
 EventUtil.on('compMenu', _ => updateState(config.get('fastClasses', false)));
-EventUtil.on('windowHolder', _ => {
-    if(document.getElementById('windowHolder').style.display != 'none') {
-        fastClasses.style.display = 'none';
-    } else {
-        updateState(config.get('fastClasses', false));
-    }
-});

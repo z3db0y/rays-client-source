@@ -6,7 +6,6 @@ fetch('https://raw.githubusercontent.com/z3db0y/rays-client/main/clans.json').th
 
     let EventUtil = require(path.join(__dirname, '../eventUtil.js'));
     ['leaderboardChanged', 'killCard', 'endTable', 'menuWindow'].forEach(event => EventUtil.on(event, _ => {
-        log('event', event);
         document.querySelectorAll('*[class^="leaderName"] span, *[class^="newLeaderName"] span, .pListName span, #kCName span, .endTableN span').forEach(el => {
             for(var clanName in clans) {
                 let style = clans[clanName].style;

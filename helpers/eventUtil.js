@@ -1,4 +1,5 @@
 const EventEmiiter = require('events');
+const path = require('path');
 
 const events = [
     {
@@ -7,13 +8,11 @@ const events = [
     },
     {
         name: 'timerChanged',
-        targetNode: '#timerVal',
-        type: 'childList'
+        targetNode: '#timerVal'
     },
     {
         name: 'chatMsg',
-        targetNode: '#chatList',
-        type: 'childList'
+        targetNode: '#chatList'
     },
     {
         name: 'killCard',
@@ -21,7 +20,8 @@ const events = [
     },
     {
         name: 'endTable',
-        targetNode: '#endTable'
+        targetNode: '#endTable',
+        type: 'subtree'
     },
     {
         name: 'menuWindow',
@@ -36,26 +36,18 @@ const events = [
         targetNode: '#instructions'
     },
     {
-        name: 'timerUpdated',
-        targetNode: '#timerVal'
-    },
-    {
         name: 'compMenu',
-        targetNode: '#mMenuHolComp'
-    },
-    {
-        name: 'windowHolder',
-        targetNode: '#windowHolder'
+        targetNode: '#mMenuHolComp',
+        type: 'attributes',
+        attributeFilter: ['style']
     },
     {
         name: 'fpsChanged',
-        targetNode: '#ingameFPS',
-        type: 'childList'
+        targetNode: '#ingameFPS'
     },
     {
         name: 'menuFpsChanged',
-        targetNode: '#menuFPS',
-        type: 'childList'
+        targetNode: '#menuFPS'
     }
 ];
 
@@ -63,20 +55,26 @@ class EventUtil extends EventEmiiter {
     constructor() {
         super();
 
-        new MutationObserver(mutations => {
-            mutations.forEach(m => {
-                events.forEach(event => {
-                    if(m.target.matches && m.target.matches(event.targetNode) && (m.type === event.type || !event.type)) {
-                        this.emit(event.name, m);
-                    }
-                });
-            });
-        }).observe(document, { childList: true, subtree: true, attributes: true });
+        let track = (event) => {
+            if(!document.querySelector(event.targetNode)) return setTimeout(() => track(event), 100);
+            let opts = {};
+            if(event.type) {opts[event.type] = true; event.type === 'subtree' ? opts.childList = true : null; }
+            else opts.childList = true;
+            if(event.attributeFilter) opts.attributeFilter = event.attributeFilter;
+            new MutationObserver(mutations => {
+                for(let m of mutations) {
+                    if(m.type === event.type || !event.type) this.emit(event.name);
+                }
+            }).observe(document.querySelector(event.targetNode), opts);
+        }
+
+        events.forEach(track);
     }
 }
 
 if(globalThis._eventUtilInstance) {
     module.exports = globalThis._eventUtilInstance;
+    
 } else {
     module.exports = globalThis._eventUtilInstance = new EventUtil();
 }

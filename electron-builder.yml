@@ -23,6 +23,14 @@ linux:
       #   - ia32
   category: Game
 
+mac:
+  artifactName: ${name}-${os}-portable-${version}.${ext}
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - ia32
+
 nsis:
   artifactName: ${name}-${os}-setup-${version}.${ext}
   oneClick: false

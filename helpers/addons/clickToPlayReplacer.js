@@ -14,6 +14,6 @@ function applyReplacer() {
     }
 }
 
-['timerUpdated', 'instructionsUpdated'].forEach(event => EventUtil.on(event, applyReplacer));
+['timerChanged', 'instructionsUpdated'].forEach(event => EventUtil.on(event, applyReplacer));
 
 if(config.get('clickToPlayReplacer', false)) timerVal.textContent = '00:00';

@@ -41,6 +41,7 @@ function destroySplash(win) {
     app.on('window-all-closed', allClosed);
     win.close();
     app.off('window-all-closed', allClosed);
+    app.on('window-all-closed', () => { app.quit(); });
 }
 
 function setSplashTitle(win, title) {
