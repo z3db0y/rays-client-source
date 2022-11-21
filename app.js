@@ -94,3 +94,6 @@ if(config.get('uncapFrames')) {
     app.commandLine.appendSwitch('disable-gpu-vsync');
 }
 app.commandLine.appendSwitch('disable-features', 'HardwareMediaKeyHandling,MediaSessionService');
+if(!config.get('hardwareAcceleration', true)) app.commandLine.appendSwitch('disable-gpu');
+if(config.get('angleBackend', 'default') !== 'default') app.commandLine.appendSwitch('use-angle', config.get('angleBackend'));
+if(config.get('webgl2', false)) app.commandLine.appendSwitch('enable-webgl2-compute-context');

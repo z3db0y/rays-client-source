@@ -21,6 +21,36 @@
         "type": "toggle"
     },
     {
+        "name": "ANGLE Backend",
+        "description": "Change the ANGLE backend the client uses. (Requires restart)",
+        "id": "angleBackend",
+        "category": "Utility",
+        "type": "select",
+        "options": [
+            { "name": "Default", "value": "default" },
+            { "name": "Direct3D 11", "value": "d3d11" },
+            { "name": "Direct3D 9", "value": "d3d9" },
+            { "name": "Direct3D 11 on 12", "value": "d3d11on12" },
+            { "name": "OpenGL", "value": "gl" },
+            { "name": "Vulkan", "value": "vulkan" },
+            { "name": "SwiftShader", "value": "swiftshader" }
+        ]
+    },
+    {
+        "name": "Use WebGL 2",
+        "description": "Enable WebGL 2 rendering. (Requires restart)",
+        "id": "webgl2",
+        "category": "Utility",
+        "type": "toggle"
+    },
+    {
+        "name": "Enable hardware acceleration",
+        "description": "Enable hardware acceleration. (Requires restart)",
+        "id": "hardwareAcceleration",
+        "category": "Utility",
+        "type": "toggle"
+    },
+    {
         "name": "FPS Multiplier",
         "description": "Flex on your friends with a fake FPS boost.",
         "id": "fpsMult",

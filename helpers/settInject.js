@@ -48,9 +48,9 @@ module.exports = function () {
                             settHTML += `<input type="input" id="${sett.id.replace(/"/g, '\\"')}" placeholder="${sett.placeholder.replace(/"/g, '\\"')}" oninput="setClientSetting(this.id, this.value)" class="inputGrey2" value="${config.get(sett.id, '').replace(/"/g, '\\"')}"></div>`;
                             break;
                         case 'select':
-                            settHTML += `<select id="${sett.id.replace(/"/g, '\\"')}" onchange="setClientSetting(this.id, this.value)" class="inputGrey2" value="${config.get(sett.id, '').replace(/"/g, '\\"')}">`;
+                            settHTML += `<select id="${sett.id.replace(/"/g, '\\"')}" onchange="setClientSetting(this.id, this.value)" class="inputGrey2"">`;
                             for(var option of sett.options) {
-                                settHTML += `<option value="${option.value}">${option.name}</option>`;
+                                settHTML += `<option value="${option.value.replace(/"/g, '\\"')}" ${config.get(sett.id) === option.value ? 'selected' : ''}>${option.name}</option>`;
                             }
                             settHTML += `</select></div>`;
                             break;
