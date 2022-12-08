@@ -1,5 +1,5 @@
 const path = require('path');
-const EventUtil = require(path.join(__dirname, '../eventUtil.js'));
+const EventUtil = require(path.join(__dirname, '../util/eventUtil.js'));
 const Store = require('electron-store');
 const config = new Store();
 

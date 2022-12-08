@@ -9,9 +9,7 @@ module.exports = function () {
         return;
     }
 
-    // TODO
-    // inject the settings
-    let settings = require(path.join(__dirname, '..', 'settings.json'));
+    let settings = require(path.join(__dirname, '../../settings.json'));
     settings.sort((a, b) => a.category.localeCompare(b.category));
     let tabIndexes = {
         basic: windows[0].tabs.basic.push({ name: 'Client', categories: [] }) - 1,
@@ -42,15 +40,15 @@ module.exports = function () {
                     settHTML += `</span>`;
                     switch(sett.type) {
                         case 'toggle':
-                            settHTML += `<label class="switch" style="margin-left:10px"><input type="checkbox" id="${sett.id.replace(/"/g, '\\"')}" ${config.get(sett.id, false) ? 'checked' : ''} onclick="setClientSetting(this.id, this.checked)"><span class="slider"><span class="grooves"></span></span></label></div>`;
+                            settHTML += `<label class="switch" style="margin-left:10px"><input type="checkbox" id="${sett.id.replace(/"/g, '\\"')}" ${config.get(sett.id, false) ? 'checked' : ''} onclick="setClientSetting(this.id, this.checked)"><span class="slider" style="width: 65px"><span class="grooves"></span></span></label></div>`;
                             break;
                         case 'input':
                             settHTML += `<input type="input" id="${sett.id.replace(/"/g, '\\"')}" placeholder="${sett.placeholder.replace(/"/g, '\\"')}" oninput="setClientSetting(this.id, this.value)" class="inputGrey2" value="${config.get(sett.id, '').replace(/"/g, '\\"')}"></div>`;
                             break;
                         case 'select':
-                            settHTML += `<select id="${sett.id.replace(/"/g, '\\"')}" onchange="setClientSetting(this.id, this.value)" class="inputGrey2"">`;
+                            settHTML += `<select id="${sett.id.replace(/"/g, '\\"')}" onchange="setClientSetting(this.id, (parseInt(this.value) !== NaN ? parseInt(this.value) : this.value))" class="inputGrey2"">`;
                             for(var option of sett.options) {
-                                settHTML += `<option value="${option.value.replace(/"/g, '\\"')}" ${config.get(sett.id) === option.value ? 'selected' : ''}>${option.name}</option>`;
+                                settHTML += `<option value="${option.value.toString().replace(/"/g, '\\"')}" ${config.get(sett.id) === option.value ? 'selected' : ''}>${option.name}</option>`;
                             }
                             settHTML += `</select></div>`;
                             break;
@@ -59,6 +57,13 @@ module.exports = function () {
                             break;
                         case 'slider':
                             settHTML += `<div class="slidecontainer" style="margin-left: auto"><input type="range" id="${sett.id.replace(/"/g, '\\"')}_slider" min="${sett.min}" max="${sett.max}" step="${sett.step}" value="${config.get(sett.id, 1)}" class="sliderM" oninput="setClientSetting('${sett.id.replace(/'/g, '\\\'')}', parseFloat(this.value)), (document.getElementById('${sett.id.replace(/'/g, '\\\'')}').value = this.value)"></div><input type="number" class="sliderVal" id="${sett.id.replace(/"/g, '\\"')}" min="${sett.min}" max="${sett.max}" value="${config.get(sett.id, 1)}" oninput="!isNaN(parseFloat(this.value)) && (document.getElementById('${sett.id.replace(/'/g, '\\\'')}_slider').value = this.value) && setClientSetting(this.id, parseFloat(this.value))" style="margin-right:0px;margin-left:0 !important;border-width:0px"></div>`;
+                            break;
+                        case 'select_with_color':
+                            settHTML += `<div class="container" style="margin-left: auto"><select style="height: 100%" id="${sett.id.replace(/"/g, '\\"')}" onchange="setClientSetting(this.id, (this.value === '0' ? document.getElementById(this.id + '_c').value : this.value)) || (document.getElementById(this.id + '_c').style.display = (this.value === '0' ? '' : 'none'))" class="inputGrey2"">`;
+                            for(var option of sett.options) {
+                                settHTML += `<option value="${option.value.toString().replace(/"/g, '\\"')}" ${(config.get(sett.id) === option.value || !sett.options.find(x => x.value == option.value)) ? 'selected' : ''}>${option.name}</option>`;
+                            }
+                            settHTML += `</select><input type="color" id="${sett.id.replace(/"/g, '\\"')}_c" style="${sett.options.find(x => x.value == config.get(sett.id)) ? 'display: none' : ''}" onchange="document.getElementById(this.id.slice(0, -2)).value === '0' ? setClientSetting(this.id.slice(0, -2), this.value) : null" ${!sett.options.find(x => x.value == config.get(sett.id)) ? 'value=' + config.get(sett.id) : ''}></div></div>`;
                             break;
                         case 'custom':
                             settHTML += sett.customHTML + '</div>';
@@ -73,4 +78,6 @@ module.exports = function () {
 
         return oSett == "<div class='setHed'>No settings found</div>" ? (!cSett ? oSett : cSett) : oSett + cSett;
     }
+
+    require(path.join(__dirname, 'easyCss.js'));
 }

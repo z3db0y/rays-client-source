@@ -41,7 +41,7 @@ function destroySplash(win) {
     app.on('window-all-closed', allClosed);
     win.close();
     app.off('window-all-closed', allClosed);
-    app.on('window-all-closed', () => { app.quit(); });
+    app.on('window-all-closed', () => { app.exit(); });
 }
 
 function setSplashTitle(win, title) {
@@ -93,6 +93,7 @@ if(config.get('uncapFrames')) {
     app.commandLine.appendSwitch('disable-frame-rate-limit');
     app.commandLine.appendSwitch('disable-gpu-vsync');
 }
+app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 app.commandLine.appendSwitch('disable-features', 'HardwareMediaKeyHandling,MediaSessionService');
 if(!config.get('hardwareAcceleration', true)) app.commandLine.appendSwitch('disable-gpu');
 if(config.get('angleBackend', 'default') !== 'default') app.commandLine.appendSwitch('use-angle', config.get('angleBackend'));

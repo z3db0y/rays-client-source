@@ -32,7 +32,7 @@ chatInput.addEventListener('keydown', e => {
         chatInput.blur();
     }
 });
-chatInput.addEventListener('keyup', e => {
+document.addEventListener('keyup', e => {
     if(e.key == 'Shift') shiftDown = false;
 });
 
@@ -300,8 +300,8 @@ function fetch_ffz_emotes(channel) {
 function saveCommand() {
     let commands = config.get('twitch_commands', []);
     commands[this.parentNode.parentNode.rowIndex - 1] = {
-        name: this.parentNode.parentNode.querySelector('.commandName').value,
-        response: this.parentNode.parentNode.querySelector('.commandRes').value
+        name: this.parentNode.parentNode.getElementsByClassName('commandName')[0].value,
+        response: this.parentNode.parentNode.getElementsByClassName('commandRes')[0].value
     };
     config.set('twitch_commands', commands);
 }
@@ -317,9 +317,9 @@ function deleteCommand() {
 function addCommand() {
     let commandHTML = document.createElement('tr');
     commandHTML.innerHTML = command;
-    commandHTML.querySelector('.commandName').oninput = saveCommand;
-    commandHTML.querySelector('.commandRes').oninput = saveCommand;
-    commandHTML.querySelector('.deleteBtn').onclick = deleteCommand;
+    commandHTML.getElementsByClassName('commandName')[0].oninput = saveCommand;
+    commandHTML.getElementsByClassName('commandRes')[0].oninput = saveCommand;
+    commandHTML.getElementsByClassName('deleteBtn')[0].onclick = deleteCommand;
     document.getElementById('twitchCommands').appendChild(commandHTML);
     config.set('twitch_commands', config.get('twitch_commands', []).concat(Object.assign({}, commandObj)));
 }
@@ -330,11 +330,12 @@ function loadCommands() {
     for(let i = 0; i < commands.length; i++) {
         let commandHTML = document.createElement('tr');
         commandHTML.innerHTML = command;
-        commandHTML.querySelector('.commandName').value = commands[i].name;
-        commandHTML.querySelector('.commandRes').value = commands[i].response;
-        commandHTML.querySelector('.commandName').oninput = saveCommand;
-        commandHTML.querySelector('.commandRes').oninput = saveCommand;
-        commandHTML.querySelector('.deleteBtn').onclick = deleteCommand;
+        window.log(commandHTML.getElementsByClassName('commandName'));
+        commandHTML.getElementsByClassName('commandName')[0].value = commands[i].name;
+        commandHTML.getElementsByClassName('commandRes')[0].value = commands[i].response;
+        commandHTML.getElementsByClassName('commandName')[0].oninput = saveCommand;
+        commandHTML.getElementsByClassName('commandRes')[0].oninput = saveCommand;
+        commandHTML.getElementsByClassName('commandRes')[0].onclick = deleteCommand;
         commandsTable.appendChild(commandHTML);
     }
 }

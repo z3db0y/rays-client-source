@@ -3,7 +3,6 @@
         "update": true,
         "uncapFrames": false,
         "resourceSwapper": true,
-        "clientStyle": false,
         "clickToPlayReplacer": false,
         "skyImage": "",
         "fastClasses": false,
@@ -25,10 +24,78 @@
             "kills": true,
             "twitch": false,
             "other": true
-        }
+        },
+        "betterF4": {
+            "enable": false,
+            "map": "",
+            "mode": -1,
+            "allowCustoms": false,
+            "allowOfficialCustoms": false,
+            "minPlayers": 0,
+            "maxPlayers": 4,
+            "minTime": 120
+        },
+        "keystrokes": {
+            "enable": false,
+            "opacity": 0.5,
+            "scale": 1,
+            "offsetX": 0,
+            "offsetY": 0,
+            "color": {
+                "normal": "#ffffff",
+                "pressed": "#000000"
+            },
+            "bg": {
+                "normal": "#000000",
+                "pressed": "#ffffff"
+            },
+            "borderRadius": 8
+        },
+        "easyCSS": {
+            "type": -1,
+            "index": 0
+        },
+        "cssPresets": []
     },
     "windowOpts": {
         "autoHideMenuBar": true,
         "show": false
-    }
+    },
+    "css": [
+        {
+            "name": "RAYS Client",
+            "author": "z3db0y",
+            "authorURL": "https://twitch.tv/z3db0y",
+            "imageURL": "client-asset://icon.png",
+            "css": "body.kpdPingAddon .pListPing::before { font-family: Orbitron !important; }\n\nbody *, #clientPopup * {\n    font-family: 'Orbitron';\n    text-shadow: none !important;\n}\n\nbody .material-icons, body .material-icons-outlined {\n    font-family: 'Material Icons' !important;\n}\n\nbody #aHider, body #adCon {\n    display: none !important;\n}\n\nbody #subLogoButtons {\n    bottom: 0;\n}\n\nbody #lC-cont {\n    visibility: hidden;\n}\n\nbody #lC-cont::before {\n    visibility: visible;\n    content: url('client-asset://icon.png');\n    width: 100%;\n    height: 100%;\n    animation: spin 1.5s infinite;\n    display: block;\n    transform-origin: center !important;\n}\n\n@keyframes spin {\n    0% { transform: scale(0.25); }\n    100% { transform: scale(0.25) rotateZ(360deg); }\n}\n\nbody #windowHolder {\n    backdrop-filter: blur(10px);\n}"
+        },
+        {
+            "name": "Yuki Aim (Outdated)",
+            "author": "tae",
+            "authorURL": "https://twitter.com/whuuayu",
+            "imageURL": "https://cdn.z3db0y.com/rays-img/yuki_aim.png",
+            "css": "@import url(https://whuuayu.github.io/yuki-aim-css/main_custom.css);"
+        },
+        {
+            "name": "Panda",
+            "author": "LukeTheDuke",
+            "authorURL": "https://twitter.com/LukeTheDuke_KR",
+            "imageURL": "https://cdn.z3db0y.com/rays-img/panda.png",
+            "css": "@import url(https://luketheduke.xyz/assets/p1/main_custom.css);"
+        },
+        {
+            "name": "Clean",
+            "author": "Ghosty",
+            "authorURL": "https://krunker.link/PhantomGame",
+            "imageURL": "https://cdn.z3db0y.com/rays-img/ghosty.png",
+            "css": "@import url(https://rawcdn.githack.com/GhostPhantomXD/Ghosty-UI-Designs-for-Krunker/c7120dcbe0f8ee924bc63118241e0f23472065cc/GhostyClean_CSS.css);"
+        },
+        {
+            "name": "MOF1",
+            "author": "MOF1",
+            "authorURL": "https://mof1.github.io/",
+            "imageURL": "https://cdn.z3db0y.com/rays-img/mof1.png",
+            "css": "@import url(https://mof1.github.io/cdn/MOF1_CSS_thief/configs.css);\n@import url(https://mof1.github.io/krunker_css/css/main_custom.css);"
+        }
+    ]
 }

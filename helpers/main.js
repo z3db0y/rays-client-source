@@ -4,6 +4,7 @@ const path = require('path');
 const config = new Store();
 const RPC = require(path.join(__dirname, '/rpc.js'));
 const properties = require(path.join(__dirname, '../properties.json'));
+const newGame = require(path.join(__dirname, '/util/newGame.js'));
 let rpc = new RPC('977054900166987828');
 let appName = "[RAYS] Client";
 
@@ -134,15 +135,13 @@ ipcMain.on('alert', (ev, message) => {
 
 const USER_AGENT = `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36`;
 
-app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
-
 let primaryDisplay = screen.getPrimaryDisplay();
 const mainWindow = new BrowserWindow(Object.assign(properties.windowOpts, {
     frame: true,
     width: primaryDisplay.workArea.width,
     height: primaryDisplay.workArea.height,
     webPreferences: {
-        preload: path.join(__dirname, '/renderer.js'),
+        preload: path.join(__dirname, '/renderer/game.js'),
         contextIsolation: false,
         webSecurity: false,
         enableRemoteModule: true
@@ -170,20 +169,16 @@ function newWindowHandler(ev, url) {
             width: primaryDisplay.workArea.width/2,
             height: primaryDisplay.workArea.height/2,
             frame: true,
-            parent: null,
             webPreferences: {
                 webSecurity: false,
-                nodeIntegration: true
+                nodeIntegration: true,
+                preload: link.pathname === '/social.html' ? path.join(__dirname, '/renderer/social.js') : null
             }
         }));
         win.setMenu(null);
         win.once('ready-to-show', () => win.show());
         win.webContents.on('new-window', newWindowHandler);
         win.webContents.on('will-prevent-unload', (ev) => ev.preventDefault());
-        win.webContents.on('before-input-event', (_, i) => {
-            if(i.key === 'Escape') mainWindow.webContents.executeJavaScript('document.exitPointerLock()');
-            if(i.key === 'F11') { _.preventDefault(); mainWindow.setFullScreen(!mainWindow.fullScreen); }
-        });
 
         win.loadURL(url, { userAgent: USER_AGENT });
         win.webContents.on('will-navigate', (ev, url) => {
@@ -192,6 +187,12 @@ function newWindowHandler(ev, url) {
                 ev.preventDefault();
                 shell.openExternal(url.href);
             }
+        });
+
+        win.webContents.on('before-input-event', (_, i) => {
+            if(i.key === 'F11') { _.preventDefault(); win.setFullScreen(!win.fullScreen); }
+            if(i.key === 'F5') { _.preventDefault(); win.reload(); }
+            if(i.key === 'F12' && !app.isPackaged) { _.preventDefault(); win.webContents.toggleDevTools(); }
         });
     } else {
         shell.openExternal(url);
@@ -202,10 +203,10 @@ mainWindow.webContents.on('new-window', newWindowHandler);
 
 mainWindow.webContents.on('before-input-event', (_, i) => {
     if(i.key === 'F11') { _.preventDefault(); mainWindow.setFullScreen(!mainWindow.fullScreen); }
-    if(i.key === 'F4') { mainWindow.loadURL('https://krunker.io', { 'userAgent': USER_AGENT}); }
+    // if(i.key === 'F4') { mainWindow.loadURL('https://krunker.io', { 'userAgent': USER_AGENT }); }
+    if(i.key === 'F4') { _.preventDefault(); newGame(mainWindow); }
     if(i.key === 'F5') { mainWindow.reload(); }
     if(i.key === 'F12' && !app.isPackaged) { _.preventDefault(); mainWindow.webContents.toggleDevTools() }
-    // if(i.key === 'F12') { _.preventDefault(); mainWindow.webContents.toggleDevTools() }
 });
 
 globalShortcut.register('Escape', () => {

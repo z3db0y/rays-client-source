@@ -2,7 +2,7 @@ const Store = require('electron-store');
 const config = new Store();
 const fs = require('fs');
 const path = require('path');
-const EventUtil = require(path.join(__dirname, '../eventUtil.js'));
+const EventUtil = require(path.join(__dirname, '../util/eventUtil.js'));
 
 let fastClasses = document.createElement('div');
 fastClasses.style.background = 'none';

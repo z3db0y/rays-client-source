@@ -2,13 +2,23 @@ const Store = require('electron-store');
 const fs = require('fs');
 const path = require('path');
 let config = new Store();
-let properties = require(path.join(__dirname, '../properties.json'));
+let properties = require(path.join(__dirname, '../../properties.json'));
 let { ipcRenderer } = require('electron');
-let version = require('electron').remote.app.getVersion();
+let { app } = require('electron').remote;
+let version = app.getVersion();
 window.alert = (message) => { ipcRenderer.send('alert', message); };
 
 function escapeRegex(str) {
     return str.replace(/[\[\]\(\)\{\}\*\+\?\!\^\$\.\\\-\|]/g, '\\$&');
+}
+
+function getter(obj, key) {
+    key = key.split('.');
+    if(key.length > 1) {
+        return getter(obj[key.shift()], key.join('.'));
+    } else {
+        return obj[key[0]];
+    }
 }
 
 String.prototype.parse = function(opts) {
@@ -35,7 +45,7 @@ function hidePopupContainer() {
 }
 
 window.setClientSetting = function(sett, value) {
-    if(!Object.keys(properties.defaultSettings).includes(sett)) return;
+    if(getter(properties.defaultSettings, sett) === undefined) return;
     config.set(sett, value);
 
     // Live update some settings.
@@ -44,10 +54,6 @@ window.setClientSetting = function(sett, value) {
 
 function settingProcessor(sett, value) {
     switch(sett) {
-        case 'clientStyle':
-            if(value) { document.body.classList.add('clientStyle'); }
-            else { document.body.classList.remove('clientStyle'); }
-            break;
         case 'kpd_ping_addon':
             if(value) { document.body.classList.add('kpdPingAddon'); }
             else { document.body.classList.remove('kpdPingAddon'); }
@@ -82,7 +88,7 @@ function toggleSettings() {
 }
 
 function openAltManager() {
-    document.getElementById('clientPopup').innerHTML = fs.readFileSync(path.join(__dirname, '../html/altManager.html'));
+    document.getElementById('clientPopup').innerHTML = fs.readFileSync(path.join(__dirname, '../../html/altManager.html'));
 
     let elCont = document.getElementById('alts');
     let alts = config.get('alts');
@@ -131,13 +137,16 @@ function injectPopup() {
     document.body.appendChild(settingCont);
 
     document.addEventListener('keydown', (ev) => {
-        if(ev.key === 'F1') toggleSettings();
+        if(ev.key === 'F1') {
+            document.exitPointerLock();
+            toggleSettings();
+        }
     });
 }
 
 function injectStyles() {
     let styleElement = document.createElement('style');
-    styleElement.textContent = fs.readFileSync(path.join(__dirname, '../html/styles.css'));
+    styleElement.textContent = fs.readFileSync(path.join(__dirname, '../../html/styles.css'));
     document.body.appendChild(styleElement);
 }
 
@@ -178,7 +187,7 @@ function injectAltManager() {
 }
 
 function editAlt(id) {
-    document.getElementById('clientPopup').innerHTML = fs.readFileSync(path.join(__dirname, '../html/addAlt.html'));
+    document.getElementById('clientPopup').innerHTML = fs.readFileSync(path.join(__dirname, '../../html/addAlt.html'));
 
     let altU = document.getElementById('altU');
     let altP = document.getElementById('altP');
@@ -263,11 +272,11 @@ function injectExitBtn() {
 }
 
 function loadAddons() {
-    let addons = fs.readdirSync(path.join(__dirname, '/addons'));
+    let addons = fs.readdirSync(path.join(__dirname, '../addons'));
     for(var filename of addons) {
-        if(filename.endsWith('.js') && fs.statSync(path.join(__dirname, '/addons', filename)).isFile()) {
+        if(filename.endsWith('.js') && fs.statSync(path.join(__dirname, '../addons', filename)).isFile()) {
             try {
-                require(path.join(__dirname, '/addons', filename));
+                require(path.join(__dirname, '../addons', filename));
             } catch(err) {
                 alert('Couldn\'t load addon: ' + filename + '\nPlease report this bug to the developer.\n\n' + err.toString());
             }
@@ -276,7 +285,7 @@ function loadAddons() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    require(path.join(__dirname, '/settInject.js'))();
+    require(path.join(__dirname, '../util/settInject.js'))();
     activitySender();
     injectExitBtn();
     injectStyles();
@@ -285,4 +294,4 @@ document.addEventListener('DOMContentLoaded', () => {
     loadAddons();
 });
 ipcRenderer.send('gameActivity', null); // Reset
-require(path.join(__dirname, '/patcher.js'));
+require(path.join(__dirname, '../util/patcher.js'));

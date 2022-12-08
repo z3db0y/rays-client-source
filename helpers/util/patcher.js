@@ -60,12 +60,12 @@ Node.prototype.appendChild = function (child) {
     if(props && props.ws && props.game && !inj) {
         inj = true;
         // load mods
-        let mods = fs.readdirSync(path.join(__dirname, 'mods'));
+        let mods = fs.readdirSync(path.join(__dirname, '../mods'));
         for(let i = 0; i < mods.length; i++) {
             let mod = mods[i];
             if(mod.endsWith('.js')) {
                 try {
-                    require(path.join(__dirname, 'mods', mod))(props);
+                    require(path.join(__dirname, '../mods', mod))(props);
                 } catch(e) {
                     alert('Failed to load mod: ' + mod + '\nPlease report this bug to the developer\n' + e.toString());
                 }

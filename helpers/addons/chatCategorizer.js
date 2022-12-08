@@ -43,7 +43,7 @@ function updateVisibleContents() {
     });
 }
 
-require(path.join(__dirname, '../eventUtil.js')).on('chatMsg', () => {
+require(path.join(__dirname, '../util/eventUtil.js')).on('chatMsg', () => {
     customChatList.style.maxHeight = chatList.style.maxHeight;
     customChatList.style.display = chatList.style.display;
     

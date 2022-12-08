@@ -1,5 +1,4 @@
 const EventEmiiter = require('events');
-const path = require('path');
 
 const events = [
     {
@@ -28,7 +27,7 @@ const events = [
         targetNode: '#menuWindow'
     },
     {
-        name: 'menuClan',
+        name: 'menuName',
         targetNode: '#menuClassNameTag'
     },
     {
@@ -57,6 +56,7 @@ class EventUtil extends EventEmiiter {
 
         let track = (event) => {
             if(!document.querySelector(event.targetNode)) return setTimeout(() => track(event), 100);
+            this.emit(event.name);
             let opts = {};
             if(event.type) {opts[event.type] = true; event.type === 'subtree' ? opts.childList = true : null; }
             else opts.childList = true;
