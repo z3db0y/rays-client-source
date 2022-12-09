@@ -46,7 +46,7 @@ module.exports = function () {
                             settHTML += `<input type="input" id="${sett.id.replace(/"/g, '\\"')}" placeholder="${sett.placeholder.replace(/"/g, '\\"')}" oninput="setClientSetting(this.id, this.value)" class="inputGrey2" value="${config.get(sett.id, '').replace(/"/g, '\\"')}"></div>`;
                             break;
                         case 'select':
-                            settHTML += `<select id="${sett.id.replace(/"/g, '\\"')}" onchange="setClientSetting(this.id, (parseInt(this.value) !== NaN ? parseInt(this.value) : this.value))" class="inputGrey2"">`;
+                            settHTML += `<select id="${sett.id.replace(/"/g, '\\"')}" onchange="setClientSetting(this.id, (isNaN(parseInt(this.value)) ? this.value : parseInt(this.value)))" class="inputGrey2"">`;
                             for(var option of sett.options) {
                                 settHTML += `<option value="${option.value.toString().replace(/"/g, '\\"')}" ${config.get(sett.id) === option.value ? 'selected' : ''}>${option.name}</option>`;
                             }
