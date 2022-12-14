@@ -1,5 +1,6 @@
 let props;
 const path = require('path');
+const config = new (require('electron-store'))();
 const EventUtil = require(path.join(__dirname, '../util/eventUtil.js'));
 
 module.exports = p => props = p;
@@ -164,4 +165,4 @@ async function init() {
     ['leaderboardChanged', 'killCard', 'endTable', 'menuWindow'].forEach(event => EventUtil.on(event, _ => apply(event)));
     EventUtil.on('menuName', _ => applyMenu());
 }
-init();
+// if(config.get('badges', true)) init();
