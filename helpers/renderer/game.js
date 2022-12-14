@@ -57,6 +57,9 @@ function settingProcessor(sett, value) {
         case 'kpd_ping_addon':
             if(value) { document.body.classList.add('kpdPingAddon'); }
             else { document.body.classList.remove('kpdPingAddon'); }
+        case 'adBlock':
+            if(value) { document.body.classList.add('adBlock'); }
+            else { document.body.classList.remove('adBlock'); }
         case 'clickToPlayReplacer':
             if(value) document.getElementById('instructions').textContent = document.getElementById('timerVal').textContent;
             else document.getElementById('instructions').textContent = 'CLICK TO PLAY';

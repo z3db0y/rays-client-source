@@ -28,6 +28,18 @@ body.kpdPingAddon .pListPing::before {
     vertical-align: top;
 }
 
+body.adBlock #aHider {
+    display: none !important;
+}
+
+body.adBlock #endAHolder {
+    display: none !important;
+}
+
+body.adBlock #adCon {
+    display: none !important;
+}
+
 #setHed_dev, #setBod_dev, #setBod_dev .settName {
     display: block !important;
 }

@@ -47,12 +47,12 @@ container.style.left = config.get('keystrokes.offsetX') || '0';
 container.style.width = '10vw';
 container.style.height = '10vw';
 container.style.fontSize = '0px';
-container.style.transform = 'translate(-50%, -50%)';
+container.style.transform = 'translate(-50%, -50%) scale(' + config.get('keystrokes.scale', 1) + ')';
 container.style.gridTemplateColumns = '25% 25% 25% 25%';
 container.style.gridTemplateRows = '25% 25% 25% 25%';
 container.style.display = config.get('keystrokes.enable') ? 'grid' : 'none';
 container.style.opacity = config.get('keystrokes.opacity', 0.5);
-container.style.scale = config.get('keystrokes.scale', 1);
+// container.style.scale = config.get('keystrokes.scale', 1);
 
 for(var keyEl in keyEls) {
     keyEls[keyEl].style.display = 'flex';
@@ -90,7 +90,7 @@ function updatekeystrokes() {
     container.style.left = (config.get('keystrokes.offsetX') || '0') + '%';
     container.style.display = config.get('keystrokes.enable', false) ? 'grid' : 'none';
     container.style.opacity = config.get('keystrokes.opacity', 0.5);
-    container.style.scale = config.get('keystrokes.scale', 1);
+    container.style.transform = 'translate(-50%, -50%) scale(' + config.get('keystrokes.scale', 1) + ')';
 
     let keys = {
         forward: parseInt(localStorage.getItem('cont_0')) || 87,
@@ -110,7 +110,14 @@ function updatekeystrokes() {
 updateVisibility();
 
 let keyNames = {
-    16: 'Shift'
+    16: 'Shift',
+    38: '↑',
+    40: '↓',
+    37: '←',
+    39: '→',
+    17: 'Ctrl',
+    18: 'Alt',
+    9: 'Tab'
 };
 
 function updateVisibility(keyName, keyCode) {

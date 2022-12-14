@@ -137,17 +137,129 @@ cssMenuStyle.innerHTML = `
 `;
 document.head.insertAdjacentElement('afterbegin', cssMenuStyle);
 
+let cssVarEl = document.createElement('style');
+document.body.insertAdjacentElement('afterbegin', cssVarEl);
+
+let isColor = val => CSS.supports('color', val);
+let isURL = val => { try { new URL(val); return true } catch { return false } };
+let isPosition = val => CSS.supports('top', val);
+let isNumber = val => !isNaN(val);
+
+function getType(val) {
+    if(isColor(val)) return 'color';
+    else if(isURL(val)) return 'url';
+    else if(isPosition(val)) return 'position';
+    else if(isNumber(val)) return 'number';
+    return 'string';
+}
+
+function getColor(val) {
+    let temp = document.createElement('canvas');
+    let ctx = temp.getContext('2d');
+    ctx.fillStyle = val;
+    let color = ctx.fillStyle;
+    temp.remove();
+    return color;
+}
+
+function getCustomVars() {
+    let vars = {};
+    Array.from(Array.from(document.styleSheets).find(x => x.ownerNode.isSameNode(cssVarEl)).cssRules).forEach(rule => {
+        if(rule.selectorText === ':root') {
+            Array.from(rule.style).forEach(prop => {
+                vars[prop.slice(2)] = rule.style.getPropertyValue(prop).trim();
+            });
+        }
+    });
+    return vars;
+}
+
+async function parseRootVars() {
+    let allrules = Array.from(Array.from(document.styleSheets).find(x => x.ownerNode.isSameNode(styleElement)).cssRules);
+    let rootVars = {};
+    let customVars = getCustomVars();
+
+    async function parseRules(rules) {
+        await Promise.all(rules.map(async rule => {
+            if (rule.selectorText === ':root') {
+                Array.from(rule.style).forEach(prop => {
+                    if(customVars[prop.slice(2)]) rootVars[prop.slice(2)] = customVars[prop.slice(2)];
+                    else rootVars[prop.slice(2)] = rule.style.getPropertyValue(prop).trim();
+                });
+            } else if(rule instanceof CSSImportRule) {
+                window.log(rule);
+                async function waitForRules() {
+                    if(!rule.styleSheet || !rule.styleSheet.cssRules) {
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                        await waitForRules();
+                    } else parseRules(Array.from(rule.styleSheet.cssRules));
+                }
+                await waitForRules();
+            }
+        }));
+    }
+    await parseRules(allrules);
+
+    let html = '';
+    for(let prop in rootVars) {
+        let val = rootVars[prop];
+        let type = getType(val);
+        html += '<div class="settName">' + prop + '<button class="settingsBtn" onclick="resetCSSVar(Array.from(this.parentElement.childNodes).find(x => x.nodeType === 3).textContent)" style="float:right;border:none">Reset</button>';
+        switch(type) {
+            case 'color':
+                html += '<input type="color" style="float:right;margin-top:-4px" value="' + getColor(val) + '" onchange="setCSSVar(Array.from(this.parentElement.childNodes).find(x => x.nodeType === 3).textContent, this.value)">';
+                break;
+            case 'url':
+            case 'position':
+            case 'string':
+                html += '<input type="text" class="inputGrey2" value="' + val + '" onchange="setCSSVar(Array.from(this.parentElement.childNodes).find(x => x.nodeType === 3).textContent, this.value)">';
+                break;
+            case 'number':
+                html += '<input type="number" class="inputGrey2" value="' + val + '" onchange="setCSSVar(Array.from(this.parentElement.childNodes).find(x => x.nodeType === 3).textContent, this.value)">';
+                break;
+        }
+        html += '</div>';
+    }
+
+    document.getElementById('setBod_rootvars').innerHTML = html || 'Nothing found';
+}
+
+function updateCustomVars(vars) {
+    let css = '';
+    for(let prop in vars) {
+        css += `--${prop}: ${vars[prop]} !important; `;
+    }
+    cssVarEl.textContent = ':root {' + css + '}';
+}
+
+window.setCSSVar = (prop, val) => {
+    let cssVars = config.get('cssVars', {});
+    cssVars[prop] = val;
+    config.set('cssVars', cssVars);
+    updateCustomVars(cssVars);
+    parseRootVars();
+};
+
+window.resetCSSVar = prop => {
+    let cssVars = config.get('cssVars', {});
+    delete cssVars[prop];
+    config.set('cssVars', cssVars);
+    updateCustomVars(cssVars);
+    parseRootVars();
+};
+
 let oGetSett = windows[0].getSettings;
 windows[0].getSettings = function () {
     let oSett = oGetSett.call(this);
     let isCSSTab = this.settingType === 'basic' && this.tabIndex === tabIndexes.basic || this.settingType === 'advanced' && this.tabIndex === tabIndexes.advanced;
 
     if (isCSSTab) {
-        return '<div style="width: 100%; display: flex; justify-content: center; align-items: center; flex-wrap: wrap"><div class="cssMenu"><span class="cssName">None</span><div class="buttonCont"><button class="applyButton" onclick="setCSS(-1)">Apply</button></div></div>' +
+        let html = '<div style="width: 100%; display: flex; justify-content: center; align-items: center; flex-wrap: wrap"><div class="cssMenu"><span class="cssName">None</span><div class="buttonCont"><button class="applyButton" onclick="setCSS(-1)">Apply</button></div></div>' +
             properties.css.map((css, i) => `<div class="cssMenu" style="background-image: url(${css.imageURL?.replace(/"/g, '\\"')})"><span class="cssName">${css.name}</span><span>by <strong class="cssAuthor" onclick="window.open('${css.authorURL.replace(/'/g, "\\'" || '')}', '_blank')">${css.author}</strong></span><div class="buttonCont"><button class="applyButton" onclick="setCSS(0, ${i})">Apply</button></div></div>`).join('') +
             config.get('cssPresets', []).map((css, i) => `<div class="cssMenu"><span class="cssName">${css.name}</span><div class="buttonCont"><div class="customButtonHolder"><button onclick="editCustomCSS(${i})" class="editButton">Edit</button><button onclick="removeCustomCSS(${i})" class="deleteButton">Delete</button></div><button class="applyButton" onclick="setCSS(1, ${i})">Apply</button></div></div>`).join('') +
-            '<div class="cssMenu" onclick="addCustomCSS()" style="cursor: pointer"><span style="font: 5vw \'Material Icons\';">add</span><span class="cssAdd">Add custom</span></div></div>';
-
+            '<div class="cssMenu" onclick="addCustomCSS()" style="cursor: pointer"><span style="font: 5vw \'Material Icons\';">add</span><span class="cssAdd">Add custom</span></div></div><div class="setHed" id="setHed_rootvars" onclick="window.windows[0].collapseFolder(this)"><span class="material-icons plusOrMinus">keyboard_arrow_down</span> :root Variables (Advanced)</div><div class="setBodH" id="setBod_rootvars"></div>';
+        parseRootVars();
+        return html;
     } else return oSett;
 };
 
@@ -194,13 +306,18 @@ window.setCSS = function (type, i) {
         index: i
     });
     
-    if(type === -1) return styleElement.disabled = true;
+    if(type === -1) {
+        styleElement.innerHTML = '';
+        window.windows[0].changeTab(tabIndexes[window.windows[0].settingType]);
+        return styleElement.disabled = true;
+    }
     else if(type === 0) { // Use preset CSS
         styleElement.innerHTML = properties.css[i].css;
     } else if(type === 1) { // Use custom CSS
         styleElement.innerHTML = config.get('cssPresets', [])[i].css;
     }
     styleElement.disabled = false;
+    window.windows[0].changeTab(tabIndexes[window.windows[0].settingType]);
 }
 
 window.addCustomCSS = function () {
@@ -227,3 +344,4 @@ window.editCustomCSS = function (i) {
 }
 
 window.setCSS(config.get('easyCSS.type', -1), config.get('easyCSS.index', 0));
+updateCustomVars(config.get('cssVars', {}));
