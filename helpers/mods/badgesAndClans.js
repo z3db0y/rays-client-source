@@ -58,14 +58,14 @@ function applyLeaderboard() {
         if(!playerName) continue;
         let playerBadges = badges[Object.keys(badges).find(x => x.toLowerCase() === playerName.toLowerCase())];
 
-        if(playerBadges) {
+        if(playerBadges && config.get('badges', true)) {
             for(var badge of playerBadges) {
                 let html = `<img class="badge" src="https://cdn.z3db0y.com/rays-badges/${badge}.png" style="height: 23px; margin-top: 3px; vertical-align: middle">`;
                 if(!player.parentElement.innerHTML.includes(html)) player.insertAdjacentHTML('beforebegin', html);
             }
         }
         let clan = clans[Object.keys(clans).find(x => x.toLowerCase() === playerClan)];
-        if(!clan?.style && !clan?.addonHTML) continue;
+        if((!clan?.style && !clan?.addonHTML) || !config.get('clanTags', true)) continue;
 
         for(var key in clan.style) clanElement.style[key] = clan.style[key];
         if(clan.addonHTML && !player.innerHTML.includes(clan.addonHTML)) clanElement.insertAdjacentHTML('afterend', clan.addonHTML);
@@ -74,7 +74,7 @@ function applyLeaderboard() {
 
 function applyKillCard() {
     let kCName = document.getElementById('kCName');
-    if(!kCName) return;
+    if(!kCName || !config.get('clanTags', true)) return;
     let clanElement = kCName.querySelector('span');
     if(!clanElement) return;
     let playerClan = clanElement.textContent.trim().slice(1, -1).toLowerCase();
@@ -97,7 +97,7 @@ function applyEndTable() {
         let playerClan = clanElement ? clanElement.textContent.trim().slice(1, -1).toLowerCase() : null;
         if(!playerName) continue;
 
-        if(playerBadges) {
+        if(playerBadges && config.get('badges', true)) {
             for(var badge of playerBadges) {
                 let html = `<img class="badge" src="https://cdn.z3db0y.com/rays-badges/${badge}.png" style="height: 28px">`;
                 if(!player.parentElement.innerHTML.includes(html)) player.parentElement.insertAdjacentHTML('beforeend', html);
@@ -105,7 +105,7 @@ function applyEndTable() {
         }
 
         let clan = clans[Object.keys(clans).find(x => x.toLowerCase() === playerClan)];
-        if(!clan?.style && !clan?.addonHTML) continue;
+        if((!clan?.style && !clan?.addonHTML) || !config.get('clanTags', true)) continue;
 
         for(var key in clan.style) clanElement.style[key] = clan.style[key];
         if(clan.addonHTML && !player.innerHTML.includes(clan.addonHTML)) clanElement.insertAdjacentHTML('afterend', clan.addonHTML);
@@ -113,7 +113,7 @@ function applyEndTable() {
 }
 
 function applyFriendsList() {
-    if(document.getElementById('friendList')) {
+    if(document.getElementById('friendList') && config.get('badges', true)) {
         let names = document.getElementsByClassName('folInfHldr');
         for(var name of names) {
             let playerName = name.querySelector('.lName').textContent.trim();
@@ -138,7 +138,7 @@ function applyMenu() {
     let playerBadges = badges[Object.keys(badges).find(x => x.toLowerCase() === playerName.toLowerCase())];
     let clanElement = menuName.querySelector('span.menuClassPlayerClan');
     
-    if(clanElement) {
+    if(clanElement && config.get('clanTags', true)) {
         let playerClan = clanElement.textContent.trim().slice(1, -1).toLowerCase();
         let clan = clans[Object.keys(clans).find(x => x.toLowerCase() === playerClan)];
         if(!clan?.style && !clan?.addonHTML) return;
@@ -147,7 +147,7 @@ function applyMenu() {
         if(clan.addonHTML && !menuName.innerHTML.includes(clan.addonHTML)) clanElement.insertAdjacentHTML('afterend', clan.addonHTML);
     }
 
-    if(!playerBadges) return;
+    if(!playerBadges || !config.get('badges', true)) return;
 
     for(var badge of playerBadges) {
         let badgeElement = document.createElement('img');
@@ -165,4 +165,4 @@ async function init() {
     ['leaderboardChanged', 'killCard', 'endTable', 'menuWindow'].forEach(event => EventUtil.on(event, _ => apply(event)));
     EventUtil.on('menuName', _ => applyMenu());
 }
-// if(config.get('badges', true)) init();
+init();

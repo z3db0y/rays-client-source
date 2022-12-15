@@ -1,7 +1,6 @@
 const Store = require('electron-store');
 const config = new Store();
 const path = require('path');
-const EventUtil = require(path.join(__dirname, '../util/eventUtil.js'));
 
 let instructions = document.getElementById('instructions');
 let timerVal = document.getElementById('timerVal');
@@ -14,6 +13,6 @@ function applyReplacer() {
     }
 }
 
-['timerChanged', 'instructionsUpdated'].forEach(event => EventUtil.on(event, applyReplacer));
+setInterval(applyReplacer, 100);
 
 if(config.get('clickToPlayReplacer', false)) timerVal.textContent = '00:00';

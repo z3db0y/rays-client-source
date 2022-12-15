@@ -2,6 +2,7 @@
     "defaultSettings": {
         "adBlock": false,
         "badges": true,
+        "clanTags": true,
         "update": true,
         "uncapFrames": false,
         "resourceSwapper": true,

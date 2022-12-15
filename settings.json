@@ -8,7 +8,7 @@
     },
     {
         "name": "Resource Swapper",
-        "description": "Enables the resource swapper, an addon used to load custom textures, models, css into clients.",
+        "description": "Enables the resource swapper, an addon used to load custom textures, models, css into clients. (Requires refresh)",
         "id": "resourceSwapper",
         "category": "Utility",
         "type": "toggle"
@@ -72,6 +72,20 @@
         "label": "Open",
         "category": "Utility",
         "onclick": "closWind(); document.getElementById('clientPopupCont').style.display = 'flex'; open_client_changelog()"
+    },
+    {
+        "name": "Show custom badges",
+        "description": "Shows RAYS client exclusive badges.",
+        "id": "badges",
+        "category": "Style",
+        "type": "toggle"
+    },
+    {
+        "name": "Show clan tags",
+        "description": "Shows RAYS client exclusive clan tags.",
+        "id": "clanTags",
+        "category": "Style",
+        "type": "toggle"
     },
     {
         "name": "Replace \"CLICK TO PLAY\" with timer",
