@@ -3,6 +3,7 @@
         "adBlock": false,
         "badges": true,
         "clanTags": true,
+        "nukeTimer": false,
         "update": true,
         "uncapFrames": false,
         "resourceSwapper": true,

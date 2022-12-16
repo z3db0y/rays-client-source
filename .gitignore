@@ -3,4 +3,3 @@ dist/
 package-lock.json
 # still in development
 ac.js
-nukeTimer.js

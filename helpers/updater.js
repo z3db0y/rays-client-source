@@ -4,12 +4,12 @@ class Updater extends EventEmitter {
     async update() {
         let self = this;
         return new Promise(async function (resolve) {
-            autoUpdater.once('update-available', () => {
+            autoUpdater.once('update-available', (info) => {
                 // Progress event.
                 autoUpdater.on('download-progress', (obj) => {
                     self.emit('progress', Math.round(obj.percent));
                 });
-                resolve(true);
+                resolve(info);
                 autoUpdater.on('update-downloaded', () => {
                     setTimeout(() => { autoUpdater.quitAndInstall(true, true); }, 1000);
                 });

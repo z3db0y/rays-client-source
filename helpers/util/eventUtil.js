@@ -52,7 +52,8 @@ class EventUtil extends EventEmiiter {
             if(!document.getElementById(event.targetNode)) return setTimeout(() => track(event), 100);
             this.emit(event.name);
             let opts = {};
-            if(event.type) {opts[event.type] = true; event.type === 'subtree' ? opts.childList = true : null; }
+            if(event.type) opts[event.type] = true;
+            if(event.type == 'subtree') opts.childList = true;
             else opts.childList = true;
             if(event.attributeFilter) opts.attributeFilter = event.attributeFilter;
             new MutationObserver(mutations => {

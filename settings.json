@@ -88,6 +88,13 @@
         "type": "toggle"
     },
     {
+        "name": "Nuke Timer",
+        "description": "Shows the time remaining until the nuke explodes next to ammo.",
+        "id": "nukeTimer",
+        "category": "Style",
+        "type": "toggle"
+    },
+    {
         "name": "Replace \"CLICK TO PLAY\" with timer",
         "description": "Replaces the \"CLICK TO PLAY\" text with the time of game remaining.",
         "id": "clickToPlayReplacer",
