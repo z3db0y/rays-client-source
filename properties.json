@@ -1,8 +1,10 @@
 {
     "defaultSettings": {
+        "loadingBackground": "",
         "adBlock": false,
         "badges": true,
         "clanTags": true,
+        "nukeTimer": false,
         "update": true,
         "uncapFrames": false,
         "resourceSwapper": true,
@@ -13,6 +15,7 @@
         "hardwareAcceleration": true,
         "angleBackend": "default",
         "webgl2": false,
+        "gameCapture": false,
         "rpc": "all",
         "twitch_oauth_token": "",
         "twitch_show_chat": false,

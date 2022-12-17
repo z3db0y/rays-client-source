@@ -8,6 +8,9 @@ let { app } = require('electron').remote;
 let version = app.getVersion();
 window.alert = (message) => { ipcRenderer.send('alert', message); };
 
+// Preload background image
+if(config.get('loadingBackground')) new Image().src = config.get('loadingBackground');
+
 function escapeRegex(str) {
     return str.replace(/[\[\]\(\)\{\}\*\+\?\!\^\$\.\\\-\|]/g, '\\$&');
 }
@@ -151,6 +154,15 @@ function injectStyles() {
     let styleElement = document.createElement('style');
     styleElement.textContent = fs.readFileSync(path.join(__dirname, '../../html/styles.css'));
     document.body.appendChild(styleElement);
+
+    if(config.get('loadingBackground', '')) {
+        let bgEl = document.getElementById('loadingBg');
+        bgEl.style.backgroundImage = `url(${config.get('loadingBackground')})`;
+        bgEl.style.filter = 'blur(3px)';
+        bgEl.style.display = 'block';
+        bgEl.style.zIndex = '1';
+        document.getElementById('initLoader').style.background = 'none';
+    }
 }
 
 function injectAltManager() {

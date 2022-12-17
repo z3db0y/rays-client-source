@@ -32,7 +32,7 @@ body.adBlock #aHider {
     display: none !important;
 }
 
-body.adBlock #endAHolder {
+body.adBlock .endAHolder {
     display: none !important;
 }
 

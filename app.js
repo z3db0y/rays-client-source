@@ -73,6 +73,7 @@ async function init() {
         if(app.isPackaged) updateAvail = await updater.update();
     }
     if(updateAvail) {
+        setSplashTitle(splash, 'Update found! (v' + updater.version + ')');
         updater.on('progress', prog => { setSplashTitle(splash, 'Updating... ' + prog + '%') });
     } else {
         if(config.get('update', true)) setSplashTitle(splash, 'No update available.');
@@ -98,3 +99,4 @@ app.commandLine.appendSwitch('disable-features', 'HardwareMediaKeyHandling,Media
 if(!config.get('hardwareAcceleration', true)) app.commandLine.appendSwitch('disable-gpu');
 if(config.get('angleBackend', 'default') !== 'default') app.commandLine.appendSwitch('use-angle', config.get('angleBackend', 'default'));
 if(config.get('webgl2', false)) app.commandLine.appendSwitch('enable-webgl2-compute-context');
+if(config.get('gameCapture', false)) app.commandLine.appendSwitch('in-process-gpu');
