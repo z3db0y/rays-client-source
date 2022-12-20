@@ -13,6 +13,5 @@ function applyReplacer() {
     }
 }
 
-setInterval(applyReplacer, 100);
-
+require(path.join(__dirname, '../util/eventUtil.js')).on('timerVal', _ => applyReplacer());
 if(config.get('clickToPlayReplacer', false)) timerVal.textContent = '00:00';

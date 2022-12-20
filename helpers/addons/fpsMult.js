@@ -1,14 +1,22 @@
 const path = require('path');
-const EventUtil = require(path.join(__dirname, '../util/eventUtil.js'));
 const Store = require('electron-store');
 const config = new Store();
 
 let ingameFPS = document.getElementById('ingameFPS');
 let menuFPS = document.getElementById('menuFPS');
 
-EventUtil.on('fpsChanged', _ => {
-    if(ingameFPS.classList.contains('m')) return ingameFPS.classList.remove('m');
-    ingameFPS.textContent = Math.round((parseInt(ingameFPS.textContent) || 0) * config.get('fpsMult', 1));
-    menuFPS.textContent = Math.round((parseInt(menuFPS.textContent) || 0) * config.get('fpsMult', 1));
-    ingameFPS.classList.add('m');
+let o = Object.getOwnPropertyDescriptor(Node.prototype, 'textContent');
+Object.defineProperty(Node.prototype, 'textContent', {
+    set: function (value) {
+        if(ingameFPS && ingameFPS.isSameNode(this)) {
+            if(config.get('fpsMult', 1) != 1) {
+                value = parseInt(value) * config.get('fpsMult', 1);
+            }
+        } else if(menuFPS && menuFPS.isSameNode(this)) {
+            if(config.get('fpsMult', 1) != 1) {
+                value = parseInt(value) * config.get('fpsMult', 1);
+            }
+        }
+        o.set.call(this, value);
+    }
 });

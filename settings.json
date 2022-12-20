@@ -307,44 +307,28 @@
         "description": "The color of the keystroke text when the key is not pressed.",
         "category": "Keystrokes",
         "id": "keystrokes.color.normal",
-        "type": "select_with_color",
-        "options": [
-            { "name": "Normal", "value": 0 },
-            { "name": "RGB", "value": "rgb" }
-        ]
+        "type": "color"
     },
     {
         "name": "Color (Pressed)",
         "description": "The color of the keystroke text when the key is pressed.",
         "category": "Keystrokes",
         "id": "keystrokes.color.pressed",
-        "type": "select_with_color",
-        "options": [
-            { "name": "Normal", "value": 0 },
-            { "name": "RGB", "value": "rgb" }
-        ]
+        "type": "color"
     },
     {
         "name": "Background Color (Normal)",
         "description": "The color of the keystroke background when the key is not pressed.",
         "category": "Keystrokes",
         "id": "keystrokes.bg.normal",
-        "type": "select_with_color",
-        "options": [
-            { "name": "Normal", "value": 0 },
-            { "name": "RGB", "value": "rgb" }
-        ]
+        "type": "color"
     },
     {
         "name": "Background Color (Pressed)",
         "description": "The color of the keystroke background when the key is pressed.",
         "category": "Keystrokes",
         "id": "keystrokes.bg.pressed",
-        "type": "select_with_color",
-        "options": [
-            { "name": "Normal", "value": 0 },
-            { "name": "RGB", "value": "rgb" }
-        ]
+        "type": "color"
     },
     {
         "name": "Offset X (%)",

@@ -1,12 +1,36 @@
-let keysdown = [];
 let config = new (require('electron-store'))();
 
+let keyNames = {
+    16: 'Shift',
+    38: '↑',
+    40: '↓',
+    37: '←',
+    39: '→',
+    17: 'Ctrl',
+    18: 'Alt',
+    9: 'Tab'
+};
+
+function getKeys() {
+    return {
+        forward: parseInt(localStorage.getItem('cont_0')) || 87,
+        reload: parseInt(localStorage.getItem('cont_reloadKey')) || 82,
+        left: parseInt(localStorage.getItem('cont_2')) || 65,
+        back: parseInt(localStorage.getItem('cont_1')) || 83,
+        right: parseInt(localStorage.getItem('cont_3')) || 68,
+        jump: parseInt(localStorage.getItem('cont_jumpKey')) || 32,
+        crouch: parseInt(localStorage.getItem('cont_crouchKey')) || 16,
+        shoot: parseInt(localStorage.getItem('cont_shoot1Key')) || 10001,
+        aim: parseInt(localStorage.getItem('cont_aim1Key')) || 10003
+    };
+}
+
 document.addEventListener('keydown', event => {
-    if(!keysdown.find(x => x === event.which)) keysdown.push(event.which);
+    updateVisibility(Object.keys(getKeys()).find(x => getKeys()[x] == event.which), event.which, true);
 });
 
 document.addEventListener('keyup', event => {
-    keysdown = keysdown.filter(key => key !== event.which);
+    updateVisibility(Object.keys(getKeys()).find(x => getKeys()[x] == event.which), event.which, false);
 });
 
 let hookedMouse = false;
@@ -16,14 +40,12 @@ Node.prototype.appendChild = function(child) {
     hookedMouse = true;
 
     document.getElementsByTagName('canvas')[4]?.addEventListener('mousedown', event => {
-        window.log(event);
-        if(!keysdown.find(x => x === event.button + 10001)) keysdown.push(event.button + 10001);
-    });
+    updateVisibility(Object.keys(getKeys()).find(x => getKeys()[x] == event.button + 10001), event.button + 10001, true);
+});
 
     document.getElementsByTagName('canvas')[4]?.addEventListener('mouseup', event => {
-        window.log(event);
-        keysdown = keysdown.filter(key => key !== event.button + 10001);
-    });
+    updateVisibility(Object.keys(getKeys()).find(x => getKeys()[x] == event.button + 10001), event.button + 10001, false);
+});
 
     return ac.apply(this, [child]);
 }
@@ -52,7 +74,6 @@ container.style.gridTemplateColumns = '25% 25% 25% 25%';
 container.style.gridTemplateRows = '25% 25% 25% 25%';
 container.style.display = config.get('keystrokes.enable') ? 'grid' : 'none';
 container.style.opacity = config.get('keystrokes.opacity', 0.5);
-// container.style.scale = config.get('keystrokes.scale', 1);
 
 for(var keyEl in keyEls) {
     keyEls[keyEl].style.display = 'flex';
@@ -63,7 +84,10 @@ for(var keyEl in keyEls) {
     keyEls[keyEl].style.fontSize = '0.75vw';
     keyEls[keyEl].style.borderRadius = config.get('keystrokes.borderRadius', 8) + '%';
     keyEls[keyEl].style.transition = '.2s';
-    keyEls[keyEl].style.animationPlayState = 'paused, paused';
+    keyEls[keyEl].style.color = config.get('keystrokes.color.normal', '#ffffff');
+    keyEls[keyEl].style.background = config.get('keystrokes.bg.normal', '#000000');
+    let keyCode = getKeys()[keyEl];
+    keyEls[keyEl].textContent = keyCode > 10000 ? 'M' + (keyCode - 10000) : (keyNames[keyCode] || String.fromCharCode(keyCode));
 }
 
 keyEls.forward.style.gridArea = '1 / 2 / 1 / 2';
@@ -79,54 +103,21 @@ keyEls.aim.style.gridArea = '3 / 4 / 3 / 4';
 for(var keyEl in keyEls) container.appendChild(keyEls[keyEl]);
 document.getElementById('inGameUI').appendChild(container);
 
-let cols = ['crimson', 'orange', 'yellow', 'lime', 'mediumblue'];
-let col = cols[0];
-function nextColor(col) {
-    return cols[cols.indexOf(col) + 1 % cols.length] || cols[0];
-}
-
-function updatekeystrokes() {
-    container.style.top = (config.get('keystrokes.offsetY') || '0') + '%';
-    container.style.left = (config.get('keystrokes.offsetX') || '0') + '%';
-    container.style.display = config.get('keystrokes.enable', false) ? 'grid' : 'none';
+function updateStyles() {
     container.style.opacity = config.get('keystrokes.opacity', 0.5);
     container.style.transform = 'translate(-50%, -50%) scale(' + config.get('keystrokes.scale', 1) + ')';
-
-    let keys = {
-        forward: parseInt(localStorage.getItem('cont_0')) || 87,
-        reload: parseInt(localStorage.getItem('cont_reloadKey')) || 82,
-        left: parseInt(localStorage.getItem('cont_2')) || 65,
-        back: parseInt(localStorage.getItem('cont_1')) || 83,
-        right: parseInt(localStorage.getItem('cont_3')) || 68,
-        jump: parseInt(localStorage.getItem('cont_jumpKey')) || 32,
-        crouch: parseInt(localStorage.getItem('cont_crouchKey')) || 16,
-        shoot: parseInt(localStorage.getItem('cont_shoot1Key')) || 10001,
-        aim: parseInt(localStorage.getItem('cont_aim1Key')) || 10003
-    };
-
-    for(let key in keyEls) updateVisibility(key, keys[key]);
-    col = nextColor(col);
+    container.style.top = (config.get('keystrokes.offsetY') + '%') || '0';
+    container.style.left = (config.get('keystrokes.offsetX') + '%') || '0';
 }
-updateVisibility();
 
-let keyNames = {
-    16: 'Shift',
-    38: '↑',
-    40: '↓',
-    37: '←',
-    39: '→',
-    17: 'Ctrl',
-    18: 'Alt',
-    9: 'Tab'
-};
-
-function updateVisibility(keyName, keyCode) {
-    let key = keysdown.find(x => x === keyCode);
+function updateVisibility(keyName, keyCode, isDown) {
+    updateStyles();
     if(keyEls[keyName]) {
-        keyEls[keyName].textContent = keyCode > 10000 ? 'M' + (keyCode - 10000) : (keyNames[keyCode] || String.fromCharCode(keyCode));
+        let keyN = keyCode > 10000 ? 'M' + (keyCode - 10000) : (keyNames[keyCode] || String.fromCharCode(keyCode));
+        keyEls[keyName].textContent != keyN ? keyEls[keyName].textContent = keyN : null;
         let color;
         let bg;
-        if(key) {
+        if(isDown) {
             color = config.get('keystrokes.color.pressed', '#000000');
             bg = config.get('keystrokes.bg.pressed', '#ffffff');
         } else {
@@ -134,16 +125,8 @@ function updateVisibility(keyName, keyCode) {
             bg = config.get('keystrokes.bg.normal', '#000000');
         }
 
-        if(color !== 'rgb') keyEls[keyName].style.animationPlayState = 'paused';
-        else keyEls[keyName].style.animationPlayState = 'running';
-
-        if(bg !== 'rgb') keyEls[keyName].style.animationPlayState = 'paused';
-        else keyEls[keyName].style.animationPlayState = 'running';
-
-        keyEls[keyName].style.color = (color === 'rgb' ? col : color);
+        keyEls[keyName].style.color != color ? keyEls[keyName].style.color = color : null;
+        keyEls[keyName].style.backgroundColor != bg ? keyEls[keyName].style.backgroundColor = bg : null;
         keyEls[keyName].style.borderRadius = config.get('keystrokes.borderRadius', 8) + '%';
-        keyEls[keyName].style.backgroundColor = (bg === 'rgb' ? col : bg);
     }
 }
-
-setInterval(() => updatekeystrokes(), 100);

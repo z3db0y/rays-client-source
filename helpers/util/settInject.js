@@ -65,6 +65,9 @@ module.exports = function () {
                             }
                             settHTML += `</select><input type="color" id="${sett.id.replace(/"/g, '\\"')}_c" style="${sett.options.find(x => x.value == config.get(sett.id)) ? 'display: none' : ''}" onchange="document.getElementById(this.id.slice(0, -2)).value === '0' ? setClientSetting(this.id.slice(0, -2), this.value) : null" ${!sett.options.find(x => x.value == config.get(sett.id)) ? 'value=' + config.get(sett.id) : ''}></div></div>`;
                             break;
+                        case 'color':
+                            settHTML += `<input type="color" id="${sett.id.replace(/"/g, '\\"')}" onchange="setClientSetting(this.id, this.value)" ${config.get(sett.id) ? 'value=' + config.get(sett.id) : ''}></div>`;
+                            break;
                         case 'custom':
                             settHTML += sett.customHTML + '</div>';
                             break;

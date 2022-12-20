@@ -255,7 +255,6 @@ function loginWithAlt(id) {
 }
 
 function activitySender() {
-    
     let i = setInterval(() => {
         if(typeof getGameActivity == 'undefined') return;
         clearInterval(i);
