@@ -308,4 +308,3 @@ document.addEventListener('DOMContentLoaded', () => {
     loadAddons();
 });
 ipcRenderer.send('gameActivity', null); // Reset
-require(path.join(__dirname, '../util/patcher.js'));

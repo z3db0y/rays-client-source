@@ -73,7 +73,7 @@ async function init() {
         if(app.isPackaged) updateAvail = await updater.update();
     }
     if(updateAvail) {
-        setSplashTitle(splash, 'Update found! (v' + updater.version + ')');
+        setSplashTitle(splash, 'Update found! (v' + updateAvail.version + ')');
         updater.on('progress', prog => { setSplashTitle(splash, 'Updating... ' + prog + '%') });
     } else {
         if(config.get('update', true)) setSplashTitle(splash, 'No update available.');
