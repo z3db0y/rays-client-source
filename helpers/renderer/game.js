@@ -70,9 +70,6 @@ function settingProcessor(sett, value) {
         case 'fastClasses':
             if(typeof window.updateFastClasses === 'function') window.updateFastClasses();
             break;
-        case 'skyImage':
-            if(typeof window.updateSkyImage === 'function') window.updateSkyImage();
-            break;
     }
 }
 
@@ -305,6 +302,6 @@ document.addEventListener('DOMContentLoaded', () => {
     injectStyles();
     injectPopup();
     injectAltManager();
-    loadAddons();
+    // loadAddons();
 });
 ipcRenderer.send('gameActivity', null); // Reset

@@ -66,16 +66,16 @@ class EventUtil extends EventEmiiter {
 
         // events.forEach(track);
 
-        new MutationObserver(mutations => {
-            mutations.forEach(mutation => {
-                let event = events.find(e => e.targetNode == mutation.target.id);
-                if(!event) return;
-                if(event.type && event.type != mutation.type) return;
-                if(event.attributeFilter && !event.attributeFilter.includes(mutation.attributeName)) return;
-                window.log(event.name);
-                this.emit(event.name);
-            });
-        }).observe(document.getElementById('uiBase'), { childList: true, subtree: true, attributes: true });
+        // new MutationObserver(mutations => {
+        //     mutations.forEach(mutation => {
+        //         let event = events.find(e => e.targetNode == mutation.target.id);
+        //         if(!event) return;
+        //         if(event.type && event.type != mutation.type) return;
+        //         if(event.attributeFilter && !event.attributeFilter.includes(mutation.attributeName)) return;
+        //         window.log(event.name);
+        //         this.emit(event.name);
+        //     });
+        // }).observe(document.getElementById('uiBase'), { childList: true, subtree: true, attributes: true });
     }
 }
 
