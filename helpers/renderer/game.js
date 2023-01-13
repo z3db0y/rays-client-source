@@ -302,6 +302,6 @@ document.addEventListener('DOMContentLoaded', () => {
     injectStyles();
     injectPopup();
     injectAltManager();
-    // loadAddons();
+    loadAddons();
 });
 ipcRenderer.send('gameActivity', null); // Reset
