@@ -14,7 +14,7 @@ function recursive(dir = __dirname) {
             console.log(`Compiling ${filePath}`);
             bytenode.compileFile(filePath, filePath + 'c');
             fs.unlinkSync(filePath);
-            fs.writeFileSync(filePath, `require('bytenode');\nconst path = require('path');\nmodule.exports = require(path.join(__dirname, '${item.name}c'));`);
+            fs.writeFileSync(filePath, `require('bytenode');\nmodule.exports = require('./${item.name}c');`);
         } else {
             console.log(`Skipping ${item.name}`);
         }
