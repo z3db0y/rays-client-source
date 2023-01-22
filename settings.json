@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {
     "Utility": [
         {
@@ -134,3 +135,293 @@
         }
     ]
 }
+=======
+[
+    {
+        "name": "Uncap FPS",
+        "description": "Allows you to play the game at more FPS than your screen refresh rate, which is usually 60 FPS. (Requires client restart)",
+        "id": "uncapFrames",
+        "category": "Utility",
+        "type": "toggle"
+    },
+    {
+        "name": "Resource Swapper",
+        "description": "Enables the resource swapper, an addon used to load custom textures, models, css into clients. (Requires refresh)",
+        "id": "resourceSwapper",
+        "category": "Utility",
+        "type": "toggle"
+    },
+    {
+        "name": "Updates",
+        "description": "Enables the update checker, which checks for client updates on startup.",
+        "id": "update",
+        "category": "Utility",
+        "type": "toggle"
+    },
+    {
+        "name": "ANGLE Backend",
+        "description": "Change the ANGLE backend the client uses. (Requires restart)",
+        "id": "angleBackend",
+        "category": "Utility",
+        "type": "select",
+        "options": [
+            { "name": "Default", "value": "default" },
+            { "name": "Direct3D 11", "value": "d3d11" },
+            { "name": "Direct3D 9", "value": "d3d9" },
+            { "name": "Direct3D 11 on 12", "value": "d3d11on12" },
+            { "name": "OpenGL", "value": "gl" },
+            { "name": "Vulkan", "value": "vulkan" },
+            { "name": "SwiftShader", "value": "swiftshader" }
+        ]
+    },
+    {
+        "name": "Use WebGL 2",
+        "description": "Enable WebGL 2 rendering. (Requires restart)",
+        "id": "webgl2",
+        "category": "Utility",
+        "type": "toggle"
+    },
+    {
+        "name": "Enable hardware acceleration",
+        "description": "Enable hardware acceleration. (Requires restart)",
+        "id": "hardwareAcceleration",
+        "category": "Utility",
+        "type": "toggle"
+    },
+    {
+        "name": "OBS Game Capture (Windows only)",
+        "description": "Allows OBS Studio to capture the game using a 'Game Capture' source. (Requires restart)",
+        "id": "gameCapture",
+        "category": "Utility",
+        "type": "toggle"
+    },
+    {
+        "name": "Client Version",
+        "type": "custom",
+        "category": "Utility",
+        "customHTML": "<span id='clientVersion' style='color: white'></span>"
+    },
+    {
+        "name": "Changelog",
+        "type": "button",
+        "label": "Open",
+        "category": "Utility",
+        "onclick": "closWind(); document.getElementById('clientPopupCont').style.display = 'flex'; open_client_changelog()"
+    },
+    {
+        "name": "Show custom badges",
+        "description": "Shows RAYS client exclusive badges.",
+        "id": "badges",
+        "category": "Style",
+        "type": "toggle"
+    },
+    {
+        "name": "Show clan tags",
+        "description": "Shows RAYS client exclusive clan tags.",
+        "id": "clanTags",
+        "category": "Style",
+        "type": "toggle"
+    },
+    {
+        "name": "Nuke Timer",
+        "description": "Shows the time remaining until the nuke explodes next to ammo.",
+        "id": "nukeTimer",
+        "category": "Style",
+        "type": "toggle"
+    },
+    {
+        "name": "Replace \"CLICK TO PLAY\" with timer",
+        "description": "Replaces the \"CLICK TO PLAY\" text with the time of game remaining.",
+        "id": "clickToPlayReplacer",
+        "category": "Style",
+        "type": "toggle"
+    },
+    {
+        "name": "Sky Image",
+        "description": "Replaces the sky with a custom image.",
+        "id": "skyImage",
+        "category": "Style",
+        "type": "input",
+        "placeholder": "Custom Image URL"
+    },
+    {
+        "name": "Loading Image URL",
+        "description": "Replaces the background of the loading screen with a custom image.",
+        "id": "loadingBackground",
+        "category": "Style",
+        "type": "input",
+        "placeholder": "Custom Image URL"
+    },
+    {
+        "name": "Fast Classes",
+        "description": "Shows comp class selector for fast class switching.",
+        "id": "fastClasses",
+        "category": "Style",
+        "type": "toggle"
+    },
+    {
+        "name": "Ad Block (CSS modification)",
+        "description": "Removes the banner ads from the game.",
+        "id": "adBlock",
+        "category": "Style",
+        "type": "toggle"
+    },
+    {
+        "name": "Discord Rich Presence",
+        "description": "Enables the Discord Rich Presence, which shows what you're doing in the game on Discord.",
+        "id": "rpc",
+        "category": "Social",
+        "type": "select",
+        "options": [
+            { "name": "All", "value": "all" },
+            { "name": "Anonymous", "value": "anon" },
+            { "name": "None", "value": "off" }
+        ]
+    },
+    {
+        "name": "Twitch Integration",
+        "category": "Twitch Integration",
+        "label": "Manage",
+        "type": "button",
+        "onclick": "closWind(); document.getElementById('clientPopupCont').style.display = 'flex'; open_twitch_settings()"
+    },
+    {
+        "name": "Show player ping",
+        "description": "Replaces the WiFi icon in the player list with the player's ping.",
+        "id": "kpd_ping_addon",
+        "category": "KPD",
+        "type": "toggle"
+    },
+    {
+        "name": "Enable better F4",
+        "description": "Allows you to choose what gamemode, map, and server you want to join when you press F4. (Slower than traditional F4)",
+        "id": "betterF4.enable",
+        "category": "Better Lobby Switcher",
+        "type": "toggle"
+    },
+    {
+        "name": "Gamemode",
+        "description": "The gamemode you want to join when you press F4.",
+        "id": "betterF4.mode",
+        "category": "Better Lobby Switcher",
+        "type": "select",
+        "options": [
+            { "name": "Any", "value": -1 },
+            { "name": "Free for All", "value": 0 },
+            { "name": "Team Deathmatch", "value": 1 },
+            { "name": "Hardpoint", "value": 2 },
+            { "name": "Capture the Flag", "value": 3 },
+            { "name": "Parkour", "value": 4 },
+            { "name": "Hide and Seek", "value": 5 },
+            { "name": "Infected", "value": 6 },
+            { "name": "Race", "value": 7 },
+            { "name": "Last Man Standing", "value": 8 },
+            { "name": "Simon Says", "value": 9 },
+            { "name": "Gun Game", "value": 10 },
+            { "name": "Prop Hunt", "value": 11 },
+            { "name": "Boss Hunt", "value": 12 },
+            { "name": "Classic FFA", "value": 13 },
+            { "name": "Deposit", "value": 14 },
+            { "name": "Stalker", "value": 15 },
+            { "name": "King of the Hill", "value": 16 },
+            { "name": "One in the Chamber", "value": 17 },
+            { "name": "Trade", "value": 18 },
+            { "name": "Kill Confirmed", "value": 19 },
+            { "name": "Defuse", "value": 20 },
+            { "name": "Sharp Shooter", "value": 21 },
+            { "name": "Traitor", "value": 22 },
+            { "name": "Raid", "value": 23 },
+            { "name": "Blitz", "value": 24 },
+            { "name": "Domination", "value": 25 },
+            { "name": "Squad Deathmatch", "value": 26 },
+            { "name": "Kranked FFA", "value": 27 },
+            { "name": "Team Defender", "value": 28 },
+            { "name": "Deposit FFA", "value": 29 },
+            { "name": "Chaos Snipers", "value": 33 },
+            { "name": "Bighead FFA", "value": 34 }
+        ]
+    },
+    {
+        "name": "Map",
+        "description": "The map you want to join when you press F4.",
+        "id": "betterF4.map",
+        "category": "Better Lobby Switcher",
+        "type": "select",
+        "options": [
+            { "name": "Any", "value": "" },
+            { "name": "Burg", "value": "Burg" },
+            { "name": "Littletown", "value": "Littletown" },
+            { "name": "Sandstorm", "value": "Sandstorm" },
+            { "name": "Subzero", "value": "Subzero" },
+            { "name": "Undergrowth", "value": "Undergrowth" },
+            { "name": "Shipment", "value": "Shipment" },
+            { "name": "Freight", "value": "Freight" },
+            { "name": "Lostworld", "value": "Lostworld" },
+            { "name": "Citadel", "value": "Citadel" },
+            { "name": "Oasis", "value": "Oasis" },
+            { "name": "Kanji", "value": "Kanji" },
+            { "name": "Industry", "value": "Industry" },
+            { "name": "Lumber", "value": "Lumber" },
+            { "name": "Evacuation", "value": "Evacuation" },
+            { "name": "Site", "value": "Site" },
+            { "name": "SkyTemple", "value": "SkyTemple" },
+            { "name": "Lagoon", "value": "Lagoon" },
+            { "name": "Bureau", "value": "Bureau" },
+            { "name": "Tortuga", "value": "Tortuga" },
+            { "name": "Tropicano", "value": "Tropicano" },
+            { "name": "Krunk_Plaza", "value": "Krunk_Plaza" },
+            { "name": "Arena", "value": "Arena" },
+            { "name": "Habitat", "value": "Habitat" },
+            { "name": "Atomic", "value": "Atomic" },
+            { "name": "Old_Burg", "value": "Old_Burg" },
+            { "name": "Throwback", "value": "Throwback" },
+            { "name": "Stockade", "value": "Stockade" },
+            { "name": "Facility", "value": "Facility" }
+        ]
+    },
+    {
+        "name": "Min Players",
+        "description": "The minimum amount of players you want to join when you press F4.",
+        "id": "betterF4.minPlayers",
+        "category": "Better Lobby Switcher",
+        "type": "slider",
+        "min": 0,
+        "max": 40,
+        "step": 1
+    },
+    {
+        "name": "Max Players",
+        "description": "The size of the lobby you want to join when you press F4.",
+        "id": "betterF4.maxPlayers",
+        "category": "Better Lobby Switcher",
+        "type": "slider",
+        "min": 0,
+        "max": 40,
+        "step": 1
+    },
+    {
+        "name": "Minimum Time Remaining",
+        "description": "The minimum amount of time remaining in the lobby you want to join when you press F4.",
+        "id": "betterF4.minTime",
+        "category": "Better Lobby Switcher",
+        "type": "slider",
+        "min": 0,
+        "max": 60,
+        "step": 1
+    },
+    {
+        "name": "Allow custom games",
+        "description": "Whether or not you want to join custom games when you press F4.",
+        "id": "betterF4.allowCustoms",
+        "category": "Better Lobby Switcher",
+        "type": "toggle"
+    },
+    {
+        "name": "Allow official customs",
+        "description": "Whether or not you want to join official customs when you press F4.",
+        "id": "betterF4.allowOfficialCustoms",
+        "category": "Better Lobby Switcher",
+        "type": "toggle"
+    }
+]
+>>>>>>> 93531a3d30c10dcab64b5a3eddd674e6158aceec
