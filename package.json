@@ -1,10 +1,6 @@
 {
   "name": "rays-client",
-<<<<<<< HEAD
   "version": "2.0.0",
-=======
-  "version": "1.1.8",
->>>>>>> 93531a3d30c10dcab64b5a3eddd674e6158aceec
   "description": "",
   "main": "app.js",
   "scripts": {
