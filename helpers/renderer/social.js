@@ -1,5 +1,5 @@
-const Store = require('electron-store');
-const config = new Store();
+const path = require('path');
+require(path.join(__dirname, 'common.js'));
 
 let wsHook;
 let resolveWsHook = () => {};

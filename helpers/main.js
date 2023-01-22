@@ -1,228 +1,193 @@
-const { app, BrowserWindow, shell, screen, ipcMain, dialog, globalShortcut } = require('electron');
-const Store = require('electron-store');
+const { BrowserWindow, screen, app, ipcMain, dialog } = require('electron');
 const path = require('path');
-const config = new Store();
-const RPC = require(path.join(__dirname, '/rpc.js'));
+const fs = require('fs');
+const Store = require('electron-store');
 const properties = require(path.join(__dirname, '../properties.json'));
+const defaultConfig = properties.defaultSettings;
+const windowOpts = properties.windowOpts;
+const config = new Store({ defaults: defaultConfig });
+const RPC = require('discord-rpc-revamp');
 const newGame = require(path.join(__dirname, '/util/newGame.js'));
-let rpc = new RPC('977054900166987828');
-let appName = "[RAYS] Client";
 
-rpc.on('connect', () => {
-    console.log(rpc.__client);
-    updateActivity();
-});
-rpc.on('ACTIVITY_JOIN', ({ secret }) => {
-    mainWindow.loadURL('https://krunker.io/?game=' + secret, { 'userAgent': USER_AGENT });
-});
+const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36';
 
-let gameActivity;
-let idleTime = 0;
-
-function updateActivity() {
-    let win = BrowserWindow.getFocusedWindow();
-
-    let winType = 0;
-    let winURL;
-    if(win) {
-        winURL = new URL(win.webContents.getURL());
-
-        if(winURL.pathname.startsWith('/editor.html')) {
-            winType = 1;
-        } else if(winURL.pathname.startsWith('/viewer.html')) {
-            winType = 2;
-        } else if(winURL.pathname.startsWith('/social.html')) {
-            winType = 3;
-        }
-    }
-
-    if(config.get('rpc', 'all') !== 'off') {
-        if(!idleTime) idleTime = Date.now();
-        switch(winType) {
-            case 3:
-                let state = 'Homepage';
-                if(winURL.searchParams.has('p') && config.get('rpc', 'all') !== 'anon') {
-                    switch(winURL.searchParams.get('p')) {
-                        case 'itemsales': state = 'Checking the prices'; break;
-                        case 'profile': state = 'Checking player stats'; break;
-                        case 'clan': state = 'Looking at clans'; break;
-                    }
-                }
-                rpc.setActivity({
-                    details: 'Browsing the hub',
-                    state,
-                    largeImageKey: 'icon',
-                    startTimestamp: idleTime
-                });
-                break;
-            case 2:
-                rpc.setActivity({
-                    details: 'Viewing some skins',
-                    largeImageKey: 'icon',
-                    startTimestamp: idleTime
-                });
-                break;
-            case 1:
-                rpc.setActivity({
-                    details: 'Making a map',
-                    largeImageKey: 'icon',
-                    startTimestamp: idleTime
-                });
-                break;
-            case 0:
-                if(!gameActivity) {
-                    rpc.setActivity({
-                        largeImageKey: 'icon',
-                        startTimestamp: idleTime
-                    });
-                } else {
-                    idleTime = 0;
-                    let startTimestamp = new Date();
-                    let endTimestamp = new Date(startTimestamp.getTime()+gameActivity.time*1000);
-                    if(config.get('rpc', 'all') === 'all') {
-                        rpc.setActivity({
-                            details: gameActivity.mode + ' | ' + gameActivity.map,
-                            state: gameActivity.custom ? 'In custom game' : 'In public game',
-                            largeImageKey: 'icon',
-                            // smallImageKey: 'https://assets.krunker.io/textures/classes/icon_' + gameActivity.class.index + '.png',
-                            smallImageKey: 'class_' + gameActivity.class.index,
-                            smallImageText: gameActivity.user,
-                            startTimestamp,
-                            endTimestamp,
-                            partyId: 'party-' + gameActivity.id.split(':')[1],
-                            joinSecret: gameActivity.id,
-                            partySize: gameActivity.players.size,
-                            partyMax: gameActivity.players.max
-                        });
-                    } else {
-                        rpc.setActivity({
-                            details: gameActivity.mode + ' | ' + gameActivity.map,
-                            state: gameActivity.custom ? 'In custom game' : 'In public game',
-                            largeImageKey: 'icon',
-                            startTimestamp,
-                            endTimestamp
-                        });
-                    }
-                }
-                break;
-        }
-    } else {
-        rpc.clearActivity();
-    }
-}
-
-app.on('browser-window-focus', _ => {
-    updateActivity();
-});
-
-config.onDidChange('rpc', _ => {
-    updateActivity();
-});
-
-ipcMain.on('gameActivity', (_, activity) => {
-    gameActivity = activity;
-    updateActivity();
-});
-ipcMain.on('exit', _ => app.quit());
-ipcMain.on('alert', (ev, message) => {
-    let win = BrowserWindow.getAllWindows().find(x => x.id === ev.sender.id);
-    dialog.showMessageBoxSync(win, {
-        message,
-        title: appName,
-        icon: path.join(__dirname, '../assets/icon.png')
-    })
-});
-
-const USER_AGENT = `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36`;
-
-let primaryDisplay = screen.getPrimaryDisplay();
-const mainWindow = new BrowserWindow(Object.assign(properties.windowOpts, {
-    frame: true,
-    width: primaryDisplay.workArea.width,
-    height: primaryDisplay.workArea.height,
-    webPreferences: {
-        preload: path.join(__dirname, '/renderer/game.js'),
-        contextIsolation: false,
-        webSecurity: false,
-        enableRemoteModule: true
-    },
-    minimizable: true,
+let mainWindow = new BrowserWindow(Object.assign({}, windowOpts, {
+    width: config.get('window.width', screen.getPrimaryDisplay().workAreaSize.width),
+    height: config.get('window.height', screen.getPrimaryDisplay().workAreaSize.height),
+    minWidth: 800,
+    minHeight: 600,
+    fullscreen: config.get('window.fullscreen', false),
+    x: config.get('window.x', 0),
+    y: config.get('window.y', 0),
+    title: '[RAYS] Client',
     icon: path.join(__dirname, '../assets/icon.png'),
-    title: appName
+    webPreferences: {
+        webSecurity: false,
+        preload: path.join(__dirname, '/renderer/game.js'),
+        enableRemoteModule: true
+    }
 }));
 mainWindow.setMenu(null);
+console.log('Main window created. Size: ' + mainWindow.getSize()[0] + 'x' + mainWindow.getSize()[1] + ' Position: ' + mainWindow.getPosition()[0] + 'x' + mainWindow.getPosition()[1]);
+
+if(config.get('window.maximized', false)) mainWindow.maximize();
 mainWindow.loadURL('https://krunker.io', { 'userAgent': USER_AGENT });
 mainWindow.on('page-title-updated', (ev) => ev.preventDefault());
 mainWindow.once('ready-to-show', () => {
     mainWindow.show();
 });
 
-app.on('second-instance', () => mainWindow.focus());
+mainWindow.on('close', () => {
+    config.set('window.width', mainWindow.getSize()[0]);
+    config.set('window.height', mainWindow.getSize()[1]);
+    config.set('window.x', mainWindow.getPosition()[0]);
+    config.set('window.y', mainWindow.getPosition()[1]);
+    config.set('window.fullscreen', mainWindow.isFullScreen());
+    config.set('window.maximized', mainWindow.isMaximized());
+    app.quit();
+});
 
-function newWindowHandler(ev, url) {
+mainWindow.webContents.on('before-input-event', (ev, input) => {
+    if(input.control || input.alt || input.meta) return;
+    if(input.type !== 'keyDown') return;
+    if(input.key === config.get('controls.fullscreen', 'F11')) (ev.preventDefault(), mainWindow.setFullScreen(!mainWindow.isFullScreen()));
+    if(input.key === config.get('controls.reload', 'F5')) (ev.preventDefault(), mainWindow.reload());
+    if(input.key === config.get('controls.newgame', 'F6')) (ev.preventDefault(), newGame(mainWindow));
+    if(input.key === config.get('controls.lastlobby', 'F4')) (ev.preventDefault(), mainWindow.webContents.goBack());
+    if(input.key === config.get('controls.devtools', 'F12') && !app.isPackaged) (ev.preventDefault(), mainWindow.webContents.openDevTools());
+});
+
+ipcMain.on('log_info', (ev, ...args) => console.log('\x1b[35m[RENDERER]\x1b[0m', ...args));
+ipcMain.on('log_warn', (ev, ...args) => console.warn('\x1b[35m[RENDERER]\x1b[0m', ...args));
+ipcMain.on('log_error', (ev, ...args) => console.error('\x1b[35m[RENDERER]\x1b[0m', ...args));
+ipcMain.on('log_debug', (ev, ...args) => console.debug('\x1b[35m[RENDERER]\x1b[0m', ...args));
+ipcMain.on('alert', (ev, ...args) => dialog.showMessageBox(mainWindow, { type: 'info', buttons: ['OK'], message: args.join(' '), title: mainWindow.getTitle() }));
+
+function getURLType(url) {
+    url = new URL(url);
+    if(url.hostname === 'krunker.io') {
+        if(url.pathname === '/editor.html') return 'editor';
+        if(url.pathname === '/social.html') return 'social';
+        if(url.pathname === '/viewer.html') return 'viewer';
+        return 'game';
+    }
+    return 'external';
+}
+
+function onNewWindow(ev, url) {
     ev.preventDefault();
-    let link = new URL(url);
-    let domain = link.hostname.split('.').slice(link.hostname.split('.').length-2).join('.');
-    if(domain === 'krunker.io') {
-        if(link.pathname === '/') return mainWindow.loadURL(url, { userAgent: USER_AGENT });
-        let win = new BrowserWindow(Object.assign(properties.windowOpts, {
-            width: primaryDisplay.workArea.width/2,
-            height: primaryDisplay.workArea.height/2,
-            frame: true,
+    if(getURLType(url) === 'external') require('electron').shell.openExternal(url);
+    else if(getURLType(url) === 'game') mainWindow.loadURL(url, { 'userAgent': USER_AGENT });
+    else {
+        let win = new BrowserWindow(Object.assign({}, windowOpts, {
+            width: Math.round(screen.getPrimaryDisplay().workAreaSize.width/2),
+            height: Math.round(screen.getPrimaryDisplay().workAreaSize.height/2),
+            minWidth: 800,
+            minHeight: 600,
+            fullscreen: false,
+            title: '[RAYS] Client',
+            icon: path.join(__dirname, '../assets/icon.png'),
             webPreferences: {
                 webSecurity: false,
-                nodeIntegration: true,
-                preload: link.pathname === '/social.html' ? path.join(__dirname, '/renderer/social.js') : null
+                preload: fs.existsSync(path.join(__dirname, '/renderer/' + getURLType(url) + '.js')) ? path.join(__dirname, '/renderer/' + getURLType(url) + '.js') : null,
+                enableRemoteModule: true
             }
         }));
         win.setMenu(null);
+        win.loadURL(url, { 'userAgent': USER_AGENT });
+        win.on('page-title-updated', (ev, title) => (ev.preventDefault(), win.setTitle('[RAYS] Client - ' + title)));
         win.once('ready-to-show', () => win.show());
-        win.webContents.on('new-window', newWindowHandler);
+        win.webContents.on('new-window', onNewWindow);
+        win.webContents.on('will-navigate', onNewWindow);
+        win.webContents.on('before-input-event', (ev, input) => {
+            if(input.control || input.alt || input.meta) return;
+            if(input.type !== 'keyDown') return;
+            if(input.key === config.get('controls.fullscreen', 'F11')) (ev.preventDefault(), win.setFullScreen(!win.isFullScreen()));
+            if(input.key === config.get('controls.reload', 'F5')) (ev.preventDefault(), win.reload());
+            if(input.key === config.get('controls.devtools', 'F12') && !app.isPackaged) (ev.preventDefault(), win.webContents.openDevTools());
+        });
         win.webContents.on('will-prevent-unload', (ev) => ev.preventDefault());
-
-        win.loadURL(url, { userAgent: USER_AGENT });
-        win.webContents.on('will-navigate', (ev, url) => {
-            url = new URL(url);
-            if(!url.hostname.endsWith('krunker.io')) {
-                ev.preventDefault();
-                shell.openExternal(url.href);
-            }
-        });
-
-        win.webContents.on('before-input-event', (_, i) => {
-            if(i.key === 'F11') { _.preventDefault(); win.setFullScreen(!win.fullScreen); }
-            if(i.key === 'F5') { _.preventDefault(); win.reload(); }
-            if(i.key === 'F12' && !app.isPackaged) { _.preventDefault(); win.webContents.toggleDevTools(); }
-        });
-    } else {
-        shell.openExternal(url);
     }
 }
 
-mainWindow.webContents.on('new-window', newWindowHandler);
+mainWindow.webContents.on('new-window', onNewWindow);
+mainWindow.webContents.on('will-navigate', onNewWindow);
+mainWindow.webContents.on('will-prevent-unload', (ev) => ev.preventDefault());
 
-mainWindow.webContents.on('before-input-event', (_, i) => {
-    if(i.key === 'F11') { _.preventDefault(); mainWindow.setFullScreen(!mainWindow.fullScreen); }
-    // if(i.key === 'F4') { mainWindow.loadURL('https://krunker.io', { 'userAgent': USER_AGENT }); }
-    if(i.key === 'F4') { _.preventDefault(); newGame(mainWindow); }
-    if(i.key === 'F5') { mainWindow.reload(); }
-    if(i.key === 'F12' && !app.isPackaged) { _.preventDefault(); mainWindow.webContents.toggleDevTools() }
+let rpc = new RPC.Client({ transport: 'ipc' });
+
+function rpcLogin() {
+    rpc.connect({ clientId: '977054900166987828' }).catch(_ => (console.error('RPC: ' + _.message), setTimeout(rpcLogin, 10000)));
+}
+rpcLogin();
+
+rpc.on('close', () => setTimeout(rpcLogin, 10000));
+
+rpc.on('ready', () => {
+    rpc.subscribe('ACTIVITY_JOIN');
+    console.log('RPC: ready');
 });
 
-globalShortcut.register('Escape', () => {
-    if(BrowserWindow.getFocusedWindow()) {
-        BrowserWindow.getFocusedWindow().webContents.executeJavaScript('document.exitPointerLock()');
-        BrowserWindow.getFocusedWindow().webContents.sendInputEvent({ type: 'keyDown', keyCode: 'Escape' });
-        BrowserWindow.getFocusedWindow().webContents.sendInputEvent({ type: 'keyUp', keyCode: 'Escape' });
+rpc.on('ACTIVITY_JOIN', ({ secret }) => mainWindow.loadURL('https://krunker.io/?game=' + secret, { 'userAgent': USER_AGENT }));
+ipcMain.on('rpc', (ev, activity) => {
+    if(!rpc.user) return;
+    if(config.get('rpc.type', 'all') === 'off') return rpc.clearActivity();
+    let focusedWindow = BrowserWindow.getFocusedWindow();
+    let focusedWindowType = focusedWindow ? getURLType(focusedWindow.webContents.getURL()) : 'game';
+    let idleTimer = 0;
+    switch(focusedWindowType) {
+        case 'game':
+            idleTimer = 0;
+            let startTimestamp = Date.now();
+            let endTimestamp = new Date(startTimestamp + 1000 * activity.time);
+            rpc.setActivity({
+                details: activity.mode + ' - ' + activity.map,
+                state: (activity.comp ? 'Competitive' : (activity.custom ? 'Custom' : 'Public')) + ' Game',
+                smallImageKey: config.get('rpc.type', 'all') == 'all' ? ('https://assets.krunker.io/textures/classes/icon_' + activity.class.index + '.png') : null,
+                smallImageText: config.get('rpc.type', 'all') == 'all' ? activity.user : null,
+                largeImageKey: 'icon',
+                largeImageText: 'RAYS Client v' + app.getVersion(),
+                startTimestamp: endTimestamp.getTime(),
+                endTimestamp: endTimestamp.getTime(),
+                partyId: 'party-' + (activity.id && activity.id.split(':')[1]),
+                partySize: activity.players.size,
+                partyMax: activity.players.max,
+                joinSecret: config.get('rpc.type', 'all') == 'all' ? activity.id : null,
+                buttons: config.get('rpc.type', 'all') == 'all' ? null : (config.get('rpc.buttons', []).length ? config.get('rpc.buttons', []) : null)
+            });
+            break;
+        case 'editor':
+            (idleTimer == 0) && (idleTimer = Date.now());
+            rpc.setActivity({
+                details: 'Creating a Map',
+                largeImageKey: 'icon',
+                largeImageText: 'RAYS Client v' + app.getVersion(),
+                startTimestamp: idleTimer
+            });
+            break;
+        case 'social':
+            (idleTimer == 0) && (idleTimer = Date.now());
+            rpc.setActivity({
+                details: 'Browsing the Hub',
+                largeImageKey: 'icon',
+                largeImageText: 'RAYS Client v' + app.getVersion(),
+                startTimestamp: idleTimer
+            });
+            break;
+        case 'viewer':
+            (idleTimer == 0) && (idleTimer = Date.now());
+            rpc.setActivity({
+                details: 'Viewing Skins',
+                largeImageKey: 'icon',
+                largeImageText: 'RAYS Client v' + app.getVersion(),
+                startTimestamp: idleTimer
+            });
+            break;
     }
 });
 
-mainWindow.webContents.on('will-navigate', (ev, url) => {
-    url = new URL(url);
-    if(!url.hostname.endsWith('krunker.io')) {
-        ev.preventDefault();
-        shell.openExternal(url.href);
-    }
+// Addons
+fs.readdirSync(path.join(__dirname, 'addons')).forEach(addon => {
+    if(!addon.endsWith('.js')) return;
+    require(path.join(__dirname, 'addons', addon));
 });
-
-mainWindow.on('closed', () => app.quit());

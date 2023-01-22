@@ -1,114 +1,225 @@
-const path = require('path');
-const { BrowserWindow, screen, nativeImage } = require('electron').remote;
-const http = require('http');
-const fs = require('fs');
 const Store = require('electron-store');
 const config = new Store();
+const TWITCH_CLIENT_ID = '5nqlrrrqri992wx4eyftoufhghqvzf';
+if(typeof window === 'undefined') main();
 
-let TWITCH_CLIENT_ID = '5nqlrrrqri992wx4eyftoufhghqvzf'; // [RAYS] Client client_id
-let channel_id;
-let tmi_client;
+function fetchTwitchUser(token) {
+    return new Promise((resolve, reject) => {
+        require('https').get('https://api.twitch.tv/helix/users', {
+            headers: {
+                'authorization': `Bearer ${token}`,
+                'client-id': TWITCH_CLIENT_ID
+            }
+        }).on('response', res => {
+            let data = '';
+            res.on('data', chunk => data += chunk);
+            res.on('end', () => {
+                try {
+                    data = JSON.parse(data);
+                    if(data.data[0]) resolve(data.data[0]);
+                    else reject();
+                } catch(e) {
+                    reject();
+                }
+            });
+        }).on('error', _ => reject());
+    });
+}
 
-let addons = {
-    '7TV': 1 << 0,
-    'BTTV': 1 << 1,
-    'FFZ': 1 << 2,
-};
+function fetchChannelBadges(channelId, token) {
+    return new Promise((resolve, reject) => {
+        require('https').get(`https://badges.twitch.tv/v1/badges/channels/${channelId}/display`, {
+            headers: {
+                authorization: `Bearer ${token}`,
+                'client-id': TWITCH_CLIENT_ID
+            }
+        }).on('response', res => {
+            let data = '';
+            res.on('data', chunk => data += chunk);
+            res.on('end', () => {
+                try {
+                    data = JSON.parse(data);
+                    resolve(data.badge_sets);
+                } catch(e) {
+                    reject();
+                }
+            });
+        }).on('error', _ => reject());
+    });
+}
 
-let command = '<td class="clientItem"><input type="text" class="commandName"></td><td class="clientItem"><input type="text" class="commandRes"></td><td class="clientItem"><button onmouseenter="playTick()" class="deleteBtn"><span class="material-icons">delete</span></button></td>';
-let commandObj = { name: '', response: '' };
-let chatMsg = '<div data-tab="-1" class="twitchMsg"><div class="chatItem" style="color: $COLOR">$USERNAME: <span class="chatMsg">$MESSAGE</span></div><br></div>';
+function fetchGlobalBadges(token) {
+    return new Promise((resolve, reject) => {
+        require('https').get('https://badges.twitch.tv/v1/badges/global/display', {
+            headers: {
+                authorization: `Bearer ${token}`,
+                'client-id': TWITCH_CLIENT_ID
+            }
+        }).on('response', res => {
+            let data = '';
+            res.on('data', chunk => data += chunk);
+            res.on('end', () => {
+                try {
+                    data = JSON.parse(data);
+                    resolve(data.badge_sets);
+                } catch(e) {
+                    reject();
+                }
+            });
+        }).on('error', _ => reject());
+    });
+}
 
-let shiftDown = false;
-let chatInput = document.getElementById('chatInput');
-chatInput.addEventListener('keydown', e => {
-    if(e.key == 'Shift') shiftDown = true;
-    if(e.key == 'Enter' && shiftDown) {
-        if(!tmi_client || tmi_client.readyState() !== 'OPEN') return;
-        e.preventDefault();
-        e.stopPropagation();
-        tmi_client.say(tmi_client.getChannels()[0], chatInput.value);
-        chatInput.value = '';
-        chatInput.blur();
-    }
-});
-document.addEventListener('keyup', e => {
-    if(e.key == 'Shift') shiftDown = false;
-});
-
-async function getChannel() {
-    let res = await fetch('https://api.twitch.tv/helix/users', {
-        headers: {
-            'Authorization': `Bearer ${window.atob(config.get('twitch_oauth_token'), 'base64')}`,
-            'Client-ID': TWITCH_CLIENT_ID
+function fetchEmoteSets(sets, token) {
+    let endpoint = 'https://api.twitch.tv/helix/chat/emotes/set?emote_set_id=';
+    let data = [];
+    return new Promise((resolve, reject) => {
+        for(let i = 0; i < sets.length; i+=25) {
+            require('https').get(endpoint + sets.slice(i, i+25).join('&emote_set_id='), {
+                headers: {
+                    authorization: `Bearer ${token}`,
+                    'client-id': TWITCH_CLIENT_ID
+                }
+            }).on('response', res => {
+                let d = '';
+                res.on('data', chunk => d += chunk);
+                res.on('end', () => {
+                    try {
+                        d = JSON.parse(d);
+                        data.push(...d.data);
+                    } catch(e) {}
+                    if(i === Math.floor(sets.length/25)*25) resolve(data);
+                });
+            }).on('error', _ => {});
         }
-    }).catch(err => {});
-
-    if(res.ok) {
-        try {
-            return (await res.json()).data[0];
-        } catch(_) { return null }
-    }
+    });
 }
 
-async function getGlobalBadges() {
-    let res = await fetch('https://badges.twitch.tv/v1/badges/global/display').catch(err => {});
-
-    if(res.ok) {
-        try {
-            return (await res.json()).badge_sets;
-        } catch(_) { return null }
-    }
+function fetchBTTVEmotes(channelId) {
+    return new Promise((resolve, reject) => {
+        require('https').get(`https://api.betterttv.net/3/cached/users/twitch/${channelId}`, {
+            agent: new (require('https').Agent)({
+                rejectUnauthorized: false
+            })
+        }).on('response', res => {
+            let data = '';
+            res.on('data', chunk => data += chunk);
+            res.on('end', () => {
+                try {
+                    data = JSON.parse(data);
+                    resolve(data);
+                } catch(e) {
+                    reject();
+                }
+            });
+        }).on('error', _ => reject());
+    });
 }
 
-async function getChannelBadges(channel_id) {
-    let res = await fetch(`https://badges.twitch.tv/v1/badges/channels/${channel_id}/display`).catch(err => {});
-
-    if(res.ok) {
-        try {
-            return (await res.json()).badge_sets;
-        } catch(_) { return null }
-    }
+function fetchFFZEmotes(channelId) {
+    return new Promise((resolve, reject) => {
+        require('https').get(`https://api.frankerfacez.com/v1/room/id/${channelId}`, {
+            agent: new (require('https').Agent)({
+                rejectUnauthorized: false
+            })
+        }).on('response', res => {
+            let data = '';
+            res.on('data', chunk => data += chunk);
+            res.on('end', () => {
+                try {
+                    data = JSON.parse(data);
+                    resolve(data);
+                } catch(e) {
+                    reject();
+                }
+            });
+        }).on('error', _ => reject());
+    });
 }
 
-async function format_7tv_emotes(message, channel_id) {
-    let channel_emotes = await fetch_7tv_emotes(channel_id).catch(err => {});
-    if(channel_emotes) {
-        for(let i = 0; i < channel_emotes.length; i++) {
-            let emote = channel_emotes[i];
-            message = message.replace(new RegExp(emote.name + '(\\s|$)', 'g'), `<img class="emote" src="https://cdn.7tv.app/emote/${emote.id}/1x">`);
+function fetch7TVEmotes(channelId) {
+    return new Promise((resolve, reject) => {
+        require('https').get(`https://api.7tv.app/v2/users/${channelId}/emotes`, {
+            agent: new (require('https').Agent)({
+                rejectUnauthorized: false
+            })
+        }).on('response', res => {
+            let data = '';
+            res.on('data', chunk => data += chunk);
+            res.on('end', () => {
+                try {
+                    data = JSON.parse(data);
+                    resolve(data);
+                } catch(e) {
+                    reject();
+                }
+            });
+        }).on('error', _ => (console.log(_),reject()));
+    });
+}
+
+let channelBadges;
+let globalBadges;
+
+async function getAuthorText(tags, token) {
+    let author = '';
+
+    if(!channelBadges) channelBadges = await fetchChannelBadges(tags['room-id'], token).catch(_ => {});
+    if(!globalBadges) globalBadges = await fetchGlobalBadges(token).catch(_ => {});
+
+    for(let badge in tags['badges']) {
+        if(channelBadges[badge]) {
+            author += `<img src="${channelBadges[badge].versions[tags['badges'][badge]].image_url_1x}">`;
+        } else if(globalBadges[badge]) {
+            author += `<img src="${globalBadges[badge].versions[tags['badges'][badge]].image_url_1x}">`;
         }
     }
+
+    if(!author) author += '<img src="https://static.twitchcdn.net/assets/favicon-32-e29e246c157142c94346.png">';
+    author += tags['display-name'];
+
+    return author;
+}
+
+async function injectBTTVEmotes(message, tags) {
+    let emotes = await fetchBTTVEmotes(tags['room-id']).catch(_ => {});
+    if(!emotes) return message;
+
+    for(let emote of emotes.channelEmotes) {
+        message = message.replace(new RegExp(escapeRegex(emote.code), 'g'), `<img src="https://cdn.betterttv.net/emote/${emote.id}/1x">`)
+    }
+
+    for(let emote of emotes.sharedEmotes) {
+        message = message.replace(new RegExp(escapeRegex(emote.code), 'g'), `<img src="https://cdn.betterttv.net/emote/${emote.id}/1x">`)
+    }
+
     return message;
 }
 
-async function format_bttv_emotes(message, channel_id) {
-    let channel_emotes = await fetch_bttv_emotes(channel_id).catch(err => {});
+async function injectFFZEmotes(message, tags) {
+    let emotes = await fetchFFZEmotes(tags['room-id']).catch(_ => {});
+    if(!emotes) return message;
 
-    if(channel_emotes) {
-        for(let i = 0; i < channel_emotes.length; i++) {
-            let emote = channel_emotes[i];
-            message = message.replace(new RegExp(emote.code + '(\\s|$)', 'g'), `<img class="emote" src="https://cdn.betterttv.net/emote/${emote.id}/1x">`);
-        }
+    for(let emote of emotes.sets[emotes.room.set].emoticons) {
+        message = message.replace(new RegExp(escapeRegex(emote.name), 'g'), `<img src="https://cdn.frankerfacez.com/emoticon/${emote.id}/1">`)
     }
 
     return message;
 }
 
-async function format_ffz_emotes(message, channel_id) {
-    let channel_emotes = await fetch_ffz_emotes(channel_id).catch(err => {});
+async function inject7TVEmotes(message, tags) {
+    let emotes = await fetch7TVEmotes(tags['room-id']).catch(_ => {});
+    console.log(emotes);
+    if(!emotes) return message;
 
-    if(channel_emotes) {
-        for(let i = 0; i < channel_emotes.length; i++) {
-            let emote = channel_emotes[i];
-            message = message.replace(new RegExp(emote.name + '(\\s|$)', 'g'), `<img class="emote" src="https://cdn.frankerfacez.com/emoticon/${emote.id}/1">`);
-        }
+    for(let emote of emotes) {
+        message = message.replace(new RegExp(escapeRegex(emote.name), 'g'), `<img src="https://cdn.7tv.app/emote/${emote.id}/1x">`)
     }
 
     return message;
 }
 
-async function format(message, userstate) {
+async function injectEmotes(message, tags) {
     let formatted = '';
     for(let i = 0; i < message.length; i++) {
 
@@ -129,9 +240,9 @@ async function format(message, userstate) {
             continue;
         }
 
-        let emoteAtI_id = userstate.emotes ? Object.keys(userstate.emotes).find(emote => userstate.emotes[emote].find(range => range.split('-')[0] == i)) : null;
-        if(emoteAtI_id) {
-            let emoteAtI = userstate.emotes[emoteAtI_id].find(range => range.split('-')[0] == i).split('-');
+        let emoteAtI_id = tags.emotes ? Object.keys(tags.emotes).find(emote => tags.emotes[emote].find(range => range.split('-')[0] == i)) : null;
+        if(emoteAtI_id && config.get('twitch.emotes.twitch', true)) {
+            let emoteAtI = tags.emotes[emoteAtI_id].find(range => range.split('-')[0] == i).split('-');
             let emoteAtI_url = `https://static-cdn.jtvnw.net/emoticons/v2/${emoteAtI_id}/default/dark/1.0`;
             formatted += `<img class="emote" src="${emoteAtI_url}">`;
             i = emoteAtI[1];
@@ -139,426 +250,474 @@ async function format(message, userstate) {
             formatted += message[i];
         }
     }
-    if(config.get('twitch_chat_addons', 0) & addons['7TV']) { formatted = await format_7tv_emotes(formatted, userstate['room-id']); }
-    if(config.get('twitch_chat_addons', 0) & addons['BTTV']) { formatted = await format_bttv_emotes(formatted, userstate['room-id']); }
-    if(config.get('twitch_chat_addons', 0) & addons['FFZ']) { formatted = await format_ffz_emotes(formatted, userstate['room-id']); }
+
+    if(config.get('twitch.emotes.bttv', false)) formatted = await injectBTTVEmotes(formatted, tags);
+    if(config.get('twitch.emotes.ffz', false)) formatted = await injectFFZEmotes(formatted, tags);
+    if(config.get('twitch.emotes.7tv', false)) formatted = await inject7TVEmotes(formatted, tags);
 
     return formatted;
-}
-
-async function fetch_emote_sets(sets) {
-    let endpoint = 'https://api.twitch.tv/helix/chat/emotes/set?emote_set_id=';
-    let data = null;
-    for(var i = 0; i < sets.length; i+=25) {
-        let res = await fetch(endpoint + sets.slice(i, i+25).join('&emote_set_id='), {
-            headers: {
-                'Authorization': `Bearer ${window.atob(config.get('twitch_oauth_token'))}`,
-                'Client-ID': TWITCH_CLIENT_ID
-            }
-        }).catch(err => {});
-        if(res.ok) {
-            try {
-                if(data) data = [...data, ...(await res.json()).data];
-                else data = (await res.json()).data;
-            } catch(_) {}
-        }
-    }
-    return data;
 }
 
 function escapeRegex(str) {
     return str.replace(/[\[\]\(\)\{\}\*\+\?\!\^\$\.\\\-\|]/g, '\\$&');
 }
 
-async function inject_emote_sets(message, userstate) {
-    let emote_sets = await fetch_emote_sets(userstate['emote-sets'].split(','));
-    if(emote_sets) {
-        for(let i = 0; i < emote_sets.length; i++) {
-            let emote = emote_sets[i];
-            let regex = new RegExp(escapeRegex(emote.name) + '(\\s|$)', 'g');
-            let matches = [...message.matchAll(regex)];
-            if(matches.length > 0) {
-                userstate['emotes'][emote.id] = [];
-                for(let match of matches) userstate['emotes'][emote.id].push(`${match.index}-${match.index + emote.name.length - 1}`);
-            }
+async function injectEmoteSets(message, tags, token) {
+    let sets = await fetchEmoteSets(tags['emote-sets'].split(','), token);
+
+    for(let emote of sets) {
+        let regex = new RegExp(escapeRegex(emote.name) + '(\\s|$)', 'g');
+        let matches = [...message.matchAll(regex)];
+        if(matches.length > 0) {
+            tags['emotes'][emote.id] = [];
+            for(let match of matches) tags['emotes'][emote.id].push(`${match.index}-${match.index + emote.name.length - 1}`);
         }
     }
 }
 
-async function initTMIClient() {
-    if(tmi_client && tmi_client.readyState != 'CLOSED') return;
-    let token = window.atob(config.get('twitch_oauth_token', ''));
-    let channel = await getChannel();
-    if(!channel) return;
-    let channel_name = channel.login;
-    let channel_id = channel.id;
-    tmi_client = new (require('tmi.js').Client)({
-        channels: [ channel_name ],
-        identity: {
-            username: channel_name,
-            password: `oauth:${token}`
-        }
-    });
-    let globalBadges = await getGlobalBadges();
-    let channelBadges = await getChannelBadges(channel_id);
+async function main() {
+    const chatMsg = '<div data-tab="-1" class="twitchMsg"><div class="chatItem" style="color: ${COLOR}">${USERNAME}: <span class="chatMsg">${MESSAGE}</span></div><br></div>';
 
-    let messages = document.getElementById('chatList');
-    tmi_client.on('chat', async (channel, userstate, message, myself) => {
-        if(channel == `#${channel_name}` && !userstate['room-id']) userstate['room-id'] = channel_id;
-        if(userstate['emote-sets']) await inject_emote_sets(message, userstate);
+    const TMI = require('tmi.js');
+    const { ipcMain, BrowserWindow, ipcRenderer } = require('electron');
 
-        let author = '';
+    function getter(obj, name) {
+        return name.split('.').reduce((o, i) => o[i], obj);
+    }
 
-        for(var badge in userstate.badges) {
-            if(badge) {
-                let badgeHTML = document.createElement('img');
-                if(channelBadges[badge]) {
-                    badgeHTML.src = channelBadges[badge].versions[userstate.badges[badge]].image_url_1x;
-                } else if(globalBadges[badge]) {
-                    badgeHTML.src = globalBadges[badge].versions[userstate.badges[badge]].image_url_1x;
-                }
-                author += badgeHTML.outerHTML;
-            }
-        }
-
-        if(!author) {
-            let twitchLogo = document.createElement('img');
-            twitchLogo.src = 'https://static.twitchcdn.net/assets/favicon-32-e29e246c157142c94346.png';
-            author += twitchLogo.outerHTML;
-        }
-        author += userstate['display-name'];
-        
-        messages.innerHTML += chatMsg.parse({
-            COLOR: userstate.color,
-            USERNAME: author,
-            MESSAGE: await format(message, userstate)
+    String.prototype.parse = function(obj) {
+        return this.replace(/\$\{([^\}]+)\}/g, (match, p1) => {
+            return getter(obj, p1) || (getter(obj, p1) === 0 ? 0 : '${' + p1 + '}');
         });
+    }
 
-        messages.scrollTop = messages.scrollHeight;
+    let userData;
+    let client;
+    async function login() {
+        userData = await fetchTwitchUser(Buffer.from(config.get('twitch.token', ''), 'base64').toString()).catch(console.error);
+        if(!userData?.login) return;
+        BrowserWindow.getAllWindows()[0].send('twitchLoggedIn');
+        if(config.get('twitch.enable', false)) {
+            client = new TMI.Client({
+                identity: {
+                    username: userData.login,
+                    password: 'oauth:' + Buffer.from(config.get('twitch.token', ''), 'base64').toString()
+                },
+                channels: [userData.login]
+            });
+            client.connect().catch(console.error);
+            client.on('chat', async (channel, tags, message, myself) => {
+                tags['username'] = tags['username'] || channel.slice(1);
+                tags['display-name'] = tags['display-name'] || userData.display_name || tags['username'];
+                if(channel === '#' + userData.login && !tags['room-id']) tags['room-id'] = userData.id;
 
-        let commands = config.get('twitch_commands', []);
-        if(!myself) {
-            for(var cmd of commands) {
-                if(message.toLowerCase().startsWith(cmd.name.toLowerCase())) {
-                    tmi_client.say(channel, cmd.response.parse({
-                        link: window.location.href,
-                        username: document.getElementById('menuAccountUsername').innerHTML,
-                        timer: document.getElementById('timerVal').innerHTML || '00:00',
-                        sky: config.get('skyImage', '')
-                    }));
-                }
-            }
-        }
-    });
-    tmi_client.connect();
-}
-
-if(config.get('twitch_oauth_token', '')) initTMIClient();
-
-function fetch_7tv_emotes(channel) {
-    return new Promise((resolve, reject) => {
-        fetch(`https://api.7tv.app/v2/users/${channel}/emotes`).then(res => {
-            if(res.ok) {
-                res.json().then(data => {
-                    resolve(data);
-                })
-            } else {
-                reject(res);
-            }
-        });
-    });
-}
-
-function fetch_bttv_emotes(channel) {
-    return new Promise((resolve, reject) => {
-        fetch(`https://api.betterttv.net/3/cached/users/twitch/${channel}`).then(res => {
-            if(res.ok) {
-                res.json().then(data => {
-                    if(data.sharedEmotes && data.channelEmotes) resolve([...data.sharedEmotes, ...data.channelEmotes]);
+                let cmds = config.get('twitch.commands', []).filter(cmd => cmd.enabled && message.toLowerCase().startsWith(cmd.name.toLowerCase()));
+                ipcMain.once('twitchCommandVars', (_, vars) => {
+                    vars.sender = tags['username'];
+                    cmds.forEach(cmd => client.say(channel, cmd.response.parse(vars)));
                 });
-            } else {
-                reject();
-            }
-        });
-    });
-}
+                BrowserWindow.getAllWindows()[0].webContents.send('getTwitchCommandVars');
 
-function fetch_ffz_emotes(channel) {
-    return new Promise((resolve, reject) => {
-        fetch(`https://api.frankerfacez.com/v1/room/id/${channel}`).then(res => {
-            if(res.ok) {
-                res.json().then(data => {
-                    if(data.sets && data.sets[data.room.set] && data.sets[data.room.set].emoticons) resolve(data.sets[data.room.set].emoticons);
-                });
-            } else {
-                reject();
-            }
-        });
-    });
-}
+                if(tags['emote-sets']) await injectEmoteSets(message, tags, Buffer.from(config.get('twitch.token', ''), 'base64').toString());
+                
+                message = await injectEmotes(message, tags);
+                let author = await getAuthorText(tags, Buffer.from(config.get('twitch.token', ''), 'base64').toString());
+                let color = tags['color'] || '#50f';
 
-function saveCommand() {
-    let commands = config.get('twitch_commands', []);
-    commands[this.parentNode.parentNode.rowIndex - 1] = {
-        name: this.parentNode.parentNode.getElementsByClassName('commandName')[0].value,
-        response: this.parentNode.parentNode.getElementsByClassName('commandRes')[0].value
-    };
-    config.set('twitch_commands', commands);
-}
-
-function deleteCommand() {
-    playSelect();
-    let commands = config.get('twitch_commands', []);
-    commands.splice(this.parentNode.parentNode.rowIndex - 1, 1);
-    config.set('twitch_commands', commands);
-    this.parentNode.parentNode.remove();
-}
-
-function addCommand() {
-    let commandHTML = document.createElement('tr');
-    commandHTML.innerHTML = command;
-    commandHTML.getElementsByClassName('commandName')[0].oninput = saveCommand;
-    commandHTML.getElementsByClassName('commandRes')[0].oninput = saveCommand;
-    commandHTML.getElementsByClassName('deleteBtn')[0].onclick = deleteCommand;
-    document.getElementById('twitchCommands').appendChild(commandHTML);
-    config.set('twitch_commands', config.get('twitch_commands', []).concat(Object.assign({}, commandObj)));
-}
-
-function loadCommands() {
-    let commands = config.get('twitch_commands', []);
-    let commandsTable = document.getElementById('twitchCommands');
-    for(let i = 0; i < commands.length; i++) {
-        let commandHTML = document.createElement('tr');
-        commandHTML.innerHTML = command;
-        window.log(commandHTML.getElementsByClassName('commandName'));
-        commandHTML.getElementsByClassName('commandName')[0].value = commands[i].name;
-        commandHTML.getElementsByClassName('commandRes')[0].value = commands[i].response;
-        commandHTML.getElementsByClassName('commandName')[0].oninput = saveCommand;
-        commandHTML.getElementsByClassName('commandRes')[0].oninput = saveCommand;
-        commandHTML.getElementsByClassName('commandRes')[0].onclick = deleteCommand;
-        commandsTable.appendChild(commandHTML);
-    }
-}
-
-async function updateInfo() {
-    if(!document.getElementById('twitchInfo') || !document.getElementById('twitchAvatar') || !document.getElementById('twitchLogin')) return;
-    let info = document.getElementById('twitchInfo');
-    let avatar = document.getElementById('twitchAvatar');
-    let loginBtn = document.getElementById('twitchLogin');
-    let streamTitle = document.getElementById('twitchStreamTitle');
-    let streamCategory = document.getElementById('twitchStreamCategory');
-    let updateStreamInfo = document.getElementById('twitchUpdateStreamInfo');
-    let addCommandBtn = document.getElementById('addTwitchCommand');
-
-    document.getElementById('7tvA').checked = config.get('twitch_chat_addons', 0) & addons['7TV'] ? true : false;
-    document.getElementById('bttvA').checked = config.get('twitch_chat_addons', 0) & addons['BTTV'] ? true : false;
-    document.getElementById('ffzA').checked = config.get('twitch_chat_addons', 0) & addons['FFZ'] ? true : false;
-
-    addCommandBtn.onclick = _ => { playSelect(); addCommand(); };
-    loadCommands();
-    if(config.get('twitch_oauth_token', '')) {
-        initTMIClient();
-        let data = await getChannel();
-
-        if(data) {
-            // Success
-            loginBtn.onclick = twitch_logout;
-            loginBtn.textContent = 'Log Out';
-
-            channel_id = data.id;
-            avatar.src = data.profile_image_url;
-            avatar.style.display = '';
-            info.innerHTML = `${data.display_name}`;
-            updateStreamInfo.onclick = update_stream_info;
-
-            let res1 = await fetch(`https://api.twitch.tv/helix/users/follows?to_id=${data.id}&first=1`, {
-                headers: {
-                    'Authorization': `Bearer ${window.atob(config.get('twitch_oauth_token'))}`,
-                    'Client-ID': TWITCH_CLIENT_ID
-                }
-            }).catch(err => {});
-            if(res1 && res1.ok) {
-                let data1 = await res1.json();
-                info.innerHTML += `\n${data1.total} followers`;
-            }
-
-            let res2 = await fetch(`https://api.twitch.tv/helix/channels?broadcaster_id=${data.id}`, {
-                headers: {
-                    'Authorization': `Bearer ${window.atob(config.get('twitch_oauth_token'))}`,
-                    'Client-ID': TWITCH_CLIENT_ID
-                }
-            }).catch(err => {});
-            if(res2 && res2.ok) {
-                let data2 = await res2.json();
-                data2 = data2.data;
-                if(data2) data2 = data2[0];
-                if(data2) {
-                    streamTitle.value = data2.title;
-                    streamCategory.value = data2.game_name;
-                }
-            }
-            return;
-        }
-    }
-    // Not logged in / Error
-    avatar.style.display = 'none';
-    loginBtn.onclick = twitch_login;
-    loginBtn.textContent = 'Log In';
-    info.textContent = 'Not logged in';
-    streamTitle.value = '';
-    streamCategory.value = '';
-    updateStreamInfo.onclick = undefined;
-}
-
-async function update_stream_info() {
-    let title = document.getElementById('twitchStreamTitle').value;
-    let game = document.getElementById('twitchStreamCategory').value;
-    let updateBtn = document.getElementById('twitchUpdateStreamInfo');
-    let gameError = document.getElementById('twitchCategoryError');
-    let success = document.getElementById('twitchInfoUpdateSuccess');
-    let error = document.getElementById('twitchInfoUpdateError');
-    [success, error].forEach(icon => {
-        icon.style.display = 'none'
-        icon.style.animation = '';
-    });
-    updateBtn.style.animation = '';
-    gameError.style.visibility = 'hidden';
-
-
-    updateBtn.textContent = 'Updating.';
-    let dots = 2;
-    let progress = setInterval(() => {
-        if(dots > 3) dots = 1;
-        updateBtn.textContent = 'Updating' + '.'.repeat(dots);
-        dots ++;
-    }, 300);
-
-    let res = await fetch('https://api.twitch.tv/helix/games?name=' + game, {
-        headers: {
-            'Client-ID': TWITCH_CLIENT_ID,
-            'Authorization': `Bearer ${window.atob(config.get('twitch_oauth_token'), 'base64')}`
-        }
-    }).catch(err => {});
-    if(res && res.ok && channel_id) {
-        let data;
-        try {
-            data = await res.json();
-            if(data) data = data.data;
-            if(data) data = data[0];
-        } catch(_) {}
-        if(data) {
-            let game_id = data.id;
-            let res1 = await fetch('https://api.twitch.tv/helix/channels?broadcaster_id=' + channel_id, {
-                method: 'PATCH',
-                body: new URLSearchParams({ title, game_id }).toString(),
-                headers: {
-                    'Client-ID': TWITCH_CLIENT_ID,
-                    'Authorization': `Bearer ${window.atob(config.get('twitch_oauth_token'), 'base64')}`,
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                }
-            }).catch(err => {});
-            if(res1 && res1.ok) {
-                clearInterval(progress);
-                updateBtn.textContent = 'Update';
-                success.style.display = '';
-                success.style.animation = 'fade 2s';
-                setTimeout(() => success.style.display = 'none', 2000);
-                return;
-            }
+                BrowserWindow.getAllWindows()[0].webContents.send('twitchChatMessage', chatMsg.parse({
+                    COLOR: color,
+                    USERNAME: author,
+                    MESSAGE: message
+                }));
+            });
         } else {
-            gameError.style.visibility = '';
+            if(client) client.disconnect();
+            client = null;
         }
-        clearInterval(progress);
-        error.style.display = '';
-        error.style.animation = 'fade 2s';
-        setTimeout(() => error.style.display = 'none', 2000);
-        updateBtn.textContent = 'Update';
     }
+    await login();
+    
+    ipcMain.handle('getTwitchUser', _ => userData);
+    ipcMain.on('twitchLogin', async _ => await login());
+    ipcMain.on('sendTwitchMsg', (_, msg) => {
+        if(!client) return;
+        client.say('#' + userData.login, msg);
+    });
 }
 
-function twitch_login () {
-    let server = http.createServer((req, res) => {
-        res.end('OK')
-    });
-    server.on('error', () => {
-        // The server isn't really needed,
-        // because the client's browser detects
-        // the redirect and the token is received
-        // there
-    });
-    let serverPort = 21573;
-    server.listen(serverPort);
+function loadTwitchData() {
+    const { ipcRenderer } = require('electron');
+    const { BrowserWindow } = require('electron').remote;
+    const path = require('path');
+    let twitchLoginBtn = document.getElementById('twitchLogin');
+    let twitchLogin = twitchLoginBtn.parentElement;
 
-    let twitchEndpoint = 'https://id.twitch.tv/oauth2/authorize'; // Official twitch OAuth2 endpoint
-    let params = {
-        'response_type': 'token',
-        'client_id': TWITCH_CLIENT_ID,
-        'scope': 'chat:edit chat:read channel:manage:broadcast', // For reading chat and sending messages as user, editing stream information
-        'redirect_uri': `http://localhost:${serverPort}`, // Redirect back here so that the window has the token etc.
-        'state': 'x'.repeat(32).replace(/x/g, () => '0123456789abcdefghijklmopqrstuvwxyz'.charAt(Math.floor(Math.random() * 35))) // Randomly generated
+    document.getElementById('twitch.enable').addEventListener('click', _ => ipcRenderer.send('twitchLogin'));
+    document.getElementById('editTwitchCommands').onclick = _ => openCommandWindow();
+
+    let loginToTwitch = async _ => {
+        twitchLoginBtn.onclick = _ => {};
+        let authWindow = new BrowserWindow({
+            width: 500,
+            height: 600,
+            show: false,
+            webPreferences: {
+                nodeIntegration: false
+            },
+            icon: path.join(__dirname, '../../assets/icon.png')
+        });
+        authWindow.setMenu(null);
+        let params = {
+            'response_type': 'token',
+            'client_id': TWITCH_CLIENT_ID,
+            'scope': 'chat:edit chat:read channel:manage:broadcast', // For reading chat and sending messages as user, editing stream information
+            'redirect_uri': `http://localhost:21573`, // Redirect back here so that the window has the token etc.
+            'state': 'x'.repeat(32).replace(/x/g, () => '0123456789abcdefghijklmopqrstuvwxyz'.charAt(Math.floor(Math.random() * 35))) // Randomly generated
+        };
+
+        await Promise.all((await authWindow.webContents.session.cookies.get({ url: 'https://web.twitch.tv' })).map(cookie => {
+            return authWindow.webContents.session.cookies.remove('https://web.twitch.tv', cookie.name);
+        }));
+        authWindow.loadURL('https://id.twitch.tv/oauth2/authorize?' + new URLSearchParams(params).toString());
+        authWindow.once('ready-to-show', _ => authWindow.show());
+        authWindow.webContents.on('will-navigate', (event, u) => {
+            let url = new URL(u);
+            if(url.hostname !== 'localhost') return;
+            let hash = new URLSearchParams(url.hash ? url.hash.substring(1) : url.search.substring(1));
+            authWindow.close();
+            if(hash.get('state') !== params.state) return;
+            if(hash.get('error')) return;
+            config.set('twitch.token', window.btoa(hash.get('access_token')));
+            ipcRenderer.send('twitchLogin');
+        });
     };
 
-    let screenSize = screen.getPrimaryDisplay().workAreaSize;
-    let windowSize = {
-        width: Math.floor(Math.max(screenSize.width, screenSize.height)/4/16*9),
-        height: Math.floor(Math.max(screenSize.width, screenSize.height)/4)
+    ipcRenderer.invoke('getTwitchUser').then(userData => {
+        twitchLogin.childNodes[0].textContent = 'Account: ' + userData.display_name + (userData.broadcaster_type ? ' (' + userData.broadcaster_type.substring(0, 1).toUpperCase() + userData.broadcaster_type.substring(1) + ')' : '')
+        twitchLoginBtn.textContent = 'Logout';
+        twitchLoginBtn.onclick = _ => {
+            config.delete('twitch.token');
+            ipcRenderer.send('twitchLogin');
+            twitchLogin.childNodes[0].textContent = 'Not logged in';
+            twitchLoginBtn.textContent = 'Login';
+            twitchLoginBtn.onclick = loginToTwitch;
+        };
+    });
+
+    twitchLoginBtn.onclick = loginToTwitch;
+}
+
+function popup(title, inputPlaceholders, inputValues, submitButtonName, afterTitle) {
+    let menuWindow = document.getElementById('menuWindow');
+
+    menuWindow.innerHTML = `<div id="referralHeader">${title}</div>${afterTitle || ''}<input class="accountInput" id="input1" value="${(inputValues[0] && inputValues[0].replace(/"/g, '\\"')) || ''}" placeholder="${(inputPlaceholders[0] && inputPlaceholders[0].replace(/"/g, '\\"')) || ''}"><input class="accountInput" id="input2" value="${(inputValues[1] && inputValues[1].replace(/"/g, '\\"')) || ''}" placeholder="${(inputPlaceholders[1] && inputPlaceholders[1].replace(/"/g, '\\"')) || ''}"><div id="saveBtn" class="button buttonG" style="width:calc(100% - 55px);padding:12px 20px;position:relative;left:50%;transform:translateX(-50%);margin-top:20px" onmouseenter="playTick()">${submitButtonName}</div>`;
+
+    let windowHolder = document.getElementById('windowHolder');
+    windowHolder.style.display = 'block';
+    windowHolder.classList = 'popupWin';
+    menuWindow.style.width = '1000px';
+    menuWindow.style.overflowY = 'auto';
+    menuWindow.classList = 'dark';
+
+    return new Promise(resolve => {
+        let input1 = document.getElementById('input1');
+        let input2 = document.getElementById('input2');
+
+        let onclose = _ => {
+            document.getElementById('windowCloser').removeEventListener('click', onclose);
+            resolve(null);
+        };
+
+        document.getElementById('windowCloser').addEventListener('click', onclose);
+        document.getElementById('saveBtn').onclick = _ => {
+            document.getElementById('windowCloser').removeEventListener('click', onclose);
+            document.getElementById('saveBtn').onclick = _ => {};
+            resolve([input1.value, input2.value]);
+        };
+    });
+}
+
+function editCommand(id) {
+    window.playSelect?.call();
+
+    let tip = '<div class="setBodH"><div style="margin-top:20px;margin-bottom:20px;text-align:center;color:rgba(255,255,255,0.5)">Tip: you can use variables in the response<br>' +
+    '${link} - Link to the game<br>' +
+    '${username} - Your krunker username<br>' +
+    '${clan} - Your clan name<br>' +
+    '${level} - Your level<br>' +
+    '${score} - Your experience (xp)<br>' +
+    '${kills} - Your total kills<br>' +
+    '${deaths} - Your total deaths<br>' +
+    '${kdr} - Your K/D ratio<br>' +
+    '${time} - Your total playtime<br>' +
+    '${wins} - Your total wins<br>' +
+    '${losses} - Your total losses<br>' +
+    '${games} - Your total games<br>' +
+    '${wlr} - Your W/L ratio<br>' +
+    '${hits} - Your total hits<br>' +
+    '${misses} - Your total misses<br>' +
+    '${shots} - Your total shots<br>' +
+    '${headshots} - Your total headshots<br>' +
+    '${accuracy} - Your accuracy<br>' +
+    '${followers} - Your krunker hub follower count<br>' +
+    '${following} - Your krunker hub following count<br>' +
+    '${class.level} - Your class level, replace "class" with the class name, eg. ${runngun.level}<br>' +
+    '${class.score} - Your class experience (xp), replace "class" with the class name, eg. ${runngun.score}<br>' +
+    '${nukes} - Your total nukes<br>' +
+    '${juggernauts} - Your total juggernauts<br>' +
+    '${airdrops} - Your total airdrops<br>' +
+    '${slimers} - Your total slimers<br>' +
+    '${sender} - The name of the person who sent the command<br>' +
+    '</div></div>';
+
+    popup((id !== undefined ? 'Edit' : 'Add') + ' Command', ['Enter command', 'Enter response'], (id !== undefined ? [config.get('twitch.commands')[id].name, config.get('twitch.commands')[id].response] : []), 'Save', tip).then(data => {
+        if(!data) return;
+        let commands = config.get('twitch.commands') || [];
+        if(id !== undefined) commands[id] = { name: data[0], response: data[1], enabled: commands[id].enabled };
+        else commands.push({ name: data[0], response: data[1], enabled: true });
+        if(data[0] && data[1]) config.set('twitch.commands', commands);
+        openCommandWindow();
+    });
+}
+
+function openCommandWindow() {
+    let menuWindow = document.getElementById('menuWindow');
+
+    menuWindow.innerHTML = `<div id="referralHeader">Commands</div><div id="twitchCommands" class="setBodH"></div><div id="addCmd" class="button buttonP" style="width:calc(100% - 55px);padding:12px 16px;position:relative;left:50%;transform:translateX(-50%)" onmouseenter="playTick()">Add New</div>`;
+
+    let commands = config.get('twitch.commands') || [];
+    let twitchCommands = document.getElementById('twitchCommands');
+    for(let i = 0; i < commands.length; i++) {
+        let command = commands[i];
+
+        let cmd = document.createElement('div');
+        cmd.classList = 'settName';
+        cmd.innerHTML = command.name;
+        twitchCommands.appendChild(cmd);
+
+        let toggleBtn = document.createElement('div');
+        toggleBtn.classList = 'settingsBtn';
+        toggleBtn.innerHTML = command.enabled ? 'Disable' : 'Enable';
+        toggleBtn.setAttribute('onmouseenter', 'playTick()');
+        toggleBtn.style.background = command.enabled ? '#fa0' : '#0a0';
+        toggleBtn.onclick = _ => {
+            window.playSelect?.call();
+            command.enabled = !command.enabled;
+            config.set('twitch.commands', commands);
+            openCommandWindow();
+        };
+
+        let editBtn = document.createElement('div');
+        editBtn.classList = 'settingsBtn';
+        editBtn.innerHTML = 'Edit';
+        editBtn.setAttribute('onmouseenter', 'playTick()');
+        editBtn.onclick = () => editCommand(i);
+
+        let deleteBtn = document.createElement('div');
+        deleteBtn.classList = 'settingsBtn';
+        deleteBtn.innerHTML = 'Delete';
+        deleteBtn.setAttribute('onmouseenter', 'playTick()');
+        deleteBtn.style.background = '#f00';
+        deleteBtn.onclick = () => {
+            window.playSelect?.call();
+            commands.splice(i, 1);
+            config.set('twitch.commands', commands);
+            openCommandWindow();
+        };
+
+        cmd.appendChild(deleteBtn);
+        cmd.appendChild(editBtn);
+        cmd.appendChild(toggleBtn);
     }
 
-    let authWindow = new BrowserWindow({
-        width: windowSize.width,
-        height: windowSize.height,
-        title: '[RAYS] Client - Twitch authorization',
-        webPreferences: {
-            webSecurity: true,
-            nodeIntegration: false,
-            contextIsolation: true,
-            enableRemoteModule: false,
-            devTools: false
-        },
-        show: false,
-        autoHideMenuBar: true,
-        icon: nativeImage.createFromDataURL(
-            'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAU9JREFUWEftVzFywjAQXPEjKmoaU+cBzPCCJHoB5AUZoKFlQk+bOE0mHZ2f4CekppAYYAxG6O5saUQTq/CMLZ92b09aSQpMW2Z2aoAZ909o30uu1DH29PC1lOBHPJaAD/z5KzTX27jF6PxOEqAyfwgBTvbkBKSaJycwz6zlqkwRqGrq9kvf7+ZAR6BToFMgVIG2Bk1a8b8g8LsCii2xGaVWYLcBdh9ncAO86VydzhmX80BKAhT4QwjcgFvM9bd6rU/cpAo4ma91ribuqmlMwA2s7351IN+yNIAXvFUJKAISOIDC7DHUP+rPRy5KgVjwKAUG4+uyItywNHv0qcyrmGAFBAsuTQ9D/alKyapTEGgMzl5MXOaEUbUCYyehJJWHQGF6eGoiMzc2eTUTFGCXlpSM1wmloEoBzlSkMaJLYDxeHgIapMB7ZmfVFhoLWo8/AFjQCjDE6JfwAAAAAElFTkSuQmCC'
-            ) // Twitch logo
+    if(commands.length == 0) twitchCommands.innerHTML = '<div class="settName">No commands added.</div>';
+    document.getElementById('addCmd').onclick = _ => editCommand();
+
+    let windowHolder = document.getElementById('windowHolder');
+    windowHolder.style.display = 'block';
+    windowHolder.classList = 'popupWin';
+    menuWindow.style.width = '1000px';
+    menuWindow.style.overflowY = 'auto';
+    menuWindow.classList = 'dark';
+}
+
+module.exports = () => {
+    if(!window.windows) return setTimeout(module.exports, 100);
+
+    function formatTime(ms) {
+        let sec = Math.floor(ms / 1000);
+        let str = '';
+
+        let years = Math.floor(sec / 31536000);
+        if(years) str += years + 'y ';
+        sec -= years * 31536000;
+
+        let months = Math.floor(sec / 2592000);
+        if(months) str += months + 'mo ';
+        sec -= months * 2592000;
+
+        let days = Math.floor(sec / 86400);
+        if(days) str += days + 'd ';
+        sec -= days * 86400;
+
+        let hours = Math.floor(sec / 3600);
+        if(hours) str += hours + 'h ';
+        sec -= hours * 3600;
+
+        let minutes = Math.floor(sec / 60);
+        if(minutes) str += minutes + 'm ';
+        sec -= minutes * 60;
+
+        return str.trim();
+    }
+
+    const { ipcRenderer } = require('electron');
+    let oSwitchTab = window.windows[0].changeTab;
+    window.windows[0].changeTab = function (tab) {
+        let _r = oSwitchTab.call(this, tab);
+        if(document.getElementById('twitchLogin')) loadTwitchData();
+        return _r;
+    };
+    let oGen = window.windows[0].gen;
+    window.windows[0].gen = function (id) {
+        let _r = oGen.call(this, id);
+        return (setTimeout(() => {
+            if(document.getElementById('twitchLogin')) loadTwitchData();
+        }), _r);
+    };
+
+    let player;
+
+    function updatePlayer() {
+        return new Promise(resolve => {
+            if(!window.localStorage.getItem('krunker_username')) return (player = null, resolve(null));
+            fetch('https://api.z3db0y.com/krunker/r/profile/' + window.localStorage.getItem('krunker_username')).then(r => r.json()).then(r => ((r = r[3] || {}), r.stats = JSON.parse(r.player_stats), player = r, resolve(r)));
+        });
+    }
+
+    let customChatList = document.getElementById('chatList_custom');
+    ipcRenderer.on('twitchChatMessage', (_, message) => (customChatList.insertAdjacentHTML('beforeend', message), customChatList.scrollTop = customChatList.scrollHeight));
+    ipcRenderer.on('getTwitchCommandVars', async (event) => {
+        if(!player) await updatePlayer();
+        if(player && window.localStorage.getItem('krunker_username') != player.player_name) await updatePlayer();
+        player ? player.stats = Object.assign({
+            c0: 0,
+            c1: 0,
+            c2: 0,
+            c3: 0,
+            c4: 0,
+            c5: 0,
+            c6: 0,
+            c7: 0,
+            c8: 0,
+            c9: 0,
+            c11: 0,
+            c12: 0,
+            c13: 0,
+            c15: 0,
+            n: 0,
+            sl: 0,
+            jg: 0,
+            ad: 0
+        }, player.stats) : null;
+
+        let stats = player ? {
+            username: player.player_name,
+            clan: player.player_clan,
+            level: Math.floor(Math.sqrt((player.player_score + 1) / 1111)),
+            score: player.player_score.toLocaleString('en-US'),
+            kills: player.player_kills.toLocaleString('en-US'),
+            deaths: player.player_deaths.toLocaleString('en-US'),
+            kdr: (player.player_kills / player.player_deaths).toFixed(2),
+            time: formatTime(player.player_timeplayed),
+            wins: player.player_wins.toLocaleString('en-US'),
+            losses: (player.player_games_played - player.player_wins).toLocaleString('en-US'),
+            games: player.player_games_played.toLocaleString('en-US'),
+            wlr: (player.player_wins / (player.player_games_played - player.player_wins)).toFixed(4),
+            following: player.player_following.toLocaleString('en-US'),
+            followers: player.player_followed.toLocaleString('en-US'),
+            hits: player.stats.h.toLocaleString('en-US'),
+            misses: (player.stats.s - player.stats.h).toLocaleString('en-US'),
+            shots: player.stats.s.toLocaleString('en-US'),
+            headshots: player.stats.hs.toLocaleString('en-US'),
+            accuracy: (player.stats.h / player.stats.s * 100).toFixed(2) + '%',
+            nukes: player.stats.n.toLocaleString('en-US'),
+            slimers: player.stats.sl.toLocaleString('en-US'),
+            juggernauts: player.stats.jg.toLocaleString('en-US'),
+            airdrops: player.stats.ad.toLocaleString('en-US'),
+            triggerman: {
+                score: player.stats['c0'].toLocaleString('en-US'),
+                level: Math.floor(Math.sqrt((player.stats['c0'] + 1) / 1111) + 1).toLocaleString('en-US')
+            },
+            hunter: {
+                score: player.stats['c1'].toLocaleString('en-US'),
+                level: Math.floor(Math.sqrt((player.stats['c1'] + 1) / 1111) + 1).toLocaleString('en-US')
+            },
+            runngun: {
+                score: player.stats['c2'].toLocaleString('en-US'),
+                level: Math.floor(Math.sqrt((player.stats['c2'] + 1) / 1111) + 1).toLocaleString('en-US')
+            },
+            spraynpray: {
+                score: player.stats['c3'].toLocaleString('en-US'),
+                level: Math.floor(Math.sqrt((player.stats['c3'] + 1) / 1111) + 1).toLocaleString('en-US')
+            },
+            vince: {
+                score: player.stats['c4'].toLocaleString('en-US'),
+                level: Math.floor(Math.sqrt((player.stats['c4'] + 1) / 1111) + 1).toLocaleString('en-US')
+            },
+            detective: {
+                score: player.stats['c5'].toLocaleString('en-US'),
+                level: Math.floor(Math.sqrt((player.stats['c5'] + 1) / 1111) + 1).toLocaleString('en-US')
+            },
+            marksman: {
+                score: player.stats['c6'].toLocaleString('en-US'),
+                level: Math.floor(Math.sqrt((player.stats['c6'] + 1) / 1111) + 1).toLocaleString('en-US')
+            },
+            rocketeer: {
+                score: player.stats['c7'].toLocaleString('en-US'),
+                level: Math.floor(Math.sqrt((player.stats['c7'] + 1) / 1111) + 1).toLocaleString('en-US')
+            },
+            agent: {
+                score: player.stats['c8'].toLocaleString('en-US'),
+                level: Math.floor(Math.sqrt((player.stats['c8'] + 1) / 1111) + 1).toLocaleString('en-US')
+            },
+            runner: {
+                score: player.stats['c9'].toLocaleString('en-US'),
+                level: Math.floor(Math.sqrt((player.stats['c9'] + 1) / 1111) + 1).toLocaleString('en-US')
+            },
+            bowman: {
+                score: player.stats['c11'].toLocaleString('en-US'),
+                level: Math.floor(Math.sqrt((player.stats['c11'] + 1) / 1111) + 1).toLocaleString('en-US')
+            },
+            commando: {
+                score: player.stats['c12'].toLocaleString('en-US'),
+                level: Math.floor(Math.sqrt((player.stats['c12'] + 1) / 1111) + 1).toLocaleString('en-US')
+            },
+            trooper: {
+                score: player.stats['c13'].toLocaleString('en-US'),
+                level: Math.floor(Math.sqrt((player.stats['c13'] + 1) / 1111) + 1).toLocaleString('en-US')
+            },
+            infiltrator: {
+                score: player.stats['c15'].toLocaleString('en-US'),
+                level: Math.floor(Math.sqrt((player.stats['c15'] + 1) / 1111) + 1).toLocaleString('en-US')
+            }
+        } : {};
+        event.sender.send('twitchCommandVars', Object.assign(stats, {
+            link: window.location.href
+        }));
     });
-    authWindow.webContents.on('page-title-updated', (ev) => ev.preventDefault());
-    authWindow.webContents.on('will-navigate', (ev, u) => {
-        let url = new URL(u);
-        let uParams = new URLSearchParams(url.hash ? url.hash.substring(1) : url.search.substring(1));
-        if(uParams.get('state') == params.state && uParams.has('access_token')) {
-            // Success
-            server.close();
-            authWindow.close();
-            config.set('twitch_oauth_token', window.btoa(uParams.get('access_token')));
-            updateInfo();
-        } else if(uParams.get('state') == params.state && uParams.has('error')) {
-            // Fail silently
-            server.close();
-            authWindow.close();
+
+    let shiftDown = false;
+    document.getElementById('chatInput').addEventListener('keydown', e => {
+        if(e.key === 'Shift') return shiftDown = true;
+        if(e.key === 'Enter' && shiftDown && config.get('twitch.sendOnShiftEnter', false)) {
+            e.preventDefault();
+            ipcRenderer.send('sendTwitchMsg', document.getElementById('chatInput').value);
+            document.getElementById('chatInput').value = '';
         }
     });
+    document.addEventListener('keyup', e => (e.key === 'Shift' && (shiftDown = false)));
 
-    authWindow.once('ready-to-show', () => authWindow.show());
-    authWindow.webContents.session.cookies.get({ url: 'https://www.twitch.tv' }).then(cookies => {
-        Promise.all(cookies.map(cookie => authWindow.webContents.session.cookies.remove('https://www.twitch.tv', cookie.name))).then(() => {
-            authWindow.loadURL(twitchEndpoint + '?' + new URLSearchParams(params).toString());
-        });
-    });
-}
-
-function twitch_logout () {
-    config.delete('twitch_oauth_token');
-    updateInfo();
-}
-
-window.open_twitch_settings = function () {
-    document.getElementById('clientPopup').innerHTML = fs.readFileSync(path.join(__dirname, '../../html/twitch.html'));
-    updateInfo();
-}
-
-window.twitchAddonTog = function (addon) {
-    addon = 1 << addon;
-    let addons = config.get('twitch_chat_addons', 0);
-    addons ^= addon;
-    config.set('twitch_chat_addons', addons);
-}
+    ipcRenderer.on('twitchLoggedIn', _ => loadTwitchData());
+    updatePlayer();
+};

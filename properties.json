@@ -1,29 +1,39 @@
 {
     "defaultSettings": {
-        "loadingBackground": "",
-        "adBlock": false,
+        "uncapFrames": true,
+        "loadingScreen": "",
         "badges": true,
-        "clanTags": true,
-        "nukeTimer": false,
-        "update": true,
-        "uncapFrames": false,
-        "resourceSwapper": true,
-        "clickToPlayReplacer": false,
-        "skyImage": "",
-        "fastClasses": false,
-        "fpsMult": 1,
-        "hardwareAcceleration": true,
+        "adBlock": false,
+        "kpdPingAddon": false,
+        "menuTimer": false,
+        "placeboFPS": 1,
         "angleBackend": "default",
         "webgl2": false,
-        "gameCapture": false,
-        "rpc": "all",
-        "twitch_oauth_token": "",
-        "twitch_show_chat": false,
-        "twitch_chat_addons": 0,
-        "kpd_ping_addon": false,
-        "twitch_commands": [],
-        "alts": [],
-        "draggables": {},
+        "hardwareAcceleration": true,
+        "inProcessGPU": false,
+        "easyCSS": {
+            "type": -1,
+            "index": -1
+        },
+        "betterMatchmaker": {
+            "enable": false,
+            "map": "any",
+            "mode": -1,
+            "minTime": 2,
+            "minPlayers": 0,
+            "maxPlayers": 4,
+            "allowCustoms": false,
+            "allowOfficialCustoms": false
+        },
+        "controls": {
+            "newgame": "F6",
+            "settings": "F1",
+            "reload": "F5",
+            "fullscreen": "F11",
+            "devtools": "F12",
+            "altmanager": "Unbound",
+            "lastlobby": "F4"
+        },
         "chatCategories": {
             "messages": true,
             "unboxings": true,
@@ -31,22 +41,52 @@
             "twitch": false,
             "other": true
         },
-        "betterF4": {
+        "msgFilter": [],
+        "alts": [],
+        "rpc": {
+            "type": "anon",
+            "buttons": [
+                {
+                    "label": "Download",
+                    "url": "https://github.com/z3db0y/rays-client"
+                },
+                {
+                    "label": "Support server",
+                    "url": "https://discord.gg/C4k9uVnPwP"
+                }
+            ]
+        },
+        "twitch": {
             "enable": false,
-            "map": "",
-            "mode": -1,
-            "allowCustoms": false,
-            "allowOfficialCustoms": false,
-            "minPlayers": 0,
-            "maxPlayers": 4,
-            "minTime": 2
+            "token": "",
+            "emotes": {
+                "twitch": true,
+                "bttv": false,
+                "ffz": false,
+                "7tv": false
+            },
+            "commands": [],
+            "sendOnShiftEnter": false
+        },
+        "environment": {
+            "sky": {
+                "type": "off",
+                "color": "#000000",
+                "image": ""
+            },
+            "fog": {
+                "enable": false,
+                "color": "#000000",
+                "distance": 1000
+            }
         },
         "keystrokes": {
             "enable": false,
-            "opacity": 0.5,
+            "offsetX": 50,
+            "offsetY": 80,
             "scale": 1,
-            "offsetX": 0,
-            "offsetY": 0,
+            "opacity": 0.5,
+            "borderRadius": 8,
             "color": {
                 "normal": "#ffffff",
                 "pressed": "#000000"
@@ -54,15 +94,8 @@
             "bg": {
                 "normal": "#000000",
                 "pressed": "#ffffff"
-            },
-            "borderRadius": 8
-        },
-        "easyCSS": {
-            "type": -1,
-            "index": 0
-        },
-        "cssPresets": [],
-        "cssVars": {}
+            }
+        }
     },
     "windowOpts": {
         "autoHideMenuBar": true,

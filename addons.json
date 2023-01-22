@@ -1,0 +1,362 @@
+{
+    "Basic": [
+        {
+            "name": "Menu timer",
+            "description": "Shows the game timer instead of CLICK TO PLAY.",
+            "type": "toggle",
+            "id": "menuTimer",
+            "refresh": true
+        },
+        {
+            "name": "Show player ping",
+            "description": "Replaces the ping icon with the player's ping.",
+            "type": "toggle",
+            "id": "kpdPingAddon",
+            "refresh": true
+        },
+        {
+            "name": "Placebo FPS",
+            "description": "Multiplies the game's FPS (does not actually increase FPS).",
+            "type": "slider",
+            "id": "placeboFPS",
+            "min": 1,
+            "max": 100,
+            "step": 0.1,
+            "refresh": true
+        },
+        {
+            "name": "Message filters",
+            "description": "Filters out chat messages containing the specified words.",
+            "type": "button",
+            "label": "Edit",
+            "onclick": "editMsgFilter()"
+        }
+    ],
+    "Discord Rich Presence": [
+        {
+            "name": "Presence Type",
+            "type": "select",
+            "id": "rpc.type",
+            "options": [
+                { "name": "All", "value": "all" },
+                { "name": "Anonymous (Allows custom buttons)", "value": "anon" },
+                { "name": "None", "value": "off" }
+            ]
+        },
+        {
+            "name": "Custom Buttons",
+            "type": "button",
+            "label": "Edit",
+            "onclick": "rpcButtonEditor()"
+        }
+    ],
+    "Better Matchmaking": [
+        {
+            "name": "Enable",
+            "description": "Enables better matchmaking.",
+            "type": "toggle",
+            "id": "betterMatchmaker.enable",
+            "refresh": true
+        },
+        {
+            "name": "Minimum time (minutes)",
+            "type": "slider",
+            "id": "betterMatchmaker.minTime",
+            "min": 0,
+            "max": 60,
+            "step": 1
+        },
+        {
+            "name": "Minimum players",
+            "type": "slider",
+            "id": "betterMatchmaker.minPlayers",
+            "min": 1,
+            "max": 100,
+            "step": 1
+        },
+        {
+            "name": "Maximum players",
+            "type": "slider",
+            "id": "betterMatchmaker.maxPlayers",
+            "min": 1,
+            "max": 100,
+            "step": 1
+        },
+        {
+            "name": "Gamemode",
+            "type": "select",
+            "id": "betterMatchmaker.gamemode",
+            "options": [
+                { "name": "Any", "value": -1 },
+                { "name": "Free for All", "value": 0 },
+                { "name": "Team Deathmatch", "value": 1 },
+                { "name": "Hardpoint", "value": 2 },
+                { "name": "Capture the Flag", "value": 3 },
+                { "name": "Parkour", "value": 4 },
+                { "name": "Hide and Seek", "value": 5 },
+                { "name": "Infected", "value": 6 },
+                { "name": "Race", "value": 7 },
+                { "name": "Last Man Standing", "value": 8 },
+                { "name": "Simon Says", "value": 9 },
+                { "name": "Gun Game", "value": 10 },
+                { "name": "Prop Hunt", "value": 11 },
+                { "name": "Boss Hunt", "value": 12 },
+                { "name": "Classic FFA", "value": 13 },
+                { "name": "Deposit", "value": 14 },
+                { "name": "Stalker", "value": 15 },
+                { "name": "King of the Hill", "value": 16 },
+                { "name": "One in the Chamber", "value": 17 },
+                { "name": "Trade", "value": 18 },
+                { "name": "Kill Confirmed", "value": 19 },
+                { "name": "Defuse", "value": 20 },
+                { "name": "Sharp Shooter", "value": 21 },
+                { "name": "Traitor", "value": 22 },
+                { "name": "Raid", "value": 23 },
+                { "name": "Blitz", "value": 24 },
+                { "name": "Domination", "value": 25 },
+                { "name": "Squad Deathmatch", "value": 26 },
+                { "name": "Kranked FFA", "value": 27 },
+                { "name": "Team Defender", "value": 28 },
+                { "name": "Deposit FFA", "value": 29 },
+                { "name": "Chaos Snipers", "value": 33 },
+                { "name": "Bighead FFA", "value": 34 }
+            ]
+        },
+        {
+            "name": "Map",
+            "type": "select",
+            "id": "betterMatchmaker.map",
+            "options": [
+                { "name": "Any", "value": "" },
+                { "name": "Burg", "value": "Burg" },
+                { "name": "Littletown", "value": "Littletown" },
+                { "name": "Sandstorm", "value": "Sandstorm" },
+                { "name": "Subzero", "value": "Subzero" },
+                { "name": "Undergrowth", "value": "Undergrowth" },
+                { "name": "Shipment", "value": "Shipment" },
+                { "name": "Freight", "value": "Freight" },
+                { "name": "Lostworld", "value": "Lostworld" },
+                { "name": "Citadel", "value": "Citadel" },
+                { "name": "Oasis", "value": "Oasis" },
+                { "name": "Kanji", "value": "Kanji" },
+                { "name": "Industry", "value": "Industry" },
+                { "name": "Lumber", "value": "Lumber" },
+                { "name": "Evacuation", "value": "Evacuation" },
+                { "name": "Site", "value": "Site" },
+                { "name": "SkyTemple", "value": "SkyTemple" },
+                { "name": "Lagoon", "value": "Lagoon" },
+                { "name": "Bureau", "value": "Bureau" },
+                { "name": "Tortuga", "value": "Tortuga" },
+                { "name": "Tropicano", "value": "Tropicano" },
+                { "name": "Krunk_Plaza", "value": "Krunk_Plaza" },
+                { "name": "Arena", "value": "Arena" },
+                { "name": "Habitat", "value": "Habitat" },
+                { "name": "Atomic", "value": "Atomic" },
+                { "name": "Old_Burg", "value": "Old_Burg" },
+                { "name": "Throwback", "value": "Throwback" },
+                { "name": "Stockade", "value": "Stockade" },
+                { "name": "Facility", "value": "Facility" }
+            ]
+        },
+        {
+            "name": "Allow custom games",
+            "description": "Allows you to join custom games.",
+            "type": "toggle",
+            "id": "betterMatchmaker.allowCustoms"
+        },
+        {
+            "name": "Allow official customs",
+            "description": "Allows you to join official custom games.",
+            "type": "toggle",
+            "id": "betterMatchmaker.allowOfficialCustoms"
+        }
+    ],
+    "Twitch Integration": [
+        {
+            "name": "Enable",
+            "description": "Enables Twitch integration.",
+            "type": "toggle",
+            "id": "twitch.enable"
+        },
+        {
+            "name": "Not logged in",
+            "type": "custom",
+            "customHTML": "<div class='settingsBtn' id='twitchLogin'>Login</div>"
+        },
+        {
+            "name": "Custom chat commands",
+            "type": "button",
+            "id": "editTwitchCommands",
+            "label": "Edit"
+        },
+        {
+            "name": "Shift-enter in chat to send message to twitch chat",
+            "type": "toggle",
+            "id": "twitch.sendOnShiftEnter"
+        },
+        {
+            "name": "Chat emotes (Twitch)",
+            "type": "toggle",
+            "id": "twitch.emotes.twitch"
+        },
+        {
+            "name": "Chat emotes (BTTV)",
+            "type": "toggle",
+            "id": "twitch.emotes.bttv"
+        },
+        {
+            "name": "Chat emotes (FFZ)",
+            "type": "toggle",
+            "id": "twitch.emotes.ffz"
+        },
+        {
+            "name": "Chat emotes (7TV)",
+            "type": "toggle",
+            "id": "twitch.emotes.7tv"
+        }
+    ],
+    "Environment Mods": [
+        {
+            "name": "Enable sky color",
+            "description": "Allows you to change the skybox.",
+            "type": "toggle",
+            "id": "environment.sky.enable",
+            "refresh": true
+        },
+        {
+            "name": "Sky color",
+            "type": "color",
+            "id": "environment.sky.color"
+        },
+        {
+            "name": "Fog",
+            "description": "Allows you to add fog to the map.",
+            "type": "toggle",
+            "id": "environment.fog.enable",
+            "refresh": true
+        },
+        {
+            "name": "Fog color",
+            "type": "color",
+            "id": "environment.fog.color"
+        },
+        {
+            "name": "Fog distance",
+            "type": "slider",
+            "id": "environment.fog.distance",
+            "min": 0,
+            "max": 5000,
+            "step": 1
+        },
+        {
+            "name": "Light tweaks",
+            "description": "Allows you to change the lighting of the map.",
+            "type": "toggle",
+            "id": "environment.lighttweaks.enable",
+            "refresh": true
+        },
+        {
+            "name": "Ambient light color",
+            "type": "color",
+            "id": "environment.lighttweaks.ambient.color"
+        },
+        {
+            "name": "Ambient light intensity",
+            "type": "slider",
+            "id": "environment.lighttweaks.ambient.intensity",
+            "min": 0,
+            "max": 10,
+            "step": 0.1
+        },
+        {
+            "name": "Sky light color",
+            "type": "color",
+            "id": "environment.lighttweaks.sky.color"
+        },
+        {
+            "name": "Sky light intensity",
+            "type": "slider",
+            "id": "environment.lighttweaks.sky.intensity",
+            "min": 0,
+            "max": 10,
+            "step": 0.1
+        }
+    ],
+    "Keystrokes": [
+        {
+            "name": "Enable",
+            "description": "Enables keystrokes.",
+            "type": "toggle",
+            "id": "keystrokes.enable",
+            "refresh": true
+        },
+        {
+            "name": "Offset X (%)",
+            "type": "slider",
+            "id": "keystrokes.offsetX",
+            "min": 0,
+            "max": 100,
+            "step": 1
+        },
+        {
+            "name": "Offset Y (%)",
+            "type": "slider",
+            "id": "keystrokes.offsetY",
+            "min": 0,
+            "max": 100,
+            "step": 1
+        },
+        {
+            "name": "Scale",
+            "type": "slider",
+            "id": "keystrokes.scale",
+            "min": 0.1,
+            "max": 2,
+            "step": 0.1            
+        },
+        {
+            "name": "Border radius (%)",
+            "type": "slider",
+            "id": "keystrokes.borderRadius",
+            "min": 0,
+            "max": 50,
+            "step": 1
+        },
+        {
+            "name": "Color (normal)",
+            "type": "select_with_color",
+            "id": "keystrokes.color.normal",
+            "options": [
+                { "name": "Normal", "value": 0 },
+                { "name": "RGB", "value": "rgb" }
+            ]
+        },
+        {
+            "name": "Color (pressed)",
+            "type": "select_with_color",
+            "id": "keystrokes.color.pressed",
+            "options": [
+                { "name": "Normal", "value": 0 },
+                { "name": "RGB", "value": "rgb" }
+            ]
+        },
+        {
+            "name": "Background color (normal)",
+            "type": "select_with_color",
+            "id": "keystrokes.bg.normal",
+            "options": [
+                { "name": "Normal", "value": 0 },
+                { "name": "RGB", "value": "rgb" }
+            ]
+        },
+        {
+            "name": "Background color (pressed)",
+            "type": "select_with_color",
+            "id": "keystrokes.bg.pressed",
+            "options": [
+                { "name": "Normal", "value": 0 },
+                { "name": "RGB", "value": "rgb" }
+            ]
+        }
+    ]
+}

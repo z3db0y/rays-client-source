@@ -3,7 +3,7 @@ const Store = require('electron-store');
 let config = new Store();
 
 module.exports = function (window) {
-    // if(!config.get('betterF4.enable', false)) return window.loadURL('https://krunker.io');
+    if(!config.get('betterMatchmaker.enable', false)) return window.loadURL('https://krunker.io');
 
     let req = request('https://matchmaker.krunker.io/game-list?hostname=krunker.io', res => {
         let data = '';
@@ -13,12 +13,12 @@ module.exports = function (window) {
             let region = await window.webContents.executeJavaScript('localStorage.getItem("kro_setngss_defaultRegion")') || 'de-fra';
             if(!games.games) return;
             games = games.games.filter(game => game[1] === region); // filter by region
-            games = games.filter(game => game[2] >= config.get('betterF4.minPlayers', 0) && game[2] <= config.get('betterF4.maxPlayers', 4)); // filter by player count
-            games = games.filter(game => game[4].c === (config.get('betterF4.allowCustoms', false) ? 1 : 0)); // filter custom games
-            games = games.filter(game => game[4].oc === (config.get('betterF4.allowOfficialCustoms', false) ? 1 : undefined)); // filter official custom games
-            games = games.filter(game => (config.get('betterF4.map', '') === '') || (game[4].i === config.get('betterF4.map', ''))); // filter by map
-            games = games.filter(game => (config.get('betterF4.mode', -1) === -1) || (game[4].g === config.get('betterF4.mode', -1))); // filter by mode
-            games = games.filter(game => game[5] >= (config.get('betterF4.minTime', 2) * 60)); // filter by time
+            games = games.filter(game => game[2] >= config.get('betterMatchmaker.minPlayers', 0) && game[2] <= config.get('betterMatchmaker.maxPlayers', 4)); // filter by player count
+            games = games.filter(game => game[4].c === (config.get('betterMatchmaker.allowCustoms', false) ? 1 : 0)); // filter custom games
+            games = games.filter(game => game[4].oc === (config.get('betterMatchmaker.allowOfficialCustoms', false) ? 1 : undefined)); // filter official custom games
+            games = games.filter(game => (config.get('betterMatchmaker.map', '') === '') || (game[4].i === config.get('betterMatchmaker.map', ''))); // filter by map
+            games = games.filter(game => (config.get('betterMatchmaker.mode', -1) === -1) || (game[4].g === config.get('betterMatchmaker.mode', -1))); // filter by mode
+            games = games.filter(game => game[5] >= (config.get('betterMatchmaker.minTime', 2) * 60)); // filter by time
             games = games.sort((a, b) => (b[2] - a[2]) || (b[5] - a[5])); // sort by players and time left
             console.log(games[0]);
             if(!games[0]) return window.loadURL('https://krunker.io');
