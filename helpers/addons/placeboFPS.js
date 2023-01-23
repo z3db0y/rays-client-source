@@ -5,11 +5,16 @@ module.exports = () => {
     let ingameFPS = document.getElementById('ingameFPS');
     let menuFPS = document.getElementById('menuFPS');
     let lastVal = '';
-    new MutationObserver(_ => {
-        if(ingameFPS.textContent == lastVal) return;
-        let randomAdd = Math.floor(Math.random() * multiplier * 2) - multiplier;
-        ingameFPS.textContent = Math.floor(parseInt(ingameFPS.textContent) * multiplier + randomAdd);
-        menuFPS.textContent = Math.floor(parseInt(menuFPS.textContent) * multiplier + randomAdd);
-        lastVal = ingameFPS.textContent;
-    }).observe(ingameFPS, { childList: true });
+
+    Object.defineProperty(ingameFPS, 'textContent', {
+        set: function(val) {
+            let randomAdd = Math.floor(Math.random() * multiplier * 2) - multiplier;
+            this.innerText = Math.floor(parseInt(val) * multiplier + randomAdd);
+            menuFPS.innerText = Math.floor(parseInt(val) * multiplier + randomAdd);
+        }
+    });
+
+    Object.defineProperty(menuFPS, 'textContent', {
+        set: function(_) {}
+    });
 }

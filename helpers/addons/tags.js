@@ -3,6 +3,10 @@ module.exports = _ => {
         !document.getElementById('menuClassNameTag') ||
         !document.getElementById('newLeaderDisplay')
     ) return setTimeout(module.exports, 100);
+    const leaderboard = document.getElementById('newLeaderDisplay');
+    const oldLeaderboard = document.getElementById('leaderDisplay');
+    const menuName = document.getElementById('menuClassNameTag');
+
     const Store = require('electron-store');
     const config = new Store();
     if(!config.get('badges', true)) return;
@@ -29,7 +33,6 @@ module.exports = _ => {
         clans = json;
     });
 
-    let menuName = document.getElementById('menuClassNameTag');
     new MutationObserver(_ => {
         let playerName = localStorage.getItem('krunker_username');
         if(!playerName) return;
@@ -53,7 +56,8 @@ module.exports = _ => {
 
     let newLeaderDisplay = document.getElementById('newLeaderDisplay');
     new MutationObserver(_ => {
-        let playerEls = document.querySelectorAll('*[class^="leaderName"], *[class^="newLeaderName"]');
+        let playerEls = [...[...leaderboard.children[0].children[0].children[0].children].slice(2).map(child => child.children[0].children[0].lastChild), ...[...oldLeaderboard.children[0].children].map(child => child.children[child.children.length - 2])];
+        window.playerEls = playerEls;
         for(let playerEl of playerEls) {
             let playerNode = [...playerEl.childNodes].find(x => x.nodeType == 3);
             let playerName = playerNode?.textContent.trim();
