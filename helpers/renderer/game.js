@@ -13,6 +13,7 @@ const loadAltManager = () => require(path.join(__dirname, '../util/altManager.js
 const loadWatermark = () => require(path.join(__dirname, '../util/watermark.js'));
 const loadRPCEditor = () => require(path.join(__dirname, '../util/rpc.js'));
 window.alert = (msg) => ipcRenderer.send('alert', msg);
+window.confirm = (msg) => ipcRenderer.sendSync('confirm', msg);
 
 function loadAddons() {
     fs.readdirSync(path.join(__dirname, '../addons')).forEach(file => {
@@ -129,6 +130,7 @@ window.importClientSettings = () => {
 };
 
 window.resetClientSettings = () => {
+    if(!confirm('Are you sure you want to reset your client settings?')) return;
     config.clear();
     alert('Client settings reset! Please restart the client to apply changes.');
 }

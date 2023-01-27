@@ -48,11 +48,27 @@ module.exports = () => {
         customChatList.style.maxHeight = chatList.style.maxHeight;
         customChatList.style.display = chatList.style.display;
         
-        chatList.childNodes.forEach(node => {
-            if(!Array.from(customChatList.childNodes).includes(node)) {
-                customChatList.appendChild(node);
+        _.forEach(m => [...m.addedNodes].forEach(n => {
+            customChatList.appendChild(n);
+            let msgNode = n.firstChild;
+            if(n.classList.contains('twitchMsg')) {
+                hideShow(n, 'twitch');
+            } else {
+                if(msgNode.childNodes.length > 1) 
+                    hideShow(n, 'messages');
+                else {
+                    if(msgNode.firstChild.childNodes.length > 1) {
+                        for(var n of msgNode.firstChild.childNodes) {
+                            if(n.textContent == ' unboxed ') {
+                                hideShow(n, 'unboxings');
+                                return;
+                            }
+                        }
+                        hideShow(n, 'kills');
+                    } else hideShow(n, 'other');
+                }
             }
-        });
+        }));
 
         customChatList.scrollTop = customChatList.scrollHeight;
 
@@ -61,8 +77,6 @@ module.exports = () => {
                 customChatList.removeChild(customChatList.childNodes[i]);
             }
         }
-
-        updateVisibleContents();
     }).observe(chatList, { childList: true });
 
     document.getElementById('chatHolder').insertBefore(categoryList, chatList);

@@ -62,6 +62,7 @@ ipcMain.on('log_warn', (ev, ...args) => console.warn('\x1b[35m[RENDERER]\x1b[0m'
 ipcMain.on('log_error', (ev, ...args) => console.error('\x1b[35m[RENDERER]\x1b[0m', ...args));
 ipcMain.on('log_debug', (ev, ...args) => console.debug('\x1b[35m[RENDERER]\x1b[0m', ...args));
 ipcMain.on('alert', (ev, ...args) => dialog.showMessageBox(mainWindow, { type: 'info', buttons: ['OK'], message: args.join(' '), title: mainWindow.getTitle() }));
+ipcMain.on('confirm', (ev, ...args) => ev.returnValue = !dialog.showMessageBoxSync(mainWindow, { type: 'question', buttons: ['Yes', 'No'], message: args.join(' '), title: mainWindow.getTitle() }, (res) => ev.returnValue = res === 0));
 
 function getURLType(url) {
     url = new URL(url);
@@ -69,7 +70,7 @@ function getURLType(url) {
         if(url.pathname === '/editor.html') return 'editor';
         if(url.pathname === '/social.html') return 'social';
         if(url.pathname === '/viewer.html') return 'viewer';
-        return 'game';
+        if(url.pathname === '/') return 'game';
     }
     return 'external';
 }

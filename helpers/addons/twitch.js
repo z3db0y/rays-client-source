@@ -183,7 +183,7 @@ async function getAuthorText(tags, token) {
 
 async function injectBTTVEmotes(message, tags) {
     let emotes = await fetchBTTVEmotes(tags['room-id']).catch(_ => {});
-    if(!emotes) return message;
+    if(!emotes || !Array.isArray(emotes.channelEmotes) || !Array.isArray(emotes.sharedEmotes)) return message;
 
     for(let emote of emotes.channelEmotes) {
         message = message.replace(new RegExp(escapeRegex(emote.code), 'g'), `<img src="https://cdn.betterttv.net/emote/${emote.id}/1x">`)
@@ -198,7 +198,7 @@ async function injectBTTVEmotes(message, tags) {
 
 async function injectFFZEmotes(message, tags) {
     let emotes = await fetchFFZEmotes(tags['room-id']).catch(_ => {});
-    if(!emotes) return message;
+    if(!emotes || !emotes.room) return message;
 
     for(let emote of emotes.sets[emotes.room.set].emoticons) {
         message = message.replace(new RegExp(escapeRegex(emote.name), 'g'), `<img src="https://cdn.frankerfacez.com/emoticon/${emote.id}/1">`)
@@ -210,7 +210,7 @@ async function injectFFZEmotes(message, tags) {
 async function inject7TVEmotes(message, tags) {
     let emotes = await fetch7TVEmotes(tags['room-id']).catch(_ => {});
     console.log(emotes);
-    if(!emotes) return message;
+    if(!emotes || !Array.isArray(emotes)) return message;
 
     for(let emote of emotes) {
         message = message.replace(new RegExp(escapeRegex(emote.name), 'g'), `<img src="https://cdn.7tv.app/emote/${emote.id}/1x">`)
