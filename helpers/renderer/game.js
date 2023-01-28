@@ -1,5 +1,5 @@
 const { ipcRenderer } = require('electron');
-const { app, session } = require('electron').remote;
+const { app, session, shell } = require('electron').remote;
 const path = require('path');
 require(path.join(__dirname, 'common.js'));
 const fs = require('fs');
@@ -134,3 +134,9 @@ window.resetClientSettings = () => {
     config.clear();
     alert('Client settings reset! Please restart the client to apply changes.');
 }
+
+window.openResourceSwapper = () => {
+    let dir = path.join(app.getPath('documents'), 'KrunkerResourceSwapper');
+    if(!fs.existsSync(dir)) return alert('Resource Swapper folder not found!');
+    shell.openPath(dir);
+};

@@ -63,6 +63,9 @@ module.exports = function () {
                             case 'toggle':
                                 settHTML += `<label class="switch" style="margin-left:10px"><input type="checkbox" id="${sett.id.replace(/"/g, '\\"')}" ${config.get(sett.id, false) ? 'checked' : ''} onclick="setClientSetting(this.id, this.checked)"><span class="slider" style="width: 65px"><span class="grooves"></span></span></label></div>`;
                                 break;
+                            case 'toggle_with_button':
+                                settHTML += `<div style="margin-left: auto"><label class="switch" style="margin-left:10px"><input type="checkbox" id="${sett.id.replace(/"/g, '\\"')}" ${config.get(sett.id, false) ? 'checked' : ''} onclick="setClientSetting(this.id, this.checked)"><span class="slider" style="width: 65px"><span class="grooves"></span></span></label><div onclick="${sett.onclick && sett.onclick.replace(/"/g, '\\"')}" style="width: auto; display: inline-table" class="settingsBtn">${sett.label}</div></div></div>`;
+                                break;
                             case 'input':
                                 settHTML += `<input type="input" id="${sett.id.replace(/"/g, '\\"')}" placeholder="${sett.placeholder.replace(/"/g, '\\"')}" oninput="setClientSetting(this.id, this.value)" class="inputGrey2" value="${config.get(sett.id, '').replace(/"/g, '\\"')}"></div>`;
                                 break;

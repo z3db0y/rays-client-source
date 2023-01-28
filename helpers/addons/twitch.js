@@ -591,9 +591,11 @@ module.exports = () => {
     function updatePlayer() {
         return new Promise(resolve => {
             if(!window.localStorage.getItem('krunker_username')) return (player = null, resolve(null));
+            setTimeout(() => resolve(null), 10000);
             fetch('https://api.z3db0y.com/krunker/r/profile/' + window.localStorage.getItem('krunker_username')).then(r => r.json()).then(r => ((r = r[3] || {}), r.stats = JSON.parse(r.player_stats), player = r, resolve(r)));
         });
     }
+    updatePlayer();
 
     let customChatList = document.getElementById('chatList_custom');
     ipcRenderer.on('twitchChatMessage', (_, message) => (customChatList.insertAdjacentHTML('beforeend', message), customChatList.scrollTop = customChatList.scrollHeight));

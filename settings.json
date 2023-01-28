@@ -8,6 +8,15 @@
             "restart": true
         },
         {
+            "name": "Resource swapper",
+            "description": "Swap out game resources with custom ones.",
+            "type": "toggle_with_button",
+            "id": "resourceSwapper",
+            "restart": true,
+            "label": "Open folder",
+            "onclick": "openResourceSwapper()"
+        },
+        {
             "name": "ANGLE backend",
             "description": "Which graphics backend to use.",
             "type": "select",

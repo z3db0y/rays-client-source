@@ -1,6 +1,7 @@
 {
     "defaultSettings": {
         "uncapFrames": true,
+        "resourceSwapper": false,
         "loadingScreen": "",
         "badges": true,
         "adBlock": false,
@@ -136,6 +137,13 @@
             "authorURL": "https://mof1.github.io/",
             "imageURL": "https://cdn.z3db0y.com/rays-img/mof1.png",
             "css": "@import url(https://mof1.github.io/cdn/MOF1_CSS_thief/configs.css);\n@import url(https://mof1.github.io/krunker_css/css/main_custom.css);"
+        },
+        {
+            "name": "Switchaim CSS",
+            "author": "Switch",
+            "authorURL": "https://www.twitch.tv/switchaim",
+            "imageURL": "https://cdn.z3db0y.com/rays-img/switch.png",
+            "css": "@import url(https://switchkr.github.io/switch/switch.css);"
         }
     ]
 }
