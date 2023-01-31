@@ -51,22 +51,17 @@ module.exports = () => {
         _.forEach(m => [...m.addedNodes].forEach(n => {
             customChatList.appendChild(n);
             let msgNode = n.firstChild;
-            if(n.classList.contains('twitchMsg')) {
-                hideShow(n, 'twitch');
-            } else {
-                if(msgNode.childNodes.length > 1) 
-                    hideShow(n, 'messages');
-                else {
-                    if(msgNode.firstChild.childNodes.length > 1) {
-                        for(var n of msgNode.firstChild.childNodes) {
-                            if(n.textContent == ' unboxed ') {
-                                hideShow(n, 'unboxings');
-                                return;
-                            }
+            if(msgNode.childNodes.length > 1) hideShow(n, 'messages');
+            else {
+                if(msgNode.firstChild.childNodes.length > 1) {
+                    for(var n1 of msgNode.firstChild.childNodes) {
+                        if(n1.textContent == ' unboxed ') {
+                            hideShow(n, 'unboxings');
+                            return;
                         }
-                        hideShow(n, 'kills');
-                    } else hideShow(n, 'other');
-                }
+                    }
+                    hideShow(n, 'kills');
+                } else hideShow(n, 'other');
             }
         }));
 

@@ -63,11 +63,11 @@ module.exports = _ => {
             let playerName = playerNode?.textContent.trim();
             let playerBadges = badges ? badges[Object.keys(badges).find(x => x.toLowerCase() === (premiumNames.find(x => x.alias == playerName)?.name || playerName).toLowerCase())] || [] : [];
 
-            for(var badge of playerBadges) {
+            playerBadges.forEach(badge => {
                 let html = `<img class="badge" src="https://cdn.z3db0y.com/rays-badges/${badge}.png" style="height: 23px; margin-top: 3px; vertical-align: middle">`;
                 if(!playerEl.parentElement.innerHTML.includes(html)) playerEl.insertAdjacentHTML('beforebegin', html);
-            }
-
+            });
+            
             let playerClan = playerEl.querySelector('span')?.textContent.trim().slice(1, -1).toLowerCase();
             let clan = clans ? clans[Object.keys(clans).find(x => x.toLowerCase() === playerClan)] : null;
             if(!clan?.style && !clan?.addonHTML) continue;

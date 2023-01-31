@@ -15,7 +15,9 @@ watermark.id = 'clientWatermark';
 watermark.style.color = '#fff';
 watermark.style.marginBottom = '5px';
 
+const curGameInfo = document.getElementById('curGameInfo');
+
 new MutationObserver((_, o) => {
     if(document.getElementById('clientWatermark')) return;
-    document.getElementById('curGameInfo').insertAdjacentElement('afterbegin', watermark);
-}).observe(document.getElementById('curGameInfo'), { childList: true });
+    curGameInfo.insertAdjacentElement('afterbegin', watermark);
+}).observe(curGameInfo, { childList: true });

@@ -410,7 +410,9 @@ function loadTwitchData() {
 function popup(title, inputPlaceholders, inputValues, submitButtonName, afterTitle) {
     let menuWindow = document.getElementById('menuWindow');
 
-    menuWindow.innerHTML = `<div id="referralHeader">${title}</div>${afterTitle || ''}<input class="accountInput" id="input1" value="${(inputValues[0] && inputValues[0].replace(/"/g, '\\"')) || ''}" placeholder="${(inputPlaceholders[0] && inputPlaceholders[0].replace(/"/g, '\\"')) || ''}"><input class="accountInput" id="input2" value="${(inputValues[1] && inputValues[1].replace(/"/g, '\\"')) || ''}" placeholder="${(inputPlaceholders[1] && inputPlaceholders[1].replace(/"/g, '\\"')) || ''}"><div id="saveBtn" class="button buttonG" style="width:calc(100% - 55px);padding:12px 20px;position:relative;left:50%;transform:translateX(-50%);margin-top:20px" onmouseenter="playTick()">${submitButtonName}</div>`;
+    menuWindow.innerHTML = `<div id="referralHeader">${title}</div>${afterTitle || ''}` + 
+    inputPlaceholders.map((x, i) => `<input class="accountInput" id="input${i}" value="${(inputValues[i] && inputValues[i].replace(/"/g, '\\"')) || ''}" placeholder="${(x && x.replace(/"/g, '\\"')) || ''}">`).join('') +
+    `<div id="saveBtn" class="button buttonG" style="width:calc(100% - 55px);padding:12px 20px;position:relative;left:50%;transform:translateX(-50%);margin-top: 20px" onmouseenter="playTick()">${submitButtonName}</div>`;
 
     let windowHolder = document.getElementById('windowHolder');
     windowHolder.style.display = 'block';
@@ -420,9 +422,6 @@ function popup(title, inputPlaceholders, inputValues, submitButtonName, afterTit
     menuWindow.classList = 'dark';
 
     return new Promise(resolve => {
-        let input1 = document.getElementById('input1');
-        let input2 = document.getElementById('input2');
-
         let onclose = _ => {
             document.getElementById('windowCloser').removeEventListener('click', onclose);
             resolve(null);
@@ -432,7 +431,7 @@ function popup(title, inputPlaceholders, inputValues, submitButtonName, afterTit
         document.getElementById('saveBtn').onclick = _ => {
             document.getElementById('windowCloser').removeEventListener('click', onclose);
             document.getElementById('saveBtn').onclick = _ => {};
-            resolve([input1.value, input2.value]);
+            resolve(inputPlaceholders.map((x, i) => document.getElementById('input' + i).value));
         };
     });
 }

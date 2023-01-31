@@ -10,12 +10,6 @@ function main() {
         callback({ cancel: false });
     });
 
-    function colorToInt(c) {
-        let hex = c.substring(1);
-        if(hex.length === 3) hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
-        return parseInt(hex, 16) || 0;
-    }
-
     protocol.registerBufferProtocol('json', (request, callback) => {
         let details = JSON.parse(decodeURIComponent(request.url.replace('json://', '')));
         let req = require('https').request(details.url, {
@@ -32,6 +26,12 @@ function main() {
             res.on('end', () => {
                 data = JSON.parse(data);
                 if(data.spawns && data.objects) {
+                    function colorToInt(c) {
+                        let hex = c.substring(1);
+                        if(hex.length === 3) hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+                        return parseInt(hex, 16) || 0;
+                    }
+
                     // It's a map!
                     if(config.get('environment.sky.enable', false)) data = Object.assign(data, {
                         sky: config.get('environment.sky.color', '#000000'),

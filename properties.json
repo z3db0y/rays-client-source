@@ -96,7 +96,8 @@
                 "normal": "#000000",
                 "pressed": "#ffffff"
             }
-        }
+        },
+        "reportedErrors": []
     },
     "windowOpts": {
         "autoHideMenuBar": true,

@@ -15,6 +15,10 @@ const loadRPCEditor = () => require(path.join(__dirname, '../util/rpc.js'));
 window.alert = (msg) => ipcRenderer.send('alert', msg);
 window.confirm = (msg) => ipcRenderer.sendSync('confirm', msg);
 
+ipcRenderer.on('krUsername', () => {
+    ipcRenderer.send('krUsername', localStorage.getItem('krunker_username'));
+});
+
 function loadAddons() {
     fs.readdirSync(path.join(__dirname, '../addons')).forEach(file => {
         if(file.endsWith('.js')) require(path.join(__dirname, '../addons', file))();

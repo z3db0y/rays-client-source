@@ -67,7 +67,7 @@ window.openChangelog = function() {
 };
 
 function genChanges(category, changelog, elem) {
-    elem.parentElement.querySelectorAll('.bigMenTab').forEach(tab => tab.classList = 'bigMenTab');
+    [...elem.parentElement.children].forEach(tab => tab.classList = 'bigMenTab');
     elem.classList = 'bigMenTab bigMenTabA';
 
     let versions = changelog.filter(update => update.version.startsWith(category.split('.')[0]));

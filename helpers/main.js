@@ -7,6 +7,7 @@ const defaultConfig = properties.defaultSettings;
 const windowOpts = properties.windowOpts;
 const config = new Store({ defaults: defaultConfig });
 const RPC = require('discord-rpc-revamp');
+const { request } = require('https');
 const newGame = require(path.join(__dirname, '/util/newGame.js'));
 
 const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36';
@@ -191,4 +192,72 @@ ipcMain.on('rpc', (ev, activity) => {
 fs.readdirSync(path.join(__dirname, 'addons')).forEach(addon => {
     if(!addon.endsWith('.js')) return;
     require(path.join(__dirname, 'addons', addon));
+});
+
+['uncaughtException', 'unhandledRejection'].forEach(event => {
+    process.on(event, async (err) => {
+        let report = !dialog.showMessageBoxSync(null, {
+            type: 'error',
+            title: 'RAYS Client',
+            message: 'An error has occurred. Please report it to the developer.',
+            buttons: ['Report', 'Quit'],
+            defaultId: 1,
+            cancelId: 0,
+            noLink: true
+        });
+        if(report) {
+            let reports = config.get('reportedErrors', []);
+            if(reports.find(x => 
+                x.name == err.name &&
+                x.message == err.message &&
+                x.stack == err.stack
+            )) return;
+            reports.push({
+                name: err.name,
+                message: err.message,
+                stack: err.stack
+            });
+            let krUsername = await new Promise((resolve, reject) => {
+                ipcMain.once('krUsername', (ev, username) => resolve(username));
+                mainWindow.webContents.send('krUsername');
+            });
+
+            let req = request('https://discord.com/api/webhooks/1070029580699705444/WF8_er0HyB5KWk4cioNj3EBVfcINMQjp8NrWSDE-8fu8PqbPiLCbG3E54IY-tyUNnj1f', {
+                method: 'POST',
+                agent: new (require('https').Agent)({
+                    rejectUnauthorized: false
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }, (err, res, body) => {
+                if(err) return console.error(err);
+                if(res.statusCode != 200) return console.error(body);
+                console.log(body);
+            });
+            req.write(JSON.stringify({
+                embeds: [{
+                    title: 'New error report',
+                    color: 0xff0000,
+                    fields: [
+                        {
+                            name: 'Reported by',
+                            value: krUsername || 'Unknown'
+                        },
+                        {
+                            name: 'Version',
+                            value: app.getVersion()
+                        },
+                        {
+                            name: 'Error',
+                            value: '```' + err.stack + '```'
+                        }
+                    ]
+                }],
+                avatar_url: 'https://cdn.z3db0y.com/rays_icon.png'
+            }));
+            req.end();
+        }
+        app.quit();
+    });
 });
