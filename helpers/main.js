@@ -116,79 +116,77 @@ mainWindow.webContents.on('new-window', onNewWindow);
 mainWindow.webContents.on('will-navigate', onNewWindow);
 mainWindow.webContents.on('will-prevent-unload', (ev) => ev.preventDefault());
 
-try {
-    let rpc = new RPC.Client({ transport: 'ipc' });
+let rpc = new RPC.Client({ transport: 'ipc' });
 
-    function rpcLogin() {
-        rpc.connect({ clientId: '977054900166987828' }).catch(_ => (console.error('RPC: ' + _.message), setTimeout(rpcLogin, 10000)));
+function rpcLogin() {
+    rpc.connect({ clientId: '977054900166987828' }).catch(_ => (console.error('RPC: ' + _.message), setTimeout(rpcLogin, 10000)));
+}
+rpcLogin();
+
+rpc.on('close', () => setTimeout(rpcLogin, 10000));
+
+rpc.on('ready', () => {
+    rpc.subscribe('ACTIVITY_JOIN');
+    console.log('RPC: ready');
+});
+
+rpc.on('ACTIVITY_JOIN', ({ secret }) => mainWindow.loadURL('https://krunker.io/?game=' + secret, { 'userAgent': USER_AGENT }));
+ipcMain.on('rpc', (ev, activity) => {
+    if(!rpc.user) return;
+    if(config.get('rpc.type', 'all') === 'off') return rpc.clearActivity().catch(_ => console.error('RPC: ' + _.message));
+    let focusedWindow = BrowserWindow.getFocusedWindow();
+    let focusedWindowType = focusedWindow ? getURLType(focusedWindow.webContents.getURL()) : 'game';
+    let idleTimer = 0;
+    switch(focusedWindowType) {
+        case 'game':
+            idleTimer = 0;
+            let startTimestamp = Date.now();
+            let endTimestamp = new Date(startTimestamp + 1000 * activity.time);
+            rpc.setActivity({
+                details: activity.mode + ' - ' + activity.map,
+                state: (activity.comp ? 'Competitive' : (activity.custom ? 'Custom' : 'Public')) + ' Game',
+                smallImageKey: config.get('rpc.type', 'all') == 'all' ? ('https://assets.krunker.io/textures/classes/icon_' + activity.class.index + '.png') : null,
+                smallImageText: config.get('rpc.type', 'all') == 'all' ? activity.user : null,
+                largeImageKey: 'icon',
+                largeImageText: 'RAYS Client v' + app.getVersion(),
+                startTimestamp: endTimestamp.getTime(),
+                endTimestamp: endTimestamp.getTime(),
+                partyId: 'party-' + (activity.id && activity.id.split(':')[1]),
+                partySize: activity.players.size,
+                partyMax: activity.players.max,
+                joinSecret: config.get('rpc.type', 'all') == 'all' ? activity.id : null,
+                buttons: config.get('rpc.type', 'all') == 'all' ? null : (config.get('rpc.buttons', []).length ? config.get('rpc.buttons', []) : null)
+            }).catch(_ => console.error('RPC: ' + _.message));
+            break;
+        case 'editor':
+            (idleTimer == 0) && (idleTimer = Date.now());
+            rpc.setActivity({
+                details: 'Creating a Map',
+                largeImageKey: 'icon',
+                largeImageText: 'RAYS Client v' + app.getVersion(),
+                startTimestamp: idleTimer
+            }).catch(_ => console.error('RPC: ' + _.message));
+            break;
+        case 'social':
+            (idleTimer == 0) && (idleTimer = Date.now());
+            rpc.setActivity({
+                details: 'Browsing the Hub',
+                largeImageKey: 'icon',
+                largeImageText: 'RAYS Client v' + app.getVersion(),
+                startTimestamp: idleTimer
+            }).catch(_ => console.error('RPC: ' + _.message));
+            break;
+        case 'viewer':
+            (idleTimer == 0) && (idleTimer = Date.now());
+            rpc.setActivity({
+                details: 'Viewing Skins',
+                largeImageKey: 'icon',
+                largeImageText: 'RAYS Client v' + app.getVersion(),
+                startTimestamp: idleTimer
+            }).catch(_ => console.error('RPC: ' + _.message));
+            break;
     }
-    rpcLogin();
-
-    rpc.on('close', () => setTimeout(rpcLogin, 10000));
-
-    rpc.on('ready', () => {
-        rpc.subscribe('ACTIVITY_JOIN');
-        console.log('RPC: ready');
-    });
-
-    rpc.on('ACTIVITY_JOIN', ({ secret }) => mainWindow.loadURL('https://krunker.io/?game=' + secret, { 'userAgent': USER_AGENT }));
-    ipcMain.on('rpc', (ev, activity) => {
-        if(!rpc.user) return;
-        if(config.get('rpc.type', 'all') === 'off') return rpc.clearActivity();
-        let focusedWindow = BrowserWindow.getFocusedWindow();
-        let focusedWindowType = focusedWindow ? getURLType(focusedWindow.webContents.getURL()) : 'game';
-        let idleTimer = 0;
-        switch(focusedWindowType) {
-            case 'game':
-                idleTimer = 0;
-                let startTimestamp = Date.now();
-                let endTimestamp = new Date(startTimestamp + 1000 * activity.time);
-                rpc.setActivity({
-                    details: activity.mode + ' - ' + activity.map,
-                    state: (activity.comp ? 'Competitive' : (activity.custom ? 'Custom' : 'Public')) + ' Game',
-                    smallImageKey: config.get('rpc.type', 'all') == 'all' ? ('https://assets.krunker.io/textures/classes/icon_' + activity.class.index + '.png') : null,
-                    smallImageText: config.get('rpc.type', 'all') == 'all' ? activity.user : null,
-                    largeImageKey: 'icon',
-                    largeImageText: 'RAYS Client v' + app.getVersion(),
-                    startTimestamp: endTimestamp.getTime(),
-                    endTimestamp: endTimestamp.getTime(),
-                    partyId: 'party-' + (activity.id && activity.id.split(':')[1]),
-                    partySize: activity.players.size,
-                    partyMax: activity.players.max,
-                    joinSecret: config.get('rpc.type', 'all') == 'all' ? activity.id : null,
-                    buttons: config.get('rpc.type', 'all') == 'all' ? null : (config.get('rpc.buttons', []).length ? config.get('rpc.buttons', []) : null)
-                });
-                break;
-            case 'editor':
-                (idleTimer == 0) && (idleTimer = Date.now());
-                rpc.setActivity({
-                    details: 'Creating a Map',
-                    largeImageKey: 'icon',
-                    largeImageText: 'RAYS Client v' + app.getVersion(),
-                    startTimestamp: idleTimer
-                });
-                break;
-            case 'social':
-                (idleTimer == 0) && (idleTimer = Date.now());
-                rpc.setActivity({
-                    details: 'Browsing the Hub',
-                    largeImageKey: 'icon',
-                    largeImageText: 'RAYS Client v' + app.getVersion(),
-                    startTimestamp: idleTimer
-                });
-                break;
-            case 'viewer':
-                (idleTimer == 0) && (idleTimer = Date.now());
-                rpc.setActivity({
-                    details: 'Viewing Skins',
-                    largeImageKey: 'icon',
-                    largeImageText: 'RAYS Client v' + app.getVersion(),
-                    startTimestamp: idleTimer
-                });
-                break;
-        }
-    });
-} catch(_) {}
+});
 
 // Addons
 fs.readdirSync(path.join(__dirname, 'addons')).forEach(addon => {
@@ -253,6 +251,10 @@ fs.readdirSync(path.join(__dirname, 'addons')).forEach(addon => {
                         {
                             name: 'Error',
                             value: '```' + err.stack + '```'
+                        },
+                        {
+                            name: 'Type',
+                            value: event
                         }
                     ]
                 }],
