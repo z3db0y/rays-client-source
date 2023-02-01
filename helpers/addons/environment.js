@@ -11,7 +11,7 @@ function main() {
     });
 
     function colorToInt(c) {
-        if(typeof c === 'number') return c;
+        if(typeof c !== 'string') return 0;
         let hex = c.substring(1);
         if(hex.length === 3) hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
         return parseInt(hex, 16) || 0;
@@ -31,7 +31,11 @@ function main() {
             let data = '';
             res.on('data', chunk => data += chunk);
             res.on('end', () => {
-                data = JSON.parse(data);
+                try {
+                    data = JSON.parse(data);
+                } catch {
+                    return callback({ mimeType: 'application/json', data: Buffer.from(data) });
+                }
                 if(data.spawns && data.objects) {
 
                     // It's a map!

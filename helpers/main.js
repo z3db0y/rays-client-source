@@ -199,7 +199,7 @@ fs.readdirSync(path.join(__dirname, 'addons')).forEach(addon => {
         let report = !dialog.showMessageBoxSync(null, {
             type: 'error',
             title: 'RAYS Client',
-            message: 'An error has occurred. Please report it to the developer.',
+            message: 'An error has occurred. Please report it to the developer. Details:\n' + err.stack,
             buttons: ['Report', 'Quit'],
             defaultId: 1,
             cancelId: 0,
@@ -217,6 +217,7 @@ fs.readdirSync(path.join(__dirname, 'addons')).forEach(addon => {
                 message: err.message,
                 stack: err.stack
             });
+            config.set('reportedErrors', reports);
             let krUsername = await new Promise((resolve, reject) => {
                 ipcMain.once('krUsername', (ev, username) => resolve(username));
                 mainWindow.webContents.send('krUsername');
@@ -231,9 +232,7 @@ fs.readdirSync(path.join(__dirname, 'addons')).forEach(addon => {
                     'Content-Type': 'application/json'
                 }
             }, (err, res, body) => {
-                if(err) return console.error(err);
-                if(res.statusCode != 200) return console.error(body);
-                console.log(body);
+                app.quit();
             });
             req.write(JSON.stringify({
                 embeds: [{
@@ -261,7 +260,8 @@ fs.readdirSync(path.join(__dirname, 'addons')).forEach(addon => {
                 avatar_url: 'https://cdn.z3db0y.com/rays_icon.png'
             }));
             req.end();
+            req.on('error', () => app.quit());
         }
-        app.quit();
+        if(!report) app.quit();
     });
 });
