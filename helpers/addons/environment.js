@@ -10,6 +10,13 @@ function main() {
         callback({ cancel: false });
     });
 
+    function colorToInt(c) {
+        if(typeof c === 'number') return c;
+        let hex = c.substring(1);
+        if(hex.length === 3) hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+        return parseInt(hex, 16) || 0;
+    }
+
     protocol.registerBufferProtocol('json', (request, callback) => {
         let details = JSON.parse(decodeURIComponent(request.url.replace('json://', '')));
         let req = require('https').request(details.url, {
@@ -26,11 +33,6 @@ function main() {
             res.on('end', () => {
                 data = JSON.parse(data);
                 if(data.spawns && data.objects) {
-                    function colorToInt(c) {
-                        let hex = c.substring(1);
-                        if(hex.length === 3) hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
-                        return parseInt(hex, 16) || 0;
-                    }
 
                     // It's a map!
                     if(config.get('environment.sky.enable', false)) data = Object.assign(data, {
@@ -39,12 +41,12 @@ function main() {
                     });
                     if(config.get('environment.fog.enable', false)) data = Object.assign(data, {
                         fogD: config.get('environment.fog.distance', 1000),
-                        fog: colorToInt(config.get('environment.fog.color', 0))
+                        fog: colorToInt(config.get('environment.fog.color', '#000000'))
                     });
                     if(config.get('environment.lighttweaks.enable', false)) data = Object.assign(data, {
-                        ambient: colorToInt(config.get('environment.lighttweaks.ambient.color', 0)),
+                        ambient: colorToInt(config.get('environment.lighttweaks.ambient.color', '#000000')),
                         ambientI: config.get('environment.lighttweaks.ambient.intensity', 1),
-                        light: colorToInt(config.get('environment.lighttweaks.sky.color', 0)),
+                        light: colorToInt(config.get('environment.lighttweaks.sky.color', '#000000')),
                         lightI: config.get('environment.lighttweaks.sky.intensity', 1)
                     });
                 }
