@@ -35,9 +35,11 @@ function injectClientStylesheet() {
 
 function injectExitButton() {
     document.getElementById('clientExit').style.display = 'flex';
-    document.getElementById('clientExit').addEventListener('click', () => {
-        document.getElementById('confirmBtn').onclick = () => app.quit();
-    });
+    let onclick = () => {
+        if(!document.getElementById('confirmBtn')) return setTimeout(onclick, 100);
+        document.getElementById('confirmBtn').onclick = () => app.exit();
+    };
+    document.getElementById('clientExit').addEventListener('click', onclick);
 }
 
 function injectLoadingScreen() {
