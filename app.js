@@ -3,10 +3,8 @@ const fs = require('fs');
 const path = require('path');
 const properties = require(path.join(__dirname, '/properties.json'));
 const Updater = require(path.join(__dirname, '/helpers/updater.js'));
-const initializeConfig = require(path.join(__dirname, '/helpers/config.js'));
+const config = new (require('electron-store'))({ defaults: properties.defaultSettings });
 const loadSwapper = require(path.join(__dirname, '/helpers/resourceSwapper.js'));
-const Store = require('electron-store');
-const config = new Store();
 const swapDir = path.normalize(`${app.getPath('documents')}/KrunkerResourceSwapper`);
 
 const SPLASH_FILE = path.join(__dirname, '/html/splash.html');
@@ -49,7 +47,7 @@ function destroySplash(win) {
     app.on('window-all-closed', allClosed);
     win.close();
     app.off('window-all-closed', allClosed);
-    app.on('window-all-closed', () => { app.exit(); });
+    app.on('window-all-closed', () => { app.quit(); });
     console.log('Splash screen destroyed.');
 }
 
@@ -80,7 +78,6 @@ async function init() {
     console.log('Registered protocols. (client-asset, client-swapfile)');
 
     let splash = await createSplash();
-    initializeConfig();
     let updater = new Updater();
     let updateAvail = false;
     if(config.get('update', true)) {

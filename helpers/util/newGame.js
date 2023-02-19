@@ -1,6 +1,6 @@
 let { request } = require('https');
-const Store = require('electron-store');
-let config = new Store();
+const path = require('path');
+const config = new (require('electron-store'))();
 
 module.exports = function (window) {
     if(!config.get('betterMatchmaker.enable', false)) return window.loadURL('https://krunker.io');

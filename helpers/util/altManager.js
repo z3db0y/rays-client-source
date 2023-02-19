@@ -1,6 +1,4 @@
-const Store = require('electron-store');
-const config = new Store();
-
+const config = new (require('electron-store'))();
 function openAltManager() {
     window.playSelect?.call();
     let menuWindow = document.getElementById('menuWindow');

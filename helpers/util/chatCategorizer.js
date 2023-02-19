@@ -1,8 +1,6 @@
 const path = require('path');
 const fs = require('fs');
-const Store = require('electron-store');
-const config = new Store();
-let getCategoryConfig = () => config.get('chatCategories', {});
+const config = new (require('electron-store'))();let getCategoryConfig = () => config.get('chatCategories', {});
 
 module.exports = () => {
     let chatList = document.getElementById('chatList');
@@ -31,7 +29,8 @@ module.exports = () => {
                     hideShow(node, 'messages');
                 else {
                     if(msgNode.firstChild.childNodes.length > 1) {
-                        for(var n of msgNode.firstChild.childNodes) {
+                        for(let i = 0; i < msgNode.firstChild.childNodes.length; i++) {
+                            n = msgNode.firstChild.childNodes[i];
                             if(n.textContent == ' unboxed ') {
                                 hideShow(node, 'unboxings');
                                 return;
@@ -48,22 +47,25 @@ module.exports = () => {
         customChatList.style.maxHeight = chatList.style.maxHeight;
         customChatList.style.display = chatList.style.display;
         
-        _.forEach(m => [...m.addedNodes].forEach(n => {
-            customChatList.appendChild(n);
-            let msgNode = n.firstChild;
-            if(msgNode.childNodes.length > 1) hideShow(n, 'messages');
-            else {
-                if(msgNode.firstChild.childNodes.length > 1) {
-                    for(var n1 of msgNode.firstChild.childNodes) {
-                        if(n1.textContent == ' unboxed ') {
-                            hideShow(n, 'unboxings');
-                            return;
+        for(var i = 0; i < _.length; i++) {
+            for(var i1 = 0; i1 < _[i].addedNodes.length; i1++) {
+                let n = _[i].addedNodes[i1];
+                customChatList.appendChild(n);
+                let msgNode = n.firstChild;
+                if(msgNode.childNodes.length > 1) hideShow(n, 'messages');
+                else {
+                    if(msgNode.firstChild.childNodes.length > 1) {
+                        for(var n1 of msgNode.firstChild.childNodes) {
+                            if(n1.textContent == ' unboxed ') {
+                                hideShow(n, 'unboxings');
+                                return;
+                            }
                         }
-                    }
-                    hideShow(n, 'kills');
-                } else hideShow(n, 'other');
+                        hideShow(n, 'kills');
+                    } else hideShow(n, 'other');
+                }
             }
-        }));
+        }
 
         customChatList.scrollTop = customChatList.scrollHeight;
 

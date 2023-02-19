@@ -1,11 +1,10 @@
-const { ipcRenderer } = require('electron');
+const { ipcRenderer, ipcMain } = require('electron');
 const { app, session, shell } = require('electron').remote;
 const path = require('path');
 require(path.join(__dirname, 'common.js'));
 const fs = require('fs');
 const defaultSettings = require(path.join(__dirname, '../../properties.json')).defaultSettings;
-const config = new (require('electron-store'))({ defaults: defaultSettings });
-const injectSettings = require(path.join(__dirname, '../util/settInject.js'));
+const config = new (require('electron-store'))();const injectSettings = require(path.join(__dirname, '../util/settInject.js'));
 const injectChatCategorizer = require(path.join(__dirname, '../util/chatCategorizer.js'));
 const loadGameFixes = () => require(path.join(__dirname, '../util/gameFixes.js'));
 const loadChangelog = () => require(path.join(__dirname, '../util/changelog.js'));
@@ -37,7 +36,7 @@ function injectExitButton() {
     document.getElementById('clientExit').style.display = 'flex';
     let onclick = () => {
         if(!document.getElementById('confirmBtn')) return setTimeout(onclick, 100);
-        document.getElementById('confirmBtn').onclick = () => app.exit();
+        document.getElementById('confirmBtn').onclick = () => app.quit();
     };
     document.getElementById('clientExit').addEventListener('click', onclick);
 }
@@ -76,6 +75,7 @@ function rpc() {
                 comp: document.getElementById('uiBase')?.classList?.contains('onCompMenu') || false
             }, getGameActivity())) : null;
         }).catch(_ => {});
+        if(document.getElementById('signedInHeaderBar')?.style.display !== 'none') window.getGameActivity ? ipcRenderer.send('updateDisplayName', getGameActivity().user) : null;
     }
     setInterval(sendRPC, 10e3);
     sendRPC();
@@ -102,6 +102,7 @@ window.exportClientSettings = () => {
     let settings = Object.assign(defaultSettings, config.store);
     delete settings['alts'];
     if(settings['twitch'] && settings['twitch'].token) delete settings['twitch'].token;
+    if(settings['spotify'] && settings['spotify'].tokens) delete settings['spotify'].tokens;
     let data = JSON.stringify(settings);
     let blob = new Blob([data], { type: 'text/plain' });
     let url = URL.createObjectURL(blob);

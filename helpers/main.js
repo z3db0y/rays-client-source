@@ -1,14 +1,14 @@
 const { BrowserWindow, screen, app, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const Store = require('electron-store');
 const properties = require(path.join(__dirname, '../properties.json'));
-const defaultConfig = properties.defaultSettings;
 const windowOpts = properties.windowOpts;
-const config = new Store({ defaults: defaultConfig });
+const config = new (require('electron-store'))({ defaults: properties.defaultSettings });
+
 const RPC = require('discord-rpc-revamp');
-const { request } = require('https');
 const newGame = require(path.join(__dirname, '/util/newGame.js'));
+const krunkerws = require(path.join(__dirname, './stats.js'));
+const Client = require(path.join(__dirname, './sock.js'));
 
 const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36';
 
@@ -64,6 +64,14 @@ ipcMain.on('log_error', (ev, ...args) => console.error('\x1b[35m[RENDERER]\x1b[0
 ipcMain.on('log_debug', (ev, ...args) => console.debug('\x1b[35m[RENDERER]\x1b[0m', ...args));
 ipcMain.on('alert', (ev, ...args) => dialog.showMessageBox(mainWindow, { type: 'info', buttons: ['OK'], message: args.join(' '), title: mainWindow.getTitle() }));
 ipcMain.on('confirm', (ev, ...args) => ev.returnValue = !dialog.showMessageBoxSync(mainWindow, { type: 'question', buttons: ['Yes', 'No'], message: args.join(' '), title: mainWindow.getTitle() }, (res) => ev.returnValue = res === 0));
+
+ipcMain.on('config.get', (ev, key) => ev.returnValue = config.get(key));
+ipcMain.on('config.set', (ev, key, val) => ev.returnValue = config.set(key, val));
+
+ipcMain.on('krunkerws.getPlayer', (ev, id) => krunkerws.getPlayer(id).then((res) => ev.returnValue = res).catch((err) => ev.returnValue = err));
+ipcMain.on('krunkerws.getSkin', (ev, id) => krunkerws.getSkin(id).then((res) => ev.returnValue = res).catch((err) => ev.returnValue = err));
+ipcMain.on('krunkerws.getPlayerAsync', (ev, id) => krunkerws.getPlayer(id).then((res) => ev.sender.send('krunkerws.getPlayerAsync', id, res)).catch((err) => ev.sender.send('krunkerws.getPlayerAsync', id, err)));
+ipcMain.on('krunkerws.getSkinAsync', (ev, id) => krunkerws.getSkin(id).then((res) => ev.sender.send('krunkerws.getSkinAsync', id, res)).catch((err) => ev.sender.send('krunkerws.getSkinAsync', id, err)));
 
 function getURLType(url) {
     url = new URL(url);
@@ -123,11 +131,15 @@ function rpcLogin() {
 }
 rpcLogin();
 
+let lastDisplayName;
+const client = new Client();
+
 rpc.on('close', () => setTimeout(rpcLogin, 10000));
 
 rpc.on('ready', () => {
     rpc.subscribe('ACTIVITY_JOIN');
     console.log('RPC: ready');
+    if(lastDisplayName) client.updateDisplayName(rpc.user.id, lastDisplayName);
 });
 
 rpc.on('ACTIVITY_JOIN', ({ secret }) => mainWindow.loadURL('https://krunker.io/?game=' + secret, { 'userAgent': USER_AGENT }));
@@ -186,6 +198,36 @@ ipcMain.on('rpc', (ev, activity) => {
             }).catch(_ => console.error('RPC: ' + _.message));
             break;
     }
+});
+
+ipcMain.on('updateDisplayName', (ev, name) => {
+    if(!rpc.user) return lastDisplayName = name;
+    if(lastDisplayName == name) return;
+    lastDisplayName = name;
+    client.updateDisplayName(rpc.user.id, name);
+});
+let getBadges = (ev) => {
+    if(!client.initSent) return setTimeout(() => getBadges(ev), 1000);
+    ev.sender.send('getBadges', client.list);
+};
+ipcMain.on('getBadges', getBadges);
+
+let getOwnBadges = (ev) => {
+    if(!client.initSent) return setTimeout(() => getOwnBadges(ev), 1000);
+    let self = client.users.find(x => x[0] == rpc.user.id);
+    if(!self) return ev.sender.send('getOwnBadges', []);
+    ev.sender.send('getOwnBadges', self[2].map(x => client.url + client.badges.find(y => y.id == x).n + '.png'));
+};
+ipcMain.on('getOwnBadges', getOwnBadges);
+
+let getClans = (ev) => {
+    if(!client.initSent) return setTimeout(() => getClans(ev), 1000);
+    ev.sender.send('getClans', client.clans);
+};
+ipcMain.on('getClans', getClans);
+
+client.on('userUpdate', user => {
+    mainWindow.webContents.send('getBadges', client.list);
 });
 
 // Addons

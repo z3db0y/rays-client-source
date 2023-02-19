@@ -102,7 +102,7 @@ body.adBlock #adCon {
 }
 
 #chatList { display: none !important; }
-#chatList_custom {
+#chatList_custom, #twitchChatHolder {
     overflow-y: auto;
     overflow-x: hidden;
     z-index: 999999;
@@ -113,16 +113,16 @@ body.adBlock #adCon {
     max-height: 250px;
 }
 
-#chatList_custom::-webkit-scrollbar {
+#chatList_custom::-webkit-scrollbar, #twitchChatHolder::-webkit-scrollbar {
     width: 6px;
 }
 
-#chatList_custom::-webkit-scrollbar-track {
+#chatList_custom::-webkit-scrollbar-track, #twitchChatHolder::-webkit-scrollbar-track {
     background: none;
     box-shadow: none;
     border-radius: unset;
 }
 
-#chatList_custom::-webkit-scrollbar-thumb {
+#chatList_custom::-webkit-scrollbar-thumb, #twitchChatHolder::-webkit-scrollbar-thumb {
     border-radius: 2px;
 }

@@ -1,7 +1,6 @@
 const path = require('path');
 const properties = require(path.join(__dirname, '../../properties.json'));
 const config = new (require('electron-store'))();
-
 module.exports = () => {
     // wait for "windows" to be a valid object
     if (typeof windows === 'undefined') {
@@ -286,7 +285,7 @@ module.exports = () => {
 
     function openPopup(title) {
         if (!document.getElementById('cssPopup')) {
-            document.getElementById('popupHolder').insertAdjacentHTML('beforeend', '<div id="cssPopup"><div class="cssPopTitle"></div><div class="cssNameLabel">CSS Name</div><textarea id="cssNameInput" rows="1" style="resize: none; color: #000"></textarea><div class="cssCodeLabel">CSS Code</div><textarea id="cssCodeInput" rows="3" style="resize: none; color: #000"></textarea><button id="cssSave">Save</button></div>');
+            document.getElementById('popupHolder').insertAdjacentHTML('beforeend', '<div id="cssPopup"><div class="cssPopTitle"></div><div class="cssNameLabel">CSS Name</div><textarea id="cssNameInput" rows="1" style="resize: none; color: #000"></textarea><div class="cssCodeLabel">CSS Code</div><textarea id="cssCodeInput" rows="20" style="resize: none; color: #000"></textarea><button id="cssSave">Save</button></div>');
         }
 
         document.getElementById('cssNameInput').value = '';
@@ -331,6 +330,7 @@ module.exports = () => {
     }
 
     window.removeCustomCSS = function (i) {
+        if(!confirm('Are you sure you want to delete this CSS?')) return;
         let css = config.get('cssPresets', []);
         css.splice(i, 1);
         config.set('cssPresets', css);

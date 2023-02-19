@@ -195,6 +195,11 @@
             "id": "twitch.sendOnShiftEnter"
         },
         {
+            "name": "Seperate chat from game chat",
+            "type": "toggle",
+            "id": "twitch.separateChat"
+        },
+        {
             "name": "Chat emotes (Twitch)",
             "type": "toggle",
             "id": "twitch.emotes.twitch"
@@ -213,73 +218,6 @@
             "name": "Chat emotes (7TV)",
             "type": "toggle",
             "id": "twitch.emotes.7tv"
-        }
-    ],
-    "Environment Mods": [
-        {
-            "name": "Enable sky color",
-            "description": "Allows you to change the skybox.",
-            "type": "toggle",
-            "id": "environment.sky.enable",
-            "refresh": true
-        },
-        {
-            "name": "Sky color",
-            "type": "color",
-            "id": "environment.sky.color"
-        },
-        {
-            "name": "Fog",
-            "description": "Allows you to add fog to the map.",
-            "type": "toggle",
-            "id": "environment.fog.enable",
-            "refresh": true
-        },
-        {
-            "name": "Fog color",
-            "type": "color",
-            "id": "environment.fog.color"
-        },
-        {
-            "name": "Fog distance",
-            "type": "slider",
-            "id": "environment.fog.distance",
-            "min": 0,
-            "max": 5000,
-            "step": 1
-        },
-        {
-            "name": "Light tweaks",
-            "description": "Allows you to change the lighting of the map.",
-            "type": "toggle",
-            "id": "environment.lighttweaks.enable",
-            "refresh": true
-        },
-        {
-            "name": "Ambient light color",
-            "type": "color",
-            "id": "environment.lighttweaks.ambient.color"
-        },
-        {
-            "name": "Ambient light intensity",
-            "type": "slider",
-            "id": "environment.lighttweaks.ambient.intensity",
-            "min": 0,
-            "max": 10,
-            "step": 0.1
-        },
-        {
-            "name": "Sky light color",
-            "type": "color",
-            "id": "environment.lighttweaks.sky.color"
-        },
-        {
-            "name": "Sky light intensity",
-            "type": "slider",
-            "id": "environment.lighttweaks.sky.intensity",
-            "min": 0,
-            "max": 10,
-            "step": 0.1
         }
     ],
     "Keystrokes": [
@@ -353,6 +291,95 @@
             "name": "Background color (pressed)",
             "type": "select_with_color",
             "id": "keystrokes.bg.pressed",
+            "options": [
+                { "name": "Normal", "value": 0 },
+                { "name": "RGB", "value": "rgb" }
+            ]
+        }
+    ],
+    "Spotify Integration": [
+        {
+            "name": "Not logged in",
+            "type": "custom",
+            "customHTML": "<div class='settingsBtn' id='spotifyLogin'>Login</div>"
+        },
+        {
+            "name": "Now playing overlay",
+            "type": "toggle",
+            "description": "Shows the currently playing song as an overlay.",
+            "id": "spotify.nowPlaying.enable",
+            "refresh": true
+        },
+        {
+            "name": "Offset X (%)",
+            "type": "slider",
+            "id": "spotify.nowPlaying.offsetX",
+            "min": 0,
+            "max": 100,
+            "step": 1
+        },
+        {
+            "name": "Offset Y (%)",
+            "type": "slider",
+            "id": "spotify.nowPlaying.offsetY",
+            "min": 0,
+            "max": 100,
+            "step": 1
+        },
+        {
+            "name": "Scale",
+            "type": "slider",
+            "id": "spotify.nowPlaying.scale",
+            "min": 0.1,
+            "max": 2,
+            "step": 0.1            
+        },
+        {
+            "name": "Border radius (%)",
+            "type": "slider",
+            "id": "spotify.nowPlaying.borderRadius",
+            "min": 0,
+            "max": 50,
+            "step": 1
+        },
+        {
+            "name": "Opacity",
+            "type": "slider",
+            "id": "spotify.nowPlaying.opacity",
+            "min": 0,
+            "max": 1,
+            "step": 0.1
+        },
+        {
+            "name": "Background color",
+            "type": "select_with_color",
+            "id": "spotify.nowPlaying.background",
+            "options": [
+                { "name": "Normal", "value": 0 },
+                { "name": "RGB", "value": "rgb" }
+            ]
+        },
+        {
+            "name": "Text color",
+            "type": "select_with_color",
+            "id": "spotify.nowPlaying.textColor",
+            "options": [
+                { "name": "Normal", "value": 0 },
+                { "name": "RGB", "value": "rgb" }
+            ]
+        },
+        {
+            "name": "Progress bar thickness",
+            "type": "slider",
+            "id": "spotify.nowPlaying.progressThickness",
+            "min": 0,
+            "max": 10,
+            "step": 1
+        },
+        {
+            "name": "Progress bar color",
+            "type": "select_with_color",
+            "id": "spotify.nowPlaying.progressColor",
             "options": [
                 { "name": "Normal", "value": 0 },
                 { "name": "RGB", "value": "rgb" }

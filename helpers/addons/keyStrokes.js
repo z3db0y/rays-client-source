@@ -1,5 +1,12 @@
 module.exports = _ => {
-    let config = new (require('electron-store'))();
+    let config = {
+        get: (k, d) => {
+        let v = require('electron').ipcRenderer.sendSync('config.get', k);
+        if (typeof v === 'undefined') return d;
+        return v;
+    },
+        set: (k, v) => require('electron').ipcRenderer.sendSync('config.set', k, v)
+    }
     if(!config.get('keystrokes.enable', false)) return;
 
     let keyNames = {
@@ -20,8 +27,10 @@ module.exports = _ => {
         setInterval(() => {
             rgbC = cols[cols.indexOf(rgbC) + 1] || cols[0];
 
-            [...document.getElementsByClassName('rgbKey_col')].forEach(x => x.style.color = rgbC);
-            [...document.getElementsByClassName('rgbKey_bg')].forEach(x => x.style.backgroundColor = rgbC);
+            let rgbCol = [...document.getElementsByClassName('rgbKey_col')];
+            for(var i = 0; i < rgbCol.length; i++) rgbCol[i].style.color = rgbC;
+            let rgbBg = [...document.getElementsByClassName('rgbKey_bg')];
+            for(var i = 0; i < rgbBg.length; i++) rgbBg[i].style.background = rgbC;
         }, 200);
     }
     startRGBLoop();
@@ -40,27 +49,31 @@ module.exports = _ => {
         };
     }
 
+    function find(array, func) {
+        for(var i = 0; i < array.length; i++) if(func(array[i])) return array[i];
+    }
+
     document.addEventListener('keydown', event => {
-        updateVisibility(Object.keys(getKeys()).find(x => getKeys()[x] == event.which), event.which, true);
+        updateVisibility(find(Object.keys(getKeys()), x => getKeys()[x] == event.which), event.which, true);
     });
 
     document.addEventListener('keyup', event => {
-        updateVisibility(Object.keys(getKeys()).find(x => getKeys()[x] == event.which), event.which, false);
+        updateVisibility(find(Object.keys(getKeys()), x => getKeys()[x] == event.which), event.which, false);
     });
 
     function hookMouse() {
         if(!document.getElementsByTagName('canvas')[4]) return setTimeout(hookMouse, 100);
         document.getElementsByTagName('canvas')[4]?.addEventListener('mousedown', event => {
-            updateVisibility(Object.keys(getKeys()).find(x => getKeys()[x] == event.button + 10001), event.button + 10001, true);
+            updateVisibility(find(Object.keys(getKeys()), x => getKeys()[x] == event.button + 10001), event.button + 10001, true);
         });
 
         document.getElementsByTagName('canvas')[4]?.addEventListener('mouseup', event => {
-            updateVisibility(Object.keys(getKeys()).find(x => getKeys()[x] == event.button + 10001), event.button + 10001, false);
+            updateVisibility(find(Object.keys(getKeys()), x => getKeys()[x] == event.button + 10001), event.button + 10001, false);
         });
 
         document.getElementsByTagName('canvas')[4]?.addEventListener('wheel', event => {
-            updateVisibility(Object.keys(getKeys()).find(x => getKeys()[x] == 20000), 20000, true);
-            setTimeout(() => updateVisibility(Object.keys(getKeys()).find(x => getKeys()[x] == 20000), 20000, false), 100);
+            updateVisibility(find(Object.keys(getKeys()), x => getKeys()[x] == 20000), 20000, true);
+            setTimeout(() => updateVisibility(find(Object.keys(getKeys()), x => getKeys()[x] == 20000), 20000, false), 100);
         });
     }
     hookMouse();
@@ -87,8 +100,8 @@ module.exports = _ => {
     container.style.display = config.get('keystrokes.enable') ? 'grid' : 'none';
     container.style.opacity = config.get('keystrokes.opacity', 0.5);
     container.style.transform = 'translate(-50%, -50%) scale(' + config.get('keystrokes.scale', 1) + ')';
-    container.style.top = (config.get('keystrokes.offsetY') + '%') || '0';
-    container.style.left = (config.get('keystrokes.offsetX') + '%') || '0';
+    container.style.top = (config.get('keystrokes.offsetY') + 'vh') || '0';
+    container.style.left = (config.get('keystrokes.offsetX') + 'vw') || '0';
 
     for(var keyEl in keyEls) {
         keyEls[keyEl].style.display = 'flex';

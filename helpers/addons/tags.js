@@ -1,3 +1,4 @@
+
 module.exports = _ => {
     if(
         !document.getElementById('menuClassNameTag') ||
@@ -7,69 +8,76 @@ module.exports = _ => {
     const oldLeaderboard = document.getElementById('leaderDisplay');
     const menuName = document.getElementById('menuClassNameTag');
 
-    const Store = require('electron-store');
-    const config = new Store();
+    const { ipcRenderer } = require('electron');
+    const config = new (require('electron-store'))();
     if(!config.get('badges', true)) return;
 
-    let premiumNames = [];
-    let badges;
-    let clans;
-    // TODO: rewrite badges
+    let badges = [];
+    let clans = [];
+    let ownBadges = [];
 
-    fetch('https://raw.githubusercontent.com/z3db0y/rays-client/main/badges.json').then(res => res.json()).catch(_ => (badges = null) && (resolveBadges && resolveBadges())).then(json => {
-        badges = json;
-
-        for(var player in badges) {
-            fetch('https://api.z3db0y.com/krunker/r/profile/' + player).then(res => res.json()).then(json => {
-                if(json[3] && json[3].player_alias && json[3].player_premium > 0) premiumNames.push({
-                    name: json[3].player_name,
-                    alias: json[3].player_alias || json[3].player_name
-                });
-            });
-        }
+    ipcRenderer.send('getBadges');
+    ipcRenderer.on('getBadges', (event, data) => {
+        badges = data;
     });
 
-    fetch('https://raw.githubusercontent.com/z3db0y/rays-client/main/clans.json').then(res => res.json()).catch(_ => (clans = null) && (resolveClans && resolveClans())).then(json => {
-        clans = json;
+    ipcRenderer.send('getOwnBadges');
+    ipcRenderer.on('getOwnBadges', (event, data) => {
+        ownBadges = data;
+        updateMenuTag();
     });
 
-    new MutationObserver(_ => {
-        let playerName = localStorage.getItem('krunker_username');
-        if(!playerName) return;
-        
-        let playerBadges = badges ? badges[Object.keys(badges).find(x => x.toLowerCase() === playerName.toLowerCase())] || [] : [];
-        for(var badge of playerBadges) {
+    ipcRenderer.send('getClans');
+    ipcRenderer.on('getClans', (event, data) => {
+        clans = data;
+        updateMenuTag();
+    });
+
+    function find(array, func) {
+        for(var i = 0; i < array.length; i++) if(func(array[i])) return array[i];
+    }
+
+    function updateMenuTag() {
+        for(var badge of ownBadges) {
             let badgeElement = document.createElement('img');
-            badgeElement.src = 'https://cdn.z3db0y.com/rays-badges/' + badge + '.png';
+            badgeElement.src = badge;
             badgeElement.style.height = '24px';
             badgeElement.style.verticalAlign = 'middle';
             if(!menuName.innerHTML.includes(badgeElement.outerHTML)) menuName.insertAdjacentElement('beforeend', badgeElement);
         }
 
         let playerClan = menuName.querySelector('span.menuClassPlayerClan')?.textContent.trim().slice(1, -1).toLowerCase();
-        let clan = clans ? clans[Object.keys(clans).find(x => x.toLowerCase() === playerClan)] : null;
+        let clan = clans ? find(clans, x => x.name.toLowerCase() === playerClan) : null;
         if(!clan?.style && !clan?.addonHTML) return;
 
         for(var key in clan.style) menuName.querySelector('span.menuClassPlayerClan').style[key] = clan.style[key];
         if(clan.addonHTML && !menuName.innerHTML.includes(clan.addonHTML)) menuName.querySelector('span.menuClassPlayerClan').insertAdjacentHTML('afterend', clan.addonHTML);
-    }).observe(menuName, { childList: true });
+    }
+    new MutationObserver(updateMenuTag).observe(menuName, { childList: true });
 
     let newLeaderDisplay = document.getElementById('newLeaderDisplay');
+
+    function map(array, func) {
+        let newa = [];
+        for(var i = 0; i < array.length; i++) newa.push(func(array[i]));
+        return newa;
+    }
+
     new MutationObserver(_ => {
-        let playerEls = [...[...leaderboard.children[0].children[0].children[0].children].slice(2).map(child => child.children[0].children[0].lastChild), ...[...oldLeaderboard.children[0].children].map(child => child.children[child.children.length - 2])];
-        window.playerEls = playerEls;
-        for(let playerEl of playerEls) {
-            let playerNode = [...playerEl.childNodes].find(x => x.nodeType == 3);
+        let playerEls = [...map([...leaderboard.children[0].children[0].children[0].children].slice(2), child => child.children[0].children[0].lastChild), ...map([...oldLeaderboard.children[0].children], child => child.children[child.children.length - 2])];
+        for(let i = 0; i < playerEls.length; i++) {
+            let playerEl = playerEls[i];
+            let playerNode = find([...playerEl.childNodes], x => x.nodeType == 3);
             let playerName = playerNode?.textContent.trim();
-            let playerBadges = badges ? badges[Object.keys(badges).find(x => x.toLowerCase() === (premiumNames.find(x => x.alias == playerName)?.name || playerName).toLowerCase())] || [] : [];
+            let playerBadges = badges ? (find(badges, x => x.name == playerName) || { badges: [] }).badges || [] : [];
 
             playerBadges.forEach(badge => {
-                let html = `<img class="badge" src="https://cdn.z3db0y.com/rays-badges/${badge}.png" style="height: 23px; margin-top: 3px; vertical-align: middle">`;
+                let html = `<img class="badge" src="${badge}" style="height: 23px; margin-top: 3px; vertical-align: middle">`;
                 if(!playerEl.parentElement.innerHTML.includes(html)) playerEl.insertAdjacentHTML('beforebegin', html);
             });
             
             let playerClan = playerEl.querySelector('span')?.textContent.trim().slice(1, -1).toLowerCase();
-            let clan = clans ? clans[Object.keys(clans).find(x => x.toLowerCase() === playerClan)] : null;
+            let clan = clans ? find(clans, x => x.name.toLowerCase() === playerClan) : null;
             if(!clan?.style && !clan?.addonHTML) continue;
 
             for(var key in clan.style) playerEl.querySelector('span').style[key] = clan.style[key];

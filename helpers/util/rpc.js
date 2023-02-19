@@ -1,5 +1,5 @@
-const Store = require('electron-store');
-const config = new Store();
+const path = require('path');
+const config = new (require('electron-store'))();
 
 window.rpcButtonEditor = () => {
     let menuWindow = document.getElementById('menuWindow');

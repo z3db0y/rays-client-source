@@ -1,8 +1,6 @@
 const path = require('path');
-const Store = require('electron-store');
 const defaultSettings = require(path.join(__dirname, '../../properties.json')).defaultSettings;
-const config = new Store();
-
+const config = new (require('electron-store'))();
 function getter(obj, path) {
     return path.split('.').reduce((o, i) => o[i], obj);
 }

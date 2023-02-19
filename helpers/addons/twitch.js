@@ -1,7 +1,9 @@
-const Store = require('electron-store');
-const config = new Store();
+const path = require('path');
+const config = new (require('electron-store'))();
 const TWITCH_CLIENT_ID = '5nqlrrrqri992wx4eyftoufhghqvzf';
 if(typeof window === 'undefined') main();
+
+let badgeCache = {};
 
 function fetchTwitchUser(token) {
     return new Promise((resolve, reject) => {
@@ -28,7 +30,8 @@ function fetchTwitchUser(token) {
 
 function fetchChannelBadges(channelId, token) {
     return new Promise((resolve, reject) => {
-        require('https').get(`https://badges.twitch.tv/v1/badges/channels/${channelId}/display`, {
+    if(badgeCache['channel'] && badgeCache['channelID'] === channelId) return resolve(badgeCache['channel']);
+    require('https').get(`https://badges.twitch.tv/v1/badges/channels/${channelId}/display`, {
             headers: {
                 authorization: `Bearer ${token}`,
                 'client-id': TWITCH_CLIENT_ID
@@ -40,6 +43,7 @@ function fetchChannelBadges(channelId, token) {
                 try {
                     data = JSON.parse(data);
                     resolve(data.badge_sets);
+                    badgeCache['channel'] = data.badge_sets;
                 } catch(e) {
                     reject();
                 }
@@ -50,6 +54,7 @@ function fetchChannelBadges(channelId, token) {
 
 function fetchGlobalBadges(token) {
     return new Promise((resolve, reject) => {
+        if(badgeCache['global']) return resolve(badgeCache['global']);
         require('https').get('https://badges.twitch.tv/v1/badges/global/display', {
             headers: {
                 authorization: `Bearer ${token}`,
@@ -62,6 +67,7 @@ function fetchGlobalBadges(token) {
                 try {
                     data = JSON.parse(data);
                     resolve(data.badge_sets);
+                    badgeCache['global'] = data.badge_sets;
                 } catch(e) {
                     reject();
                 }
@@ -97,7 +103,8 @@ function fetchEmoteSets(sets, token) {
 
 function fetchBTTVEmotes(channelId) {
     return new Promise((resolve, reject) => {
-        require('https').get(`https://api.betterttv.net/3/cached/users/twitch/${channelId}`, {
+    if(badgeCache['bttv'] && badgeCache['bttvID'] === channelId) return resolve(badgeCache['bttv']);
+    require('https').get(`https://api.betterttv.net/3/cached/users/twitch/${channelId}`, {
             agent: new (require('https').Agent)({
                 rejectUnauthorized: false
             })
@@ -108,6 +115,8 @@ function fetchBTTVEmotes(channelId) {
                 try {
                     data = JSON.parse(data);
                     resolve(data);
+                    badgeCache['bttv'] = data;
+                    badgeCache['bttvID'] = channelId;
                 } catch(e) {
                     reject();
                 }
@@ -118,7 +127,8 @@ function fetchBTTVEmotes(channelId) {
 
 function fetchFFZEmotes(channelId) {
     return new Promise((resolve, reject) => {
-        require('https').get(`https://api.frankerfacez.com/v1/room/id/${channelId}`, {
+    if(badgeCache['ffz'] && badgeCache['ffzID'] === channelId) return resolve(badgeCache['ffz']);
+    require('https').get(`https://api.frankerfacez.com/v1/room/id/${channelId}`, {
             agent: new (require('https').Agent)({
                 rejectUnauthorized: false
             })
@@ -129,6 +139,8 @@ function fetchFFZEmotes(channelId) {
                 try {
                     data = JSON.parse(data);
                     resolve(data);
+                    badgeCache['ffz'] = data;
+                    badgeCache['ffzID'] = channelId;
                 } catch(e) {
                     reject();
                 }
@@ -139,6 +151,7 @@ function fetchFFZEmotes(channelId) {
 
 function fetch7TVEmotes(channelId) {
     return new Promise((resolve, reject) => {
+    if(badgeCache['7tv'] && badgeCache['7tvID'] === channelId) return resolve(badgeCache['7tv']);
         require('https').get(`https://api.7tv.app/v2/users/${channelId}/emotes`, {
             agent: new (require('https').Agent)({
                 rejectUnauthorized: false
@@ -150,6 +163,8 @@ function fetch7TVEmotes(channelId) {
                 try {
                     data = JSON.parse(data);
                     resolve(data);
+                    badgeCache['7tv'] = data;
+                    badgeCache['7tvID'] = channelId;
                 } catch(e) {
                     reject();
                 }
@@ -209,7 +224,6 @@ async function injectFFZEmotes(message, tags) {
 
 async function inject7TVEmotes(message, tags) {
     let emotes = await fetch7TVEmotes(tags['room-id']).catch(_ => {});
-    console.log(emotes);
     if(!emotes || !Array.isArray(emotes)) return message;
 
     for(let emote of emotes) {
@@ -282,7 +296,7 @@ async function main() {
     const { ipcMain, BrowserWindow, ipcRenderer } = require('electron');
 
     function getter(obj, name) {
-        return name.split('.').reduce((o, i) => o[i], obj);
+        return name.split('.').reduce((o, i) => o ? o[i] : null, obj);
     }
 
     String.prototype.parse = function(obj) {
@@ -314,7 +328,15 @@ async function main() {
                 let cmds = config.get('twitch.commands', []).filter(cmd => cmd.enabled && message.toLowerCase().startsWith(cmd.name.toLowerCase()));
                 ipcMain.once('twitchCommandVars', (_, vars) => {
                     vars.sender = tags['username'];
-                    cmds.forEach(cmd => client.say(channel, cmd.response.parse(vars)));
+                    cmds.forEach(cmd => {
+                        if(cmd.lastRun + cmd.cooldown * 1000 > Date.now()) client.say(channel, `@${tags['username']}, this command is on cooldown for another ${formatTime(1000 * cmd.cooldown * cmd.cooldownMlt - (Date.now() - cmd.lastRun), true)}`);
+                        else {
+                            let commands = config.get('twitch.commands', []);
+                            commands.find(c => c.name == cmd.name).lastRun = Date.now();
+                            config.set('twitch.commands', commands);
+                            client.say(channel, cmd.response.parse(vars));
+                        }
+                    });
                 });
                 BrowserWindow.getAllWindows()[0].webContents.send('getTwitchCommandVars');
 
@@ -407,35 +429,6 @@ function loadTwitchData() {
     twitchLoginBtn.onclick = loginToTwitch;
 }
 
-function popup(title, inputPlaceholders, inputValues, submitButtonName, afterTitle) {
-    let menuWindow = document.getElementById('menuWindow');
-
-    menuWindow.innerHTML = `<div id="referralHeader">${title}</div>${afterTitle || ''}` + 
-    inputPlaceholders.map((x, i) => `<input class="accountInput" id="input${i}" value="${(inputValues[i] && inputValues[i].replace(/"/g, '\\"')) || ''}" placeholder="${(x && x.replace(/"/g, '\\"')) || ''}">`).join('') +
-    `<div id="saveBtn" class="button buttonG" style="width:calc(100% - 55px);padding:12px 20px;position:relative;left:50%;transform:translateX(-50%);margin-top: 20px" onmouseenter="playTick()">${submitButtonName}</div>`;
-
-    let windowHolder = document.getElementById('windowHolder');
-    windowHolder.style.display = 'block';
-    windowHolder.classList = 'popupWin';
-    menuWindow.style.width = '1000px';
-    menuWindow.style.overflowY = 'auto';
-    menuWindow.classList = 'dark';
-
-    return new Promise(resolve => {
-        let onclose = _ => {
-            document.getElementById('windowCloser').removeEventListener('click', onclose);
-            resolve(null);
-        };
-
-        document.getElementById('windowCloser').addEventListener('click', onclose);
-        document.getElementById('saveBtn').onclick = _ => {
-            document.getElementById('windowCloser').removeEventListener('click', onclose);
-            document.getElementById('saveBtn').onclick = _ => {};
-            resolve(inputPlaceholders.map((x, i) => document.getElementById('input' + i).value));
-        };
-    });
-}
-
 function editCommand(id) {
     window.playSelect?.call();
 
@@ -469,14 +462,49 @@ function editCommand(id) {
     '${sender} - The name of the person who sent the command<br>' +
     '</div></div>';
 
-    popup((id !== undefined ? 'Edit' : 'Add') + ' Command', ['Enter command', 'Enter response'], (id !== undefined ? [config.get('twitch.commands')[id].name, config.get('twitch.commands')[id].response] : []), 'Save', tip).then(data => {
-        if(!data) return;
+    let menuWindow = document.getElementById('menuWindow');
+    menuWindow.innerHTML = `<div id="referralHeader">${(id !== undefined ? 'Edit' : 'Add') + ' Command'}</div>${tip}` +
+    `<input class="accountInput" id="input0" value="${(id !== undefined ? config.get('twitch.commands')[id].name.replace(/"/g, '\\"') : '') || ''}" placeholder="Enter command">` +
+    `<input class="accountInput" id="input1" value="${(id !== undefined ? config.get('twitch.commands')[id].response.replace(/"/g, '\\"') : '') || ''}" placeholder="Enter response">` +
+    `<div><input class="accountInput" min="0" style="width: 50%" type="number" id="cooldown" value="${(id !== undefined ? config.get('twitch.commands')[id].cooldown : '') || ''}" placeholder="Command cooldown"><select id="cooldownMlt" class="inputGrey2" style="float:none;width:calc(50% - 20px);font-size:20px;padding:10px">` + 
+        `<option value="1" ${(id !== undefined ? (config.get('twitch.commands')[id].cooldownMlt == 1 ? 'selected' : '') : '') || ''}>Seconds</option>` +
+        `<option value="60" ${(id !== undefined ? (config.get('twitch.commands')[id].cooldownMlt == 60 ? 'selected' : '') : '') || ''}>Minutes</option>` +
+        `<option value="3600" ${(id !== undefined ? (config.get('twitch.commands')[id].cooldownMlt == 3600 ? 'selected' : '') : '') || ''}>Hours</option>` +
+        `<option value="86400" ${(id !== undefined ? (config.get('twitch.commands')[id].cooldownMlt == 86400 ? 'selected' : '') : '') || ''}>Days</option>` +
+        `<option value="604800" ${(id !== undefined ? (config.get('twitch.commands')[id].cooldownMlt == 604800 ? 'selected' : '') : '') || ''}>Weeks</option>` +
+        `<option value="2592000" ${(id !== undefined ? (config.get('twitch.commands')[id].cooldownMlt == 2592000 ? 'selected' : '') : '') || ''}>Months</option>` +
+        `<option value="31536000" ${(id !== undefined ? (config.get('twitch.commands')[id].cooldownMlt == 31536000 ? 'selected' : '') : '') || ''}>Years</option>` +
+    `</select></div>` + 
+    `<div id="saveBtn" class="button buttonG" style="width:calc(100% - 55px);padding:12px 20px;position:relative;left:50%;transform:translateX(-50%);margin-top: 20px" onmouseenter="playTick()">Save</div>`;
+
+    document.getElementById('saveBtn').onclick = _ => {
         let commands = config.get('twitch.commands') || [];
-        if(id !== undefined) commands[id] = { name: data[0], response: data[1], enabled: commands[id].enabled };
-        else commands.push({ name: data[0], response: data[1], enabled: true });
-        if(data[0] && data[1]) config.set('twitch.commands', commands);
+        if(id !== undefined) commands[id] = {
+            name: document.getElementById('input0').value,
+            response: document.getElementById('input1').value,
+            cooldown: parseInt(document.getElementById('cooldown').value) || 0,
+            cooldownMlt: parseInt(document.getElementById('cooldownMlt').value) || 1,
+            enabled: commands[id].enabled,
+            lastRun: commands[id].lastRun
+        };
+        else commands.push({
+            name: document.getElementById('input0').value,
+            response: document.getElementById('input1').value,
+            cooldown: parseInt(document.getElementById('cooldown').value) || 0,
+            cooldownMlt: parseInt(document.getElementById('cooldownMlt').value) || 1,
+            enabled: true,
+            lastRun: 0
+        });
+        config.set('twitch.commands', commands);
         openCommandWindow();
-    });
+    };
+
+    let windowHolder = document.getElementById('windowHolder');
+    windowHolder.style.display = 'block';
+    windowHolder.classList = 'popupWin';
+    menuWindow.style.width = '1000px';
+    menuWindow.style.overflowY = 'auto';
+    menuWindow.classList = 'dark';
 }
 
 function openCommandWindow() {
@@ -540,34 +568,45 @@ function openCommandWindow() {
     menuWindow.classList = 'dark';
 }
 
+function formatTime(ms, seconds = false) {
+    let sec = Math.floor(ms / 1000);
+    let str = '';
+
+    let years = Math.floor(sec / 31536000);
+    if(years) str += years + 'y ';
+    sec -= years * 31536000;
+
+    let months = Math.floor(sec / 2592000);
+    if(months) str += months + 'mo ';
+    sec -= months * 2592000;
+
+    let days = Math.floor(sec / 86400);
+    if(days) str += days + 'd ';
+    sec -= days * 86400;
+
+    let hours = Math.floor(sec / 3600);
+    if(hours) str += hours + 'h ';
+    sec -= hours * 3600;
+
+    let minutes = Math.floor(sec / 60);
+    if(minutes) str += minutes + 'm ';
+    sec -= minutes * 60;
+
+    if(seconds) str += sec + 's';
+
+    return str.trim();
+}
+
 module.exports = () => {
     if(!window.windows) return setTimeout(module.exports, 100);
 
-    function formatTime(ms) {
-        let sec = Math.floor(ms / 1000);
-        let str = '';
-
-        let years = Math.floor(sec / 31536000);
-        if(years) str += years + 'y ';
-        sec -= years * 31536000;
-
-        let months = Math.floor(sec / 2592000);
-        if(months) str += months + 'mo ';
-        sec -= months * 2592000;
-
-        let days = Math.floor(sec / 86400);
-        if(days) str += days + 'd ';
-        sec -= days * 86400;
-
-        let hours = Math.floor(sec / 3600);
-        if(hours) str += hours + 'h ';
-        sec -= hours * 3600;
-
-        let minutes = Math.floor(sec / 60);
-        if(minutes) str += minutes + 'm ';
-        sec -= minutes * 60;
-
-        return str.trim();
+    let chat = document.getElementById('chatList_custom');
+    window.log('Twitch Chat Loaded', config.get('twitch.separateChat', false) ? 'Separate' : 'Integrated');
+    if(config.get('twitch.separateChat', false)) {
+        chat = document.createElement('div');
+        chat.style.marginBottom = '6px';
+        chat.id = 'twitchChatHolder';
+        document.getElementById('chatHolder').insertAdjacentElement('afterbegin', chat);
     }
 
     const { ipcRenderer } = require('electron');
@@ -589,15 +628,21 @@ module.exports = () => {
 
     function updatePlayer() {
         return new Promise(resolve => {
-            if(!window.localStorage.getItem('krunker_username')) return (player = null, resolve(null));
+            let n = window.localStorage.getItem('krunker_username');
+            if(!n) return (player = null, resolve(null));
             setTimeout(() => resolve(null), 10000);
-            fetch('https://api.z3db0y.com/krunker/r/profile/' + window.localStorage.getItem('krunker_username')).then(r => r.json()).then(r => ((r = r[3] || {}), r.stats = JSON.parse(r.player_stats), player = r, resolve(r)));
+            try {
+                let l = (_, id, data) => (id == n && (data.stats = JSON.parse(data.player_stats), player = data, resolve(data), ipcRenderer.off('krunkerws.getPlayerAsync', l)));
+                ipcRenderer.on('krunkerws.getPlayerAsync', l);
+            } catch(e) {
+                window.log('Error getting player data', e);
+                resolve(null);
+            }
+            ipcRenderer.send('krunkerws.getPlayerAsync', n);
         });
     }
-    updatePlayer();
 
-    let customChatList = document.getElementById('chatList_custom');
-    ipcRenderer.on('twitchChatMessage', (_, message) => (customChatList.insertAdjacentHTML('beforeend', message), customChatList.scrollTop = customChatList.scrollHeight));
+    ipcRenderer.on('twitchChatMessage', (_, message) => (chat.insertAdjacentHTML('beforeend', message), chat.scrollTop = chat.scrollHeight));
     ipcRenderer.on('getTwitchCommandVars', async (event) => {
         if(!player) await updatePlayer();
         if(player && window.localStorage.getItem('krunker_username') != player.player_name) await updatePlayer();

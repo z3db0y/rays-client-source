@@ -67,7 +67,8 @@
                 "7tv": false
             },
             "commands": [],
-            "sendOnShiftEnter": false
+            "sendOnShiftEnter": false,
+            "separateChat": false
         },
         "environment": {
             "sky": {
@@ -97,7 +98,26 @@
                 "pressed": "#ffffff"
             }
         },
-        "reportedErrors": []
+        "tradeAssistant": true,
+        "spotify": {
+            "tokens": {
+                "access_token": "",
+                "refresh_token": "",
+                "expires_at": 0
+            },
+            "nowPlaying": {
+                "enable": false,
+                "offsetX": 0,
+                "offsetY": 0,
+                "scale": 1,
+                "opacity": 0.5,
+                "borderRadius": 10,
+                "textColor": "#ffffff",
+                "background": "#000000",
+                "progressThickness": 2,
+                "progressColor": "#ffffff"
+            }
+        }
     },
     "windowOpts": {
         "autoHideMenuBar": true,
@@ -145,6 +165,13 @@
             "authorURL": "https://www.twitch.tv/switchaim",
             "imageURL": "https://cdn.z3db0y.com/rays-img/switch.png",
             "css": "@import url(https://switchkr.github.io/switch/switch.css);"
+        },
+        {
+            "name": "Violo CSS",
+            "author": "Violence.",
+            "authorURL": "https://krunker.io/social.html?p=profile&q=Kilerho",
+            "imageURL": "https://cdn.z3db0y.com/rays-img/violo.jpg",
+            "css": "@import url(https://gistcdn.githack.com/CoderZ90/190e538ff07264e68cac145c3c736617/raw/6a51fa7959f4273b2fce97c7f57537f3a427e7bf/kalakaluta.css)"
         }
     ]
 }
