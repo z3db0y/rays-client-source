@@ -75,7 +75,7 @@ function rpc() {
                 comp: document.getElementById('uiBase')?.classList?.contains('onCompMenu') || false
             }, getGameActivity())) : null;
         }).catch(_ => {});
-        if(document.getElementById('signedInHeaderBar')?.style.display !== 'none') window.getGameActivity ? ipcRenderer.send('updateDisplayName', getGameActivity().user) : null;
+        if(document.getElementById('signedInHeaderBar')?.style.display !== 'none') window.getGameActivity ? ipcRenderer.send('updateDisplayName', getGameActivity().user, window.localStorage.getItem('krunker_username')) : null;
     }
     setInterval(sendRPC, 10e3);
     sendRPC();

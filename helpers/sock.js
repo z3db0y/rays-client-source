@@ -24,8 +24,8 @@ class Client {
         this._events = new EventEmitter();
     }
 
-    updateDisplayName(discordId, name) {
-        this.initSent ? this.send('u', name) : this.send('init', discordId, name, crypto.createHmac('sha256', this.seed).update(getSocketKey()).digest('hex'));
+    updateDisplayName(discordId, name, username) {
+        this.initSent ? this.send('u', name, username) : this.send('init', discordId, name, crypto.createHmac('sha256', this.seed).update(getSocketKey()).digest('hex'), username);
         this.initSent = true;
     }
 
@@ -41,10 +41,12 @@ class Client {
                 }
             }) : null;
             if (!badges.length) return;
+            if(!user[1]) return;
 
             this.list.push({
                 name: user[1],
-                badges: badges.map(b => this.url + b.n + '.png')
+                uname: user[3],
+                badges: badges.sort((a, b) => b.p - a.p).map(b => this.url + b.n + '.png')
             });
         });
     }

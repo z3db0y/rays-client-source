@@ -1,3 +1,4 @@
+const { ipcRenderer } = require('electron');
 const path = require('path');
 require(path.join(__dirname, 'common.js'));
 
@@ -22,15 +23,17 @@ let awaitBadges = () => new Promise(resolve => {
     else resolve(badges);
 });
 
-fetch('https://raw.githubusercontent.com/z3db0y/rays-client/main/badges.json').then(res => res.json()).catch(_ => (badges = null) && (resolveBadges && resolveBadges())).then(json => {
-    badges = json;
+ipcRenderer.send('getBadges');
+ipcRenderer.on('getBadges', (event, data) => {
+    badges = data;
     if(resolveBadges) resolveBadges(badges);
-}).catch(_ => (badges = null) && (resolveBadges && resolveBadges()));
+});
 
-fetch('https://raw.githubusercontent.com/z3db0y/rays-client/main/clans.json').then(res => res.json()).catch(_ => (clans = null) && (resolveClans && resolveClans())).then(json => {
-    clans = json;
+ipcRenderer.send('getClans');
+ipcRenderer.on('getClans', (event, data) => {
+    clans = data;
     if(resolveClans) resolveClans(clans);
-}).catch(_ => (clans = null) && (resolveClans && resolveClans()));
+});
 
 window.WebSocket = new Proxy(window.WebSocket, {
     construct(target, args) {
@@ -50,17 +53,17 @@ function applyPostBadges() {
         let playerName = Array.from(postInfoName.children).find(x => x.tagName === 'A').textContent;
         let clanElement = Array.from(postInfoName.children).find(x => x.tagName === 'SPAN' && !x.classList.contains('postTime'));
         let playerClan = clanElement?.textContent?.slice(1, -1).trim();
-        let playerBadges = badges[Object.keys(badges).find(x => x.toLowerCase() === playerName.toLowerCase())];
+        let playerBadges = badges.find(x => x.uname == playerName)?.badges;
 
         if(playerBadges) {
             for(var badge of playerBadges) {
-                let html = `<img src="https://cdn.z3db0y.com/rays-badges/${badge}.png" style="height: 25px; vertical-align: middle; margin-bottom: 5px; margin-left: 0.3em">`;
+                let html = `<img src="${badge}" style="height: 25px; vertical-align: middle; margin-bottom: 5px; margin-left: 0.3em">`;
                 if(!postInfoName.innerHTML.includes(html)) postInfoName.insertAdjacentHTML('beforeend', html);
             }
         }
 
         if(!playerClan) continue;
-        let clan = clans[Object.keys(clans).find(x => x.toLowerCase() === playerClan.toLowerCase())];
+        let clan = clans.find(x => x.name.toLowerCase() == playerClan.toLowerCase());
         if(clan) {
             for(var key in clan.style) clanElement.style[key] = clan.style[key];
             if(clan.addonHTML && !postInfoName.innerHTML.includes(clan.addonHTML)) clanElement.insertAdjacentHTML('afterend', clan.addonHTML);
@@ -72,10 +75,10 @@ function applyLeaderAndSearchBadges() {
     let leaderNames = document.querySelectorAll('a.lName');
     for(var leaderName of leaderNames) {
         let playerName = leaderName.textContent;
-        let playerBadges = badges[Object.keys(badges).find(x => x.toLowerCase() === playerName.toLowerCase())];
+        let playerBadges = badges.find(x => x.uname == playerName)?.badges;
         if(playerBadges) {
             for(var badge of playerBadges) {
-                let html = `<img src="https://cdn.z3db0y.com/rays-badges/${badge}.png" style="height: 26px; margin-right: 5px">`;
+                let html = `<img src="${badge} style="height: 26px; margin-right: 5px">`;
                 if(!leaderName.parentElement.innerHTML.includes(html)) leaderName.parentElement.insertAdjacentHTML('afterbegin', html);
             }
         }
@@ -83,7 +86,7 @@ function applyLeaderAndSearchBadges() {
         let clanElement = Array.from(leaderName.parentElement.children).find(x => x.tagName === 'SPAN') || Array.from(leaderName.parentElement.children).find(x => x.tagName === 'A' && !x.classList.contains('lName'));
         let playerClan = clanElement?.textContent?.slice(1, -1).trim();
         if(!playerClan) continue;
-        let clan = clans[Object.keys(clans).find(x => x.toLowerCase() === playerClan.toLowerCase())];
+        let clan = clans.find(x => x.name.toLowerCase() == playerClan.toLowerCase());
         if(clan) {
             for(var key in clan.style) clanElement.style[key] = clan.style[key];
             if(clan.addonHTML && !leaderName.parentElement.innerHTML.includes(clan.addonHTML.replace(/vertical-align: middle(;?)/g, ''))) clanElement.insertAdjacentHTML('afterend', `<span style="cursor: pointer" onclick="openLink(\'/social.html?p=clan&q=${encodeURIComponent(playerClan)}\', \'_blank\')">` + clan.addonHTML.replace(/vertical-align: middle(;?)/g, '')) + '</span>';
@@ -95,7 +98,7 @@ function applyClanBadges() {
     let clanElement = document.querySelector('.clanInfH > span');
     if(!clanElement) return;
     let clanName = clanElement.textContent.slice(1, -1).trim();
-    let clan = clans[Object.keys(clans).find(x => x.toLowerCase() === clanName.toLowerCase())];
+    let clan = clans.find(x => x.name.toLowerCase() == clanName.toLowerCase());
     if(clan) {
         for(var key in clan.style) clanElement.style[key] = clan.style[key];
         if(clan.addonHTML && !clanElement.parentElement.innerHTML.includes(clan.addonHTML.replace(/vertical-align: middle(;?)/g, ''))) clanElement.insertAdjacentHTML('afterend', clan.addonHTML.replace(/vertical-align: middle(;?)/g, ''));
@@ -104,10 +107,10 @@ function applyClanBadges() {
     let members = document.getElementById('clanRoster').getElementsByClassName('lName');
     for(var member of members) {
         let playerName = member.textContent;
-        let playerBadges = badges[Object.keys(badges).find(x => x.toLowerCase() === playerName.toLowerCase())];
+        let playerBadges = badges.find(x => x.uname == playerName)?.badges;
         if(playerBadges) {
             for(var badge of playerBadges) {
-                let html = `<img src="https://cdn.z3db0y.com/rays-badges/${badge}.png" style="height: 26px; margin-right: 1px; margin-top: -8px; vertical-align: middle">`;
+                let html = `${badge}" style="height: 26px; margin-right: 1px; margin-top: -8px; vertical-align: middle">`;
                 if(!member.parentElement.innerHTML.includes(html)) member.parentElement.insertAdjacentHTML('afterbegin', html);
             }
         }
@@ -118,10 +121,10 @@ function applyProfileBadges() {
     let nameElement = document.getElementById('nameSwitch');
     let playerName = nameElement?.textContent;
     if(!playerName) return;
-    let playerBadges = badges[Object.keys(badges).find(x => x.toLowerCase() === playerName.toLowerCase())];
+    let playerBadges = badges.find(x => x.uname == playerName)?.badges;
     if(playerBadges) {
         for(var badge of playerBadges) {
-            let html = `<img src="https://cdn.z3db0y.com/rays-badges/${badge}.png" style="height: 32px; vertical-align: middle; margin-top: -14px">`;
+            let html = `<img src="${badge}" style="height: 32px; vertical-align: middle; margin-top: -14px">`;
             if(!nameElement.parentElement.innerHTML.includes(html)) nameElement.parentElement.insertAdjacentHTML('afterbegin', html);
         }
     }
@@ -129,7 +132,7 @@ function applyProfileBadges() {
     let clanElement = Array.from(nameElement.parentElement.children).find(x => x.tagName === 'A');
     let playerClan = clanElement?.textContent?.slice(1, -1).trim();
     if(!playerClan) return;
-    let clan = clans[Object.keys(clans).find(x => x.toLowerCase() === playerClan.toLowerCase())];
+    let clan = clans.find(x => x.name.toLowerCase() == playerClan.toLowerCase());
     if(clan) {
         for(var key in clan.style) clanElement.style[key] = clan.style[key];
         if(clan.addonHTML && !nameElement.parentElement.innerHTML.includes(clan.addonHTML.replace(/vertical-align: middle(;?)/g, ''))) clanElement.insertAdjacentHTML('afterend', `<a target="_blank" href="/social.html?p=clan&q=${encodeURIComponent(playerClan)}">` + clan.addonHTML.replace(/vertical-align: middle(;?)/g, '') + '</a>');
@@ -182,6 +185,7 @@ window.onload = async () => {
     wsHookFunc();
     await awaitBadges();
     await awaitClans();
+    console.log(badges);
     applyPostBadges();
     applyLeaderAndSearchBadges();
     applyClanBadges();

@@ -30,6 +30,13 @@
             "type": "button",
             "label": "Edit",
             "onclick": "editMsgFilter()"
+        },
+        {
+            "name": "TradeAssistant",
+            "description": "A tool to help you trade.",
+            "type": "toggle",
+            "id": "tradeAssistant",
+            "refresh": true
         }
     ],
     "Discord Rich Presence": [

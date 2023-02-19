@@ -132,6 +132,7 @@ function rpcLogin() {
 rpcLogin();
 
 let lastDisplayName;
+let lastUsername;
 const client = new Client();
 
 rpc.on('close', () => setTimeout(rpcLogin, 10000));
@@ -200,14 +201,16 @@ ipcMain.on('rpc', (ev, activity) => {
     }
 });
 
-ipcMain.on('updateDisplayName', (ev, name) => {
-    if(!rpc.user) return lastDisplayName = name;
+ipcMain.on('updateDisplayName', (ev, name, name2) => {
+    if(!rpc.user) return (lastDisplayName = name, lastUsername = name2);
     if(lastDisplayName == name) return;
     lastDisplayName = name;
-    client.updateDisplayName(rpc.user.id, name);
+    lastUsername = name2;
+    client.updateDisplayName(rpc.user.id, name, name2);
 });
 let getBadges = (ev) => {
     if(!client.initSent) return setTimeout(() => getBadges(ev), 1000);
+    console.log(client.list);
     ev.sender.send('getBadges', client.list);
 };
 ipcMain.on('getBadges', getBadges);
@@ -216,7 +219,7 @@ let getOwnBadges = (ev) => {
     if(!client.initSent) return setTimeout(() => getOwnBadges(ev), 1000);
     let self = client.users.find(x => x[0] == rpc.user.id);
     if(!self) return ev.sender.send('getOwnBadges', []);
-    ev.sender.send('getOwnBadges', self[2].map(x => client.url + client.badges.find(y => y.id == x).n + '.png'));
+    ev.sender.send('getOwnBadges', self[2].sort((a, b) => client.badges.find(x => x.id == b).p - client.badges.find(x => x.id == a).p).map(x => client.url + client.badges.find(y => y.id == x).n + '.png'));
 };
 ipcMain.on('getOwnBadges', getOwnBadges);
 
@@ -228,6 +231,8 @@ ipcMain.on('getClans', getClans);
 
 client.on('userUpdate', user => {
     mainWindow.webContents.send('getBadges', client.list);
+    let self = client.users.find(x => x[0] == rpc.user.id);
+    mainWindow.webContents.send('getOwnBadges', self[2].sort((a, b) => client.badges.find(x => x.id == b).p - client.badges.find(x => x.id == a).p).map(x => client.url + client.badges.find(y => y.id == x).n + '.png'));
 });
 
 // Addons
