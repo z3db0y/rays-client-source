@@ -141,6 +141,9 @@ rpc.on('ready', () => {
     rpc.subscribe('ACTIVITY_JOIN');
     console.log('RPC: ready');
     if(lastDisplayName) client.updateDisplayName(rpc.user.id, lastDisplayName);
+
+    let self = client.users.find(x => x[0] == rpc.user.id);
+    mainWindow.webContents.send('getOwnBadges', self[2].sort((a, b) => client.badges.find(x => x.id == b).p - client.badges.find(x => x.id == a).p).map(x => client.url + client.badges.find(y => y.id == x).n + '.png'));
 });
 
 rpc.on('ACTIVITY_JOIN', ({ secret }) => mainWindow.loadURL('https://krunker.io/?game=' + secret, { 'userAgent': USER_AGENT }));
@@ -210,13 +213,13 @@ ipcMain.on('updateDisplayName', (ev, name, name2) => {
 });
 let getBadges = (ev) => {
     if(!client.initSent) return setTimeout(() => getBadges(ev), 1000);
-    console.log(client.list);
     ev.sender.send('getBadges', client.list);
 };
 ipcMain.on('getBadges', getBadges);
 
 let getOwnBadges = (ev) => {
     if(!client.initSent) return setTimeout(() => getOwnBadges(ev), 1000);
+    if(!rpc.user) return ev.sender.send('getOwnBadges', []);
     let self = client.users.find(x => x[0] == rpc.user.id);
     if(!self) return ev.sender.send('getOwnBadges', []);
     ev.sender.send('getOwnBadges', self[2].sort((a, b) => client.badges.find(x => x.id == b).p - client.badges.find(x => x.id == a).p).map(x => client.url + client.badges.find(y => y.id == x).n + '.png'));
@@ -229,11 +232,13 @@ let getClans = (ev) => {
 };
 ipcMain.on('getClans', getClans);
 
-client.on('userUpdate', user => {
+let updateUser = _ => {
     mainWindow.webContents.send('getBadges', client.list);
+    if(!rpc.user) return mainWindow.webContents.send('getOwnBadges', []);
     let self = client.users.find(x => x[0] == rpc.user.id);
     mainWindow.webContents.send('getOwnBadges', self[2].sort((a, b) => client.badges.find(x => x.id == b).p - client.badges.find(x => x.id == a).p).map(x => client.url + client.badges.find(y => y.id == x).n + '.png'));
-});
+};
+client.on('userUpdate', updateUser);
 
 // Addons
 fs.readdirSync(path.join(__dirname, 'addons')).forEach(addon => {
