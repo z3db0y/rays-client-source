@@ -109,6 +109,7 @@ if(config.get('uncapFrames')) {
     app.commandLine.appendSwitch('disable-frame-rate-limit');
     app.commandLine.appendSwitch('disable-gpu-vsync');
 }
+app.commandLine.appendSwitch('no-sandbox');
 app.commandLine.appendSwitch('ui-disable-partial-swap');
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 app.commandLine.appendSwitch('disable-features', 'HardwareMediaKeyHandling,MediaSessionService');

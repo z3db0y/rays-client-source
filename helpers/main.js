@@ -236,6 +236,7 @@ let updateUser = _ => {
     mainWindow.webContents.send('getBadges', client.list);
     if(!rpc.user) return mainWindow.webContents.send('getOwnBadges', []);
     let self = client.users.find(x => x[0] == rpc.user.id);
+    if(!self) return;
     mainWindow.webContents.send('getOwnBadges', self[2].sort((a, b) => client.badges.find(x => x.id == b).p - client.badges.find(x => x.id == a).p).map(x => client.url + client.badges.find(y => y.id == x).n + '.png'));
 };
 client.on('userUpdate', updateUser);

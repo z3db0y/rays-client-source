@@ -11,6 +11,7 @@ const loadChangelog = () => require(path.join(__dirname, '../util/changelog.js')
 const loadAltManager = () => require(path.join(__dirname, '../util/altManager.js'));
 const loadWatermark = () => require(path.join(__dirname, '../util/watermark.js'));
 const loadRPCEditor = () => require(path.join(__dirname, '../util/rpc.js'));
+const loadServerBrowserUtil = () => require(path.join(__dirname, '../util/serverBrowserUtil.js'));
 window.alert = (msg) => ipcRenderer.send('alert', msg);
 window.confirm = (msg) => ipcRenderer.sendSync('confirm', msg);
 
@@ -50,6 +51,7 @@ function injectLoadingScreen() {
 
 loadChangelog();
 injectLoadingScreen();
+loadServerBrowserUtil();
 document.addEventListener('DOMContentLoaded', async function() {
     loadAddons();
     loadGameFixes();

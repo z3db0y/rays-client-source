@@ -11,7 +11,6 @@ module.exports = () => {
     if(!config.get('tradeAssistant', true)) return;
     if(!window.windows || !window.createTip) return setTimeout(module.exports, 100);
     let priceCache = {};
-    window.priceCache = priceCache;
 
     let tip1;
     let tip2;
@@ -45,6 +44,7 @@ module.exports = () => {
 
     function getItemPrice(itemId) {
         if(priceCache[itemId]) return priceCache[itemId];
+        if(Object.keys(priceCache).length >= 30) delete priceCache[Object.keys(priceCache)[0]]; // Limit price cache to 30 items
         priceCache[itemId] = new Promise((resolve) => {
             ipcRenderer.send('krunkerws.getSkinAsync', itemId);
             let l = async (event, id, r) => {
@@ -70,7 +70,7 @@ module.exports = () => {
     async function tooltipMod(itemId) {
         let tooltip = document.querySelector('.tooltip');
         if(!tooltip) return;
-        // Don't fetch locked items to stop my api from getting spammed
+        // Don't fetch locked items to stop websocket from getting spammed
         let itemEl = (document.getElementById('trd_inv_0_' + itemId) || document.getElementById('trd_inv_1_' + itemId) || document.getElementById('trd_sel_0_' + itemId) || document.getElementById('trd_sel_1_' + itemId));
         if(!itemEl || [...itemEl.children].some(x => x.classList.contains('tItemBound'))) return;
         let anchorPoint = tooltip.getBoundingClientRect().top + tooltip.clientHeight;

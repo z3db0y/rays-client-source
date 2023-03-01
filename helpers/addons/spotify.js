@@ -4,7 +4,7 @@ const SPOTIFY_CLIENT_ID = '281624bb93ef4de691632928e99a8b06';
 
 class Spotify extends require('events') {
 
-    static #fetch(url, opts) {
+    #fetch(url, opts) {
         url = new URL(url);
         let lib = url.protocol === 'https:' ? require('https') : require('http');
         return new Promise((resolve, reject) => {
@@ -14,6 +14,35 @@ class Spotify extends require('events') {
                 res.on('end', async () => {
                     if(res.statusCode >= 400) {
                         let newTokens = await Spotify.refreshToken(this._refresh, this._client_id);
+                        newTokens.expires_at = Date.now() + newTokens.expires_in * 1000;
+                        this._token = newTokens.access_token;
+                        this._refresh = newTokens.refresh_token | this._refresh;
+                        this.emit('refresh', newTokens);
+                    } else {
+                        try {
+                            resolve(JSON.parse(data));
+                        } catch(e) {
+                            reject(e);
+                        }
+                    }
+                });
+            });
+            req.on('error', reject);
+            if(opts.body) req.write(opts.body);
+            req.end();
+        });
+    }
+
+    static fetch(url, opts) {
+        url = new URL(url);
+        let lib = url.protocol === 'https:' ? require('https') : require('http');
+        return new Promise((resolve, reject) => {
+            let req = lib.request(url.toString(), opts, res => {
+                let data = '';
+                res.on('data', chunk => data += chunk);
+                res.on('end', async () => {
+                    if(res.statusCode >= 400) {
+                        reject(new Error("Invalid status code: " + res.statusCode));
                     } else {
                         try {
                             resolve(JSON.parse(data));
@@ -37,7 +66,7 @@ class Spotify extends require('events') {
     }
 
     getProfile() {
-        return Spotify.#fetch('https://api.spotify.com/v1/me', {
+        return this.#fetch('https://api.spotify.com/v1/me', {
             headers: {
                 'Authorization': `Bearer ${this._token}`,
                 'Content-Type': 'application/json'
@@ -46,7 +75,7 @@ class Spotify extends require('events') {
     }
 
     getCurrentTrack() {
-        return Spotify.#fetch('https://api.spotify.com/v1/me/player/currently-playing', {
+        return this.#fetch('https://api.spotify.com/v1/me/player/currently-playing', {
             headers: {
                 'Authorization': `Bearer ${this._token}`,
                 'Content-Type': 'application/json'
@@ -55,7 +84,7 @@ class Spotify extends require('events') {
     }
 
     static getTokens(code, redirect_uri, client_id, verifier) {
-        return Spotify.#fetch('https://accounts.spotify.com/api/token', {
+        return Spotify.fetch('https://accounts.spotify.com/api/token', {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
@@ -71,7 +100,7 @@ class Spotify extends require('events') {
     }
 
     static refreshToken(refresh_token, client_id) {
-        return Spotify.#fetch('https://accounts.spotify.com/api/token', {
+        return Spotify.fetch('https://accounts.spotify.com/api/token', {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
@@ -203,7 +232,6 @@ module.exports = () => {
         spotifyInstance = config.get('spotify.tokens.access_token', '') ? new Spotify(config.get('spotify.tokens.access_token'), config.get('spotify.tokens.refresh_token'), SPOTIFY_CLIENT_ID) : nulll;
         if(spotifyInstance) {
             spotifyInstance.on('refresh', tokens => {
-                tokens.expires_at = Date.now() + tokens.expires_in * 1000;
                 config.set('spotify.tokens', tokens);
             });
             if(config.get('spotify.nowPlaying.enable', false)) {
