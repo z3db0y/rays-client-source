@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const config = new (require('electron-store'))();let getCategoryConfig = () => config.get('chatCategories', {});
+const { ipcRenderer } = require('electron');
 
 module.exports = () => {
     let chatList = document.getElementById('chatList');
@@ -9,7 +10,10 @@ module.exports = () => {
     let categoryList = document.createElement('div');
     categoryList.id = 'chatCategorySelector';
     categoryList.innerHTML = fs.readFileSync(path.join(__dirname, '../../html/chat_categories.html')).toString();
-
+    if(config.get('hideChatCategorizer', false)) categoryList.style.display = 'none';
+    ipcRenderer.on('config.onDidAnyChange', e => {
+        categoryList.style.display = config.get('hideChatCategorizer', false) ? 'none' : '';
+    });
     let categoryConfig = getCategoryConfig();
 
     function hideShow(node, cat) {
@@ -168,4 +172,41 @@ module.exports = () => {
         menuWindow.style.overflowY = 'auto';
         menuWindow.classList = 'dark';
     }
+
+    window.openChatCategorizer = () => {
+        let menuWindow = document.getElementById('menuWindow');
+
+        menuWindow.innerHTML = `<div class="button buttonG" style="width:calc(100% - 55px);padding:12px 16px;position:relative;left:50%;transform:translateX(-50%)" onmouseenter="playTick()" onclick="showWindow(0),showWindow(1)">Back to settings</div><div id="chatCats" class="setBodH"></div>`;
+
+        let catMap = {
+            messages: 'Player Messages',
+            unboxings: 'Unboxings',
+            kills: 'Kill feed',
+            twitch: 'Twitch chat',
+            other: 'Other'
+        };
+
+        let chatCats = document.getElementById('chatCats');
+        for(let cat in catMap) {
+            let catDiv = document.createElement('div');
+            catDiv.classList = 'settName';
+            catDiv.innerHTML = `${catMap[cat].slice(0, 1).toUpperCase() + catMap[cat].slice(1)} <label class="switch" style="margin-left:10px"><input type="checkbox"><span class="slider" style="width: 65px"><span class="grooves"></span></span></label>`;
+            catDiv.querySelector('input').checked = categoryConfig[cat];
+            catDiv.querySelector('input').onchange = e => {
+                categoryConfig[cat] = e.target.checked;
+                categories[cat].classList = e.target.checked ? 'selected' : '';
+                config.set('chatCategories', categoryConfig);
+                updateVisibleContents();
+            };
+            
+            chatCats.appendChild(catDiv);
+        }
+
+        let windowHolder = document.getElementById('windowHolder');
+        windowHolder.style.display = 'block';
+        windowHolder.classList = 'popupWin';
+        menuWindow.style.width = '1000px';
+        menuWindow.style.overflowY = 'auto';
+        menuWindow.classList = 'dark';
+    };
 };

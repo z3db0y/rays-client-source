@@ -2,6 +2,7 @@
     "defaultSettings": {
         "uncapFrames": true,
         "resourceSwapper": false,
+        "hideChatCategorizer": false,
         "loadingScreen": "",
         "badges": true,
         "adBlock": false,
@@ -18,8 +19,9 @@
         },
         "betterMatchmaker": {
             "enable": false,
-            "map": "any",
-            "mode": -1,
+            "maps": [],
+            "modes": [],
+            "regions": [],
             "minTime": 2,
             "minPlayers": 0,
             "maxPlayers": 4,
@@ -123,55 +125,87 @@
         "autoHideMenuBar": true,
         "show": false
     },
-    "css": [
-        {
-            "name": "RAYS Client",
-            "author": "z3db0y",
-            "authorURL": "https://twitch.tv/z3db0y",
-            "imageURL": "client-asset://icon.png",
-            "css": "body.kpdPingAddon .pListPing::before { font-family: Orbitron !important; }\n\nbody *, #clientPopup * {\n    font-family: 'Orbitron';\n    text-shadow: none !important;\n}\n\nbody .material-icons, body .material-icons-outlined {\n    font-family: 'Material Icons' !important;\n}\n\nbody #aHider, body #adCon {\n    display: none !important;\n}\n\nbody #subLogoButtons {\n    bottom: 0;\n}\n\nbody #lC-cont {\n    visibility: hidden;\n}\n\nbody #lC-cont::before {\n    visibility: visible;\n    content: url('client-asset://icon.png');\n    width: 100%;\n    height: 100%;\n    animation: spin 1.5s infinite;\n    display: block;\n    transform-origin: center !important;\n}\n\n@keyframes spin {\n    0% { transform: scale(0.25); }\n    100% { transform: scale(0.25) rotateZ(360deg); }\n}\n\nbody #windowHolder {\n    backdrop-filter: blur(10px);\n}"
+    "matchmaker": {
+        "gamemodes": {
+            "Free for All": 0,
+            "Team Deathmatch": 1,
+            "Hardpoint": 2,
+            "Capture the Flag": 3,
+            "Parkour": 4,
+            "Hide and Seek": 5,
+            "Infected": 6,
+            "Race": 7,
+            "Last Man Standing": 8,
+            "Simon Says": 9,
+            "Gun Game": 10,
+            "Prop Hunt": 11,
+            "Boss Hunt": 12,
+            "Classic FFA": 13,
+            "Deposit": 14,
+            "Stalker": 15,
+            "King of the Hill": 16,
+            "One in the Chamber": 17,
+            "Trade": 18,
+            "Kill Confirmed": 19,
+            "Defuse": 20,
+            "Sharp Shooter": 21,
+            "Traitor": 22,
+            "Raid": 23,
+            "Blitz": 24,
+            "Domination": 25,
+            "Squad Deathmatch": 26,
+            "Kranked FFA": 27,
+            "Team Defender": 28,
+            "Deposit FFA": 29,
+            "Chaos Snipers": 33,
+            "Bighead FFA": 34
         },
-        {
-            "name": "Yuki Aim (Outdated)",
-            "author": "tae",
-            "authorURL": "https://twitter.com/whuuayu",
-            "imageURL": "https://cdn.z3db0y.com/rays-img/yuki_aim.png",
-            "css": "@import url(https://whuuayu.github.io/yuki-aim-css/main_custom.css);"
-        },
-        {
-            "name": "Panda",
-            "author": "LukeTheDuke",
-            "authorURL": "https://twitter.com/LukeTheDuke_KR",
-            "imageURL": "https://cdn.z3db0y.com/rays-img/panda.png",
-            "css": "@import url(https://luketheduke.xyz/assets/p1/main_custom.css);"
-        },
-        {
-            "name": "Clean",
-            "author": "Ghosty",
-            "authorURL": "https://krunker.link/PhantomGame",
-            "imageURL": "https://cdn.z3db0y.com/rays-img/ghosty.png",
-            "css": "@import url(https://rawcdn.githack.com/GhostPhantomXD/Ghosty-UI-Designs-for-Krunker/c7120dcbe0f8ee924bc63118241e0f23472065cc/GhostyClean_CSS.css);"
-        },
-        {
-            "name": "MOF1",
-            "author": "MOF1",
-            "authorURL": "https://mof1.github.io/",
-            "imageURL": "https://cdn.z3db0y.com/rays-img/mof1.png",
-            "css": "@import url(https://mof1.github.io/cdn/MOF1_CSS_thief/configs.css);\n@import url(https://mof1.github.io/krunker_css/css/main_custom.css);"
-        },
-        {
-            "name": "Switchaim CSS",
-            "author": "Switch",
-            "authorURL": "https://www.twitch.tv/switchaim",
-            "imageURL": "https://cdn.z3db0y.com/rays-img/switch.png",
-            "css": "@import url(https://switchkr.github.io/switch/switch.css);"
-        },
-        {
-            "name": "Violo CSS",
-            "author": "Violence.",
-            "authorURL": "https://krunker.io/social.html?p=profile&q=Kilerho",
-            "imageURL": "https://cdn.z3db0y.com/rays-img/violo.jpg",
-            "css": "@import url(https://gistcdn.githack.com/CoderZ90/190e538ff07264e68cac145c3c736617/raw/6a51fa7959f4273b2fce97c7f57537f3a427e7bf/kalakaluta.css)"
+        "maps": [
+            "Burg",
+            "Littletown",
+            "Sandstorm",
+            "Subzero",
+            "Undergrowth",
+            "Shipment",
+            "Freight",
+            "Lostworld",
+            "Citadel",
+            "Oasis",
+            "Kanji",
+            "Industry",
+            "Lumber",
+            "Evacuation",
+            "Site",
+            "SkyTemple",
+            "Lagoon",
+            "Bureau",
+            "Tortuga",
+            "Tropicano",
+            "Krunk_Plaza",
+            "Arena",
+            "Habitat",
+            "Atomic",
+            "Old_Burg",
+            "Throwback",
+            "Stockade",
+            "Facility"
+        ],
+        "regions": {
+            "Default": 0,
+            "Frankfurt": "de-fra",
+            "Silicon Valley": "us-ca-sv",
+            "Sydney": "au-syd",
+            "Tokyo": "jb-hnd",
+            "Miami": "us-fl",
+            "Singapore":  "sgp",
+            "New York": "us-nj",
+            "India": "blr",
+            "Dallas": "us-tx",
+            "Brazil": "brz",
+            "Middle East": "me-bhn",
+            "South Africa": "af-ct",
+            "South Korea": "as-seoul",
+            "Hawaii": "us-hi"
         }
-    ]
+    }
 }

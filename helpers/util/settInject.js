@@ -1,6 +1,8 @@
+const { ipcRenderer } = require('electron');
 const path = require('path');
 const defaultSettings = require(path.join(__dirname, '../../properties.json')).defaultSettings;
 const config = new (require('electron-store'))();
+config.onDidAnyChange(() => ipcRenderer.send('config.onDidAnyChange'));
 function getter(obj, path) {
     return path.split('.').reduce((o, i) => o[i], obj);
 }

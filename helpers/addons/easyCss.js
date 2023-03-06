@@ -1,7 +1,18 @@
 const path = require('path');
 const properties = require(path.join(__dirname, '../../properties.json'));
 const config = new (require('electron-store'))();
-module.exports = () => {
+
+let cssFetchStarted = false;
+let cssList = [];
+
+module.exports = async () => {
+    if(!cssFetchStarted) {
+        cssFetchStarted = true;
+        try {
+            cssList = await (await fetch('https://api.z3db0y.com/rays/css').catch(() => {})).json().catch(() => {});
+            cssList = cssList.css;
+        } catch {}
+    }
     // wait for "windows" to be a valid object
     if (typeof windows === 'undefined') {
         return new Promise(resolve => setTimeout(() => resolve(module.exports()), 100));
@@ -259,7 +270,7 @@ module.exports = () => {
 
         if (isCSSTab) {
             let html = '<div style="width: 100%; display: flex; justify-content: center; align-items: center; flex-wrap: wrap"><div class="cssMenu"><span class="cssName">None</span><div class="buttonCont"><button class="applyButton" onclick="setCSS(-1)">Apply</button></div></div>' +
-                properties.css.map((css, i) => `<div class="cssMenu" style="background-image: url(${css.imageURL?.replace(/"/g, '\\"')})"><span class="cssName">${css.name}</span><span>by <strong class="cssAuthor" onclick="window.open('${css.authorURL.replace(/'/g, "\\'" || '')}', '_blank')">${css.author}</strong></span><div class="buttonCont"><button class="applyButton" onclick="setCSS(0, ${i})">Apply</button></div></div>`).join('') +
+                cssList.map((css, i) => `<div class="cssMenu" style="background-image: url(${css.imageURL?.replace(/"/g, '\\"')})"><span class="cssName">${css.name}</span><span>by <strong class="cssAuthor" onclick="window.open('${css.authorURL.replace(/'/g, "\\'" || '')}', '_blank')">${css.author}</strong></span><div class="buttonCont"><button class="applyButton" onclick="setCSS(0, ${i})">Apply</button></div></div>`).join('') +
                 config.get('cssPresets', []).map((css, i) => `<div class="cssMenu"><span class="cssName">${css.name}</span><div class="buttonCont"><div class="customButtonHolder"><button onclick="editCustomCSS(${i})" class="editButton">Edit</button><button onclick="removeCustomCSS(${i})" class="deleteButton">Delete</button></div><button class="applyButton" onclick="setCSS(1, ${i})">Apply</button></div></div>`).join('') +
                 '<div class="cssMenu" onclick="addCustomCSS()" style="cursor: pointer"><span style="font: 5vw \'Material Icons\';">add</span><span class="cssAdd">Add custom</span></div></div><div class="setHed" id="setHed_rootvars" onclick="window.windows[0].collapseFolder(this)"><span class="material-icons plusOrMinus">keyboard_arrow_down</span> :root Variables (Advanced)</div><div class="setBodH" id="setBod_rootvars"></div>';
             parseRootVars();
@@ -315,7 +326,7 @@ module.exports = () => {
             if(window.windows[0].tabIndex == tabIndexes[window.windows[0].settingType]) window.windows[0].changeTab(tabIndexes[window.windows[0].settingType]);
             return styleElement.disabled = true;
         } else if (type === 0) { // Use preset CSS
-            styleElement.innerHTML = properties.css[i].css;
+            styleElement.innerHTML = cssList[i].css;
         } else if (type === 1) { // Use custom CSS
             styleElement.innerHTML = config.get('cssPresets', [])[i].css;
         }

@@ -22,6 +22,7 @@ class Client {
         this.list = [];
         this.initSent = false;
         this._events = new EventEmitter();
+        this._queue = [];
     }
 
     updateDisplayName(discordId, name, username) {
@@ -33,7 +34,6 @@ class Client {
         this.list = [];
         this.users.forEach(user => {
             let badges = [];
-            console.log(this.badges);
             user[2] ? user[2].forEach(badge => {
                 let badgeData = this.badges.find(b => b.id === badge);
                 if (badgeData) {
@@ -120,6 +120,10 @@ class Client {
 
     open() {
         console.log('Connected to server');
+        this._queue.forEach(packet => {
+            this.send(...packet);
+            this._queue.splice(this._queue.indexOf(packet), 1);
+        });
     }
 
     close() {
@@ -130,7 +134,10 @@ class Client {
     }
 
     send(arg, ...data) {
-        this.ws.send(msgpack.encode([arg, ...data]));
+        try { this.ws.send(msgpack.encode([arg, ...data])); }
+        catch {
+            this._queue.push([arg, ...data]);
+        }
     }
 }
 

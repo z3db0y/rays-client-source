@@ -1,4 +1,4 @@
-const { BrowserWindow, screen, app, ipcMain, dialog } = require('electron');
+const { BrowserWindow, screen, app, ipcMain, dialog, ipcRenderer } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const properties = require(path.join(__dirname, '../properties.json'));
@@ -7,7 +7,7 @@ const config = new (require('electron-store'))({ defaults: properties.defaultSet
 
 const RPC = require('discord-rpc-revamp');
 const newGame = require(path.join(__dirname, '/util/newGame.js'));
-const krunkerws = require(path.join(__dirname, './stats.js'));
+const krunkerws = new (require(path.join(__dirname, './stats.js')))();
 const Client = require(path.join(__dirname, './sock.js'));
 
 const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36';
@@ -143,6 +143,7 @@ rpc.on('ready', () => {
     if(lastDisplayName) client.updateDisplayName(rpc.user.id, lastDisplayName);
 
     let self = client.users.find(x => x[0] == rpc.user.id);
+    if(!self) return;
     mainWindow.webContents.send('getOwnBadges', self[2].sort((a, b) => client.badges.find(x => x.id == b).p - client.badges.find(x => x.id == a).p).map(x => client.url + client.badges.find(y => y.id == x).n + '.png'));
 });
 
@@ -240,6 +241,8 @@ let updateUser = _ => {
     mainWindow.webContents.send('getOwnBadges', self[2].sort((a, b) => client.badges.find(x => x.id == b).p - client.badges.find(x => x.id == a).p).map(x => client.url + client.badges.find(y => y.id == x).n + '.png'));
 };
 client.on('userUpdate', updateUser);
+
+ipcMain.on('config.onDidAnyChange', (ev, k) => ev.sender.send('config.onDidAnyChange'));
 
 // Addons
 fs.readdirSync(path.join(__dirname, 'addons')).forEach(addon => {

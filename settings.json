@@ -81,6 +81,20 @@
             "label": "Open"
         }
     ],
+    "Chat Categories": [
+        {
+            "name": "Hide category bar on top of chat",
+            "description": "Hides the category bar on top of the chat.",
+            "type": "toggle",
+            "id": "hideChatCategorizer"
+        },
+        {
+            "name": "Enabled chat categories",
+            "type": "button",
+            "onclick": "openChatCategorizer()",
+            "label": "Edit"
+        }
+    ],
     "Style": [
         {
             "name": "Custom Badges and Clan Tags",
