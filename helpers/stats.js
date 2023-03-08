@@ -77,6 +77,7 @@ class Stats {
         this.ws.on('open', this.open.bind(this));
         this.ws.on('close', this.close.bind(this));
         this.ws.on('message', this.message.bind(this));
+        this.ws.on('error', () => {});
     }
 
     open() {

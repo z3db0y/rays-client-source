@@ -4,7 +4,7 @@ const SPOTIFY_CLIENT_ID = '281624bb93ef4de691632928e99a8b06';
 
 class Spotify extends require('events') {
 
-    #fetch(url, opts) {
+    _fetch(url, opts) {
         url = new URL(url);
         let lib = url.protocol === 'https:' ? require('https') : require('http');
         return new Promise((resolve, reject) => {
@@ -66,7 +66,7 @@ class Spotify extends require('events') {
     }
 
     getProfile() {
-        return this.#fetch('https://api.spotify.com/v1/me', {
+        return this._fetch('https://api.spotify.com/v1/me', {
             headers: {
                 'Authorization': `Bearer ${this._token}`,
                 'Content-Type': 'application/json'
@@ -75,7 +75,7 @@ class Spotify extends require('events') {
     }
 
     getCurrentTrack() {
-        return this.#fetch('https://api.spotify.com/v1/me/player/currently-playing', {
+        return this._fetch('https://api.spotify.com/v1/me/player/currently-playing', {
             headers: {
                 'Authorization': `Bearer ${this._token}`,
                 'Content-Type': 'application/json'
@@ -117,14 +117,7 @@ class Spotify extends require('events') {
 module.exports = () => {
     if(!window.windows) return setTimeout(module.exports, 100);
 
-    const config = {
-        get: (k, d) => {
-            let v = require('electron').ipcRenderer.sendSync('config.get', k);
-            if (typeof v === 'undefined') return d;
-            return v;
-        },
-        set: (k, v) => require('electron').ipcRenderer.sendSync('config.set', k, v)
-    };
+    const config = new (require('electron-store'))();
 
     let oSwitchTab = window.windows[0].changeTab;
     window.windows[0].changeTab = function (tab) {
@@ -155,9 +148,6 @@ module.exports = () => {
         nowPlayingOverlay.style.position = 'absolute';
         nowPlayingOverlay.style.top = config.get('spotify.nowPlaying.offsetY', 0) + '%';
         nowPlayingOverlay.style.left = config.get('spotify.nowPlaying.offsetX', 0) + '%';
-        nowPlayingOverlay.style.minWidth = '9vw';
-        nowPlayingOverlay.style.maxWidth = '20vw';
-        nowPlayingOverlay.style.height = '3vw';
         nowPlayingOverlay.style.display = 'flex';
         nowPlayingOverlay.style.alignItems = 'center';
         nowPlayingOverlay.style.background = config.get('spotify.nowPlaying.background', '#000000');
@@ -170,19 +160,19 @@ module.exports = () => {
         document.getElementById('inGameUI').appendChild(nowPlayingOverlay);
         nowPlayingImage = document.createElement('img');
         nowPlayingImage.style.width = 'auto';
-        nowPlayingImage.style.height = '100%';
+        nowPlayingImage.style.height = '72px';
         nowPlayingImage.transition = 'background 0.1s ease-in-out';
         nowPlayingOverlay.appendChild(nowPlayingImage);
         let dataContainer = document.createElement('div');
         nowPlayingTitle = document.createElement('div');
         nowPlayingTitle.style.fontWeight = 'bold';
-        nowPlayingTitle.style.fontSize = '130%';
+        nowPlayingTitle.style.fontSize = '25px';
         nowPlayingTitle.style.color = config.get('spotify.nowPlaying.textColor', '#ffffff');
         nowPlayingTitle.style.textAlign = 'center';
         config.get('spotify.nowPlaying.textColor', '#ffffff') == 'rgb' ? nowPlayingTitle.style.animation = 'rainbowT 1s linear infinite' : nowPlayingTitle.style.animation = 'none';
         dataContainer.appendChild(nowPlayingTitle);
         nowPlayingArtist = document.createElement('div');
-        nowPlayingArtist.style.fontSize = '110%';
+        nowPlayingArtist.style.fontSize = '15px';
         nowPlayingArtist.style.color = config.get('spotify.nowPlaying.textColor', '#ffffff');
         nowPlayingArtist.style.textAlign = 'center';
         config.get('spotify.nowPlaying.textColor', '#ffffff') == 'rgb' ? nowPlayingArtist.style.animation = 'rainbowT 1s linear infinite' : nowPlayingArtist.style.animation = 'none';
@@ -293,6 +283,8 @@ module.exports = () => {
             spotifyLogin.textContent = 'Logout';
             spotifyInstance.getProfile().then(profile => {
                 spotifyLogin.parentNode.childNodes[0].textContent = `Account: ${profile.display_name} (${profile.product[0].toUpperCase() + profile.product.slice(1).toLowerCase()})`;
+            }).catch(_ => {
+                spotifyLogin.parentNode.childNodes[0].textContent = 'Failed to load account data';
             });
             spotifyLogin.onclick = () => {
                 config.set('spotify.tokens', {});
