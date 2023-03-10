@@ -5,7 +5,7 @@ let { Agent } = require('https');
 const EventEmitter = require('events');
 let socketKey = [116, 104, 110, 107, 115, 95, 115, 111, 114, 116, 101];
 
-const getSocketKey = () => {
+const getSocketKey = function() {
     let key = '';
     for (let i = 0; i < socketKey.length; i++) {
         key += String.fromCharCode(socketKey[i]);
@@ -26,6 +26,7 @@ class Client {
     }
 
     updateDisplayName(discordId, name, username) {
+        if(!this.seed) return setTimeout(() => this.updateDisplayName(discordId, name, username), 1000);
         this.initSent ? this.send('u', name, username) : this.send('init', discordId, name, crypto.createHmac('sha256', this.seed).update(getSocketKey()).digest('hex'), username);
         this.initSent = true;
     }
