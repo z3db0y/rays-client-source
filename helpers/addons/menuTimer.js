@@ -1,12 +1,5 @@
 module.exports = () => {
-    const config = {
-        get: (k, d) => {
-        let v = require('electron').ipcRenderer.sendSync('config.get', k);
-        if (typeof v === 'undefined') return d;
-        return v;
-    },
-        set: (k, v) => require('electron').ipcRenderer.sendSync('config.set', k, v)
-    }
+    const config = new (require('electron-store'))();
     if(!config.get('menuTimer', false)) return;
     let timerVal = document.getElementById('timerVal');
     let instructions = document.getElementById('instructions');

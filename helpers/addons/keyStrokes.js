@@ -1,12 +1,5 @@
 module.exports = _ => {
-    let config = {
-        get: (k, d) => {
-        let v = require('electron').ipcRenderer.sendSync('config.get', k);
-        if (typeof v === 'undefined') return d;
-        return v;
-    },
-        set: (k, v) => require('electron').ipcRenderer.sendSync('config.set', k, v)
-    }
+    let config = new (require('electron-store'))();
     if(!config.get('keystrokes.enable', false)) return;
 
     let keyNames = {

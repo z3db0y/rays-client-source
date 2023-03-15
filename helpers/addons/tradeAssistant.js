@@ -1,13 +1,6 @@
 module.exports = () => {
     const { ipcRenderer } = require('electron');
-    const config = {
-        get: (k, d) => {
-            let v = ipcRenderer.sendSync('config.get', k);
-            if (typeof v === 'undefined') return d;
-            return v;
-        },
-        set: (k, v) => ipcRenderer.sendSync('config.set', k, v)
-    };
+    const config = new (require('electron-store'))();
     if(!config.get('tradeAssistant', true)) return;
     if(!window.windows || !window.createTip) return setTimeout(module.exports, 100);
     let priceCache = {};

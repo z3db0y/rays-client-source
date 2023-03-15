@@ -1,12 +1,5 @@
 module.exports = () => {
-    const config = {
-        get: (k, d) => {
-        let v = require('electron').ipcRenderer.sendSync('config.get', k);
-        if (typeof v === 'undefined') return d;
-        return v;
-    },
-        set: (k, v) => require('electron').ipcRenderer.sendSync('config.set', k, v)
-    }
+    const config = new (require('electron-store'))();
     let multiplier = config.get('placeboFPS', 1);
     if(multiplier == 1) return;
     let ingameFPS = document.getElementById('ingameFPS');

@@ -1,6 +1,9 @@
 name: Build RAYS Client
 
-on: push
+on:
+  push:
+    tags:
+      - '*'
 
 jobs:
   build:

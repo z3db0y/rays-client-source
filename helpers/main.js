@@ -65,9 +65,6 @@ ipcMain.on('log_debug', (ev, ...args) => console.debug('\x1b[35m[RENDERER]\x1b[0
 ipcMain.on('alert', (ev, ...args) => dialog.showMessageBox(mainWindow, { type: 'info', buttons: ['OK'], message: args.join(' '), title: mainWindow.getTitle() }));
 ipcMain.on('confirm', (ev, ...args) => ev.returnValue = !dialog.showMessageBoxSync(mainWindow, { type: 'question', buttons: ['Yes', 'No'], message: args.join(' '), title: mainWindow.getTitle() }, (res) => ev.returnValue = res === 0));
 
-ipcMain.on('config.get', (ev, key) => ev.returnValue = config.get(key));
-ipcMain.on('config.set', (ev, key, val) => ev.returnValue = config.set(key, val));
-
 ipcMain.on('krunkerws.getPlayer', (ev, id) => krunkerws.getPlayer(id).then((res) => ev.returnValue = res).catch((err) => ev.returnValue = err));
 ipcMain.on('krunkerws.getSkin', (ev, id) => krunkerws.getSkin(id).then((res) => ev.returnValue = res).catch((err) => ev.returnValue = err));
 ipcMain.on('krunkerws.getPlayerAsync', (ev, id) => krunkerws.getPlayer(id).then((res) => ev.sender.send('krunkerws.getPlayerAsync', id, res)).catch((err) => ev.sender.send('krunkerws.getPlayerAsync', id, err)));
@@ -248,4 +245,12 @@ ipcMain.on('config.onDidAnyChange', (ev, k) => ev.sender.send('config.onDidAnyCh
 fs.readdirSync(path.join(__dirname, 'addons')).forEach(addon => {
     if(!addon.endsWith('.js')) return;
     require(path.join(__dirname, 'addons', addon));
+});
+
+process.on('uncaughtException', (err) => {
+    console.error(err);
+});
+
+process.on('unhandledRejection', (err) => {
+    console.error(err);
 });

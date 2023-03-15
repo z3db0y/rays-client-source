@@ -13,7 +13,8 @@ class Spotify extends require('events') {
                 res.on('data', chunk => data += chunk);
                 res.on('end', async () => {
                     if(res.statusCode >= 400) {
-                        let newTokens = await Spotify.refreshToken(this._refresh, this._client_id);
+                        let newTokens = await Spotify.refreshToken(this._refresh, this._client_id).catch(() => {});
+                        if(!newTokens) reject(new Error("Invalid status code: " + res.statusCode));
                         newTokens.expires_at = Date.now() + newTokens.expires_in * 1000;
                         this._token = newTokens.access_token;
                         this._refresh = newTokens.refresh_token | this._refresh;
@@ -333,7 +334,7 @@ module.exports = () => {
                         tokens.expires_at = Date.now() + tokens.expires_in * 1000;
                         config.set('spotify.tokens', tokens);
                         loadSpotifyData();
-                    });
+                    }).catch(() => {});
                 });
             };
         }

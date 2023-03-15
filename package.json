@@ -1,6 +1,6 @@
 {
   "name": "rays-client",
-  "version": "2.0.7-patch.4",
+  "version": "2.0.8",
   "description": "",
   "main": "app.js",
   "scripts": {
