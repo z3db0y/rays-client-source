@@ -21,6 +21,7 @@ module.exports = _ => {
     let ownBadges = [];
 
     ipcRenderer.on('getBadges', (event, data) => {
+        if(badges.find(x => x.name === data.name)) badges.splice(badges.findIndex(x => x.name === data.name), 1);
         badges.push(data);
     });
 
