@@ -209,9 +209,9 @@ ipcMain.on('updateDisplayName', (ev, name, name2) => {
     lastUsername = name2;
     client.updateDisplayName(rpc.user.id, name, name2);
 });
-let getBadges = (ev) => {
-    if(!client.initSent) return setTimeout(() => getBadges(ev), 1000);
-    ev.sender.send('getBadges', client.list);
+let getBadges = (ev, name) => {
+    if(!client.initSent) return setTimeout(() => getBadges(ev, name), 1000);
+    ev.sender.send('getBadges', client.list.find(x => x.name == name) || { name });
 };
 ipcMain.on('getBadges', getBadges);
 
@@ -231,11 +231,11 @@ let getClans = (ev) => {
 ipcMain.on('getClans', getClans);
 
 let updateUser = _ => {
-    mainWindow.webContents.send('getBadges', client.list);
     if(!rpc.user) return mainWindow.webContents.send('getOwnBadges', []);
     let self = client.users.find(x => x[0] == rpc.user.id);
     if(!self) return;
     mainWindow.webContents.send('getOwnBadges', self[2].sort((a, b) => client.badges.find(x => x.id == b).p - client.badges.find(x => x.id == a).p).map(x => client.url + client.badges.find(y => y.id == x).n + '.png'));
+    mainWindow.webContents.send('getBadges', client.list.find(x => x.name == lastDisplayName) || { name: lastDisplayName });
 };
 client.on('userUpdate', updateUser);
 

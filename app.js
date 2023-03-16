@@ -109,9 +109,13 @@ if(config.get('uncapFrames')) {
     app.commandLine.appendSwitch('disable-frame-rate-limit');
     app.commandLine.appendSwitch('disable-gpu-vsync');
 }
+app.commandLine.appendSwitch('no-sandbox');
 app.commandLine.appendSwitch('ui-disable-partial-swap');
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 app.commandLine.appendSwitch('disable-features', 'HardwareMediaKeyHandling,MediaSessionService');
+app.commandLine.appendSwitch('no-sandbox');
+app.commandLine.appendSwitch('enable-quic');
+app.commandLine.appendSwitch('high-resolution-timer');
 if(!config.get('hardwareAcceleration', true)) app.commandLine.appendSwitch('disable-gpu');
 if(config.get('angleBackend', 'default') !== 'default') app.commandLine.appendSwitch('use-angle', config.get('angleBackend', 'default'));
 if(config.get('webgl2', false)) app.commandLine.appendSwitch('enable-webgl2-compute-context');

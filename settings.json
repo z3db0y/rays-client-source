@@ -75,6 +75,13 @@
             "restart": true
         },
         {
+            "name": "Automatic updates",
+            "description": "Automatically update the client when a new version is available.",
+            "type": "toggle",
+            "id": "update",
+            "restart": true
+        },
+        {
             "name": "Client changelog",
             "type": "button",
             "onclick": "openChangelog()",
@@ -97,10 +104,17 @@
     ],
     "Style": [
         {
-            "name": "Custom Badges and Clan Tags",
-            "description": "Enables client exclusive badges and clan tags.",
+            "name": "Custom Badges",
+            "description": "Enables client exclusive badges.",
             "type": "toggle",
             "id": "badges",
+            "refresh": true
+        },
+        {
+            "name": "Custom Clan Tags",
+            "description": "Enables client exclusive clan tags.",
+            "type": "toggle",
+            "id": "clans",
             "refresh": true
         },
         {

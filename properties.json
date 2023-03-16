@@ -1,10 +1,12 @@
 {
     "defaultSettings": {
+        "update": true,
         "uncapFrames": true,
         "resourceSwapper": false,
         "hideChatCategorizer": false,
         "loadingScreen": "",
         "badges": true,
+        "clans": true,
         "adBlock": false,
         "kpdPingAddon": false,
         "menuTimer": false,
