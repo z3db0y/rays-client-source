@@ -21,7 +21,7 @@ function openAltManager() {
 			window.showWindow?.call(null, 5);
 			window.logoutAcc?.call();
 			document.getElementById('accName').value = alt.username;
-			document.getElementById('accPass').value = window.atob(decrypt(alt.password));
+			document.getElementById('accPass').value = decrypt(window.atob(alt.password));
 			setTimeout(() => window.loginAcc?.call(), 100);
 		};
 		altDiv.appendChild(altName);
@@ -40,7 +40,7 @@ function openAltManager() {
 			window.showWindow?.call(null, 5);
 			window.logoutAcc?.call();
 			document.getElementById('accName').value = alt.username;
-			document.getElementById('accPass').value = window.atob(decrypt(alt.password));
+			document.getElementById('accPass').value = decrypt(window.atob(alt.password));
 			setTimeout(() => window.loginAcc?.call(), 100);
 		};
 
@@ -140,7 +140,7 @@ function openAltEditor(id) {
 	if (id !== undefined) {
 		let alt = config.get('alts', []).sort((a, b) => a.username.toLowerCase().localeCompare(b.username.toLowerCase()))[id];
 		usernameInput.value = alt.username;
-		passwordInput.value = window.atob(decrypt(alt.password));
+		passwordInput.value = decrypt(window.atob(alt.password));
 	}
 
 	function saveAlt() {
