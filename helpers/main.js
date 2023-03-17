@@ -51,11 +51,20 @@ mainWindow.on('close', () => {
 mainWindow.webContents.on('before-input-event', (ev, input) => {
     if(input.control || input.alt || input.meta) return;
     if(input.type !== 'keyDown') return;
-    if(input.key === config.get('controls.fullscreen', 'F11')) (ev.preventDefault(), mainWindow.setFullScreen(!mainWindow.isFullScreen()));
-    if(input.key === config.get('controls.reload', 'F5')) (ev.preventDefault(), mainWindow.reload());
-    if(input.key === config.get('controls.newgame', 'F6')) (ev.preventDefault(), newGame(mainWindow));
-    if(input.key === config.get('controls.lastlobby', 'F4')) (ev.preventDefault(), mainWindow.webContents.goBack());
-    if(input.key === config.get('controls.devtools', 'F12') && !app.isPackaged) (ev.preventDefault(), mainWindow.webContents.openDevTools());
+
+    let controls = Object.assign({
+        fullscreen: 'F11',
+        reload: 'F5',
+        newgame: 'F6',
+        lastlobby: 'F4',
+        devtools: 'F12'
+    }, config.get('controls', {}));
+
+    if(input.key === controls.fullscreen) (ev.preventDefault(), mainWindow.setFullScreen(!mainWindow.isFullScreen()));
+    if(input.key === controls.reload) (ev.preventDefault(), mainWindow.reload());
+    if(input.key === controls.newgame) (ev.preventDefault(), newGame(mainWindow));
+    if(input.key === controls.lastlobby) (ev.preventDefault(), mainWindow.webContents.goBack());
+    if(input.key === controls.devtools && !app.isPackaged) (ev.preventDefault(), mainWindow.webContents.openDevTools());
 });
 
 ipcMain.on('log_info', (ev, ...args) => console.log('\x1b[35m[RENDERER]\x1b[0m', ...args));
