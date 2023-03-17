@@ -74,18 +74,6 @@
             "sendOnShiftEnter": false,
             "separateChat": false
         },
-        "environment": {
-            "sky": {
-                "type": "off",
-                "color": "#000000",
-                "image": ""
-            },
-            "fog": {
-                "enable": false,
-                "color": "#000000",
-                "distance": 1000
-            }
-        },
         "keystrokes": {
             "enable": false,
             "offsetX": 50,

@@ -12,6 +12,14 @@ const Client = require(path.join(__dirname, './sock.js'));
 
 const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36';
 
+let controls  = Object.assign({
+    fullscreen: 'F11',
+    reload: 'F5',
+    newgame: 'F6',
+    lastlobby: 'F4',
+    devtools: 'F12'
+}, config.get('controls', {}));
+
 let mainWindow = new BrowserWindow(Object.assign({}, windowOpts, {
     width: config.get('window.width', screen.getPrimaryDisplay().workAreaSize.width),
     height: config.get('window.height', screen.getPrimaryDisplay().workAreaSize.height),
@@ -51,14 +59,6 @@ mainWindow.on('close', () => {
 mainWindow.webContents.on('before-input-event', (ev, input) => {
     if(input.control || input.alt || input.meta) return;
     if(input.type !== 'keyDown') return;
-
-    let controls = Object.assign({
-        fullscreen: 'F11',
-        reload: 'F5',
-        newgame: 'F6',
-        lastlobby: 'F4',
-        devtools: 'F12'
-    }, config.get('controls', {}));
 
     if(input.key === controls.fullscreen) (ev.preventDefault(), mainWindow.setFullScreen(!mainWindow.isFullScreen()));
     if(input.key === controls.reload) (ev.preventDefault(), mainWindow.reload());
@@ -118,9 +118,10 @@ function onNewWindow(ev, url) {
         win.webContents.on('before-input-event', (ev, input) => {
             if(input.control || input.alt || input.meta) return;
             if(input.type !== 'keyDown') return;
-            if(input.key === config.get('controls.fullscreen', 'F11')) (ev.preventDefault(), win.setFullScreen(!win.isFullScreen()));
-            if(input.key === config.get('controls.reload', 'F5')) (ev.preventDefault(), win.reload());
-            if(input.key === config.get('controls.devtools', 'F12') && !app.isPackaged) (ev.preventDefault(), win.webContents.openDevTools());
+
+            if(input.key === controls.fullscreen) (ev.preventDefault(), win.setFullScreen(!win.isFullScreen()));
+            if(input.key === controls.reload) (ev.preventDefault(), win.reload());
+            if(input.key === controls.devtools && !app.isPackaged) (ev.preventDefault(), win.webContents.openDevTools());
         });
         win.webContents.on('will-prevent-unload', (ev) => ev.preventDefault());
     }
@@ -248,7 +249,13 @@ let updateUser = _ => {
 };
 client.on('userUpdate', updateUser);
 
-ipcMain.on('config.onDidAnyChange', (ev, k) => ev.sender.send('config.onDidAnyChange'));
+ipcMain.on('config.onDidAnyChange', ev => (ev.sender.send('config.onDidAnyChange'), controls = Object.assign({
+    fullscreen: 'F11',
+    reload: 'F5',
+    newgame: 'F6',
+    lastlobby: 'F4',
+    devtools: 'F12'
+}, config.get('controls', {}))));
 
 // Addons
 fs.readdirSync(path.join(__dirname, 'addons')).forEach(addon => {
