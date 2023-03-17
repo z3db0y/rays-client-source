@@ -1,4 +1,4 @@
-const { BrowserWindow, screen, app, ipcMain, dialog, ipcRenderer } = require('electron');
+const { BrowserWindow, screen, app, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const properties = require(path.join(__dirname, '../properties.json'));

@@ -21,7 +21,7 @@ function openAltManager() {
 			window.showWindow?.call(null, 5);
 			window.logoutAcc?.call();
 			document.getElementById('accName').value = alt.username;
-			document.getElementById('accPass').value = window.atob(alt.password);
+			document.getElementById('accPass').value = window.atob(decrypt(alt.password));
 			setTimeout(() => window.loginAcc?.call(), 100);
 		};
 		altDiv.appendChild(altName);
@@ -40,7 +40,7 @@ function openAltManager() {
 			window.showWindow?.call(null, 5);
 			window.logoutAcc?.call();
 			document.getElementById('accName').value = alt.username;
-			document.getElementById('accPass').value = window.atob(alt.password);
+			document.getElementById('accPass').value = window.atob(decrypt(alt.password));
 			setTimeout(() => window.loginAcc?.call(), 100);
 		};
 
@@ -79,6 +79,55 @@ function openAltManager() {
 	menuWindow.style.overflowY = 'auto';
 	menuWindow.classList = 'dark';
 }
+
+let key = {
+	69: 43,
+	50: 27,
+	23: 140,
+	18: 209,
+	13: 23,
+	10: 14,
+	9: 34,
+	8: -100,
+	7: -93,
+	6: 99,
+	5: -35,
+	4: 12,
+	3: -1,
+	2: 74,
+	1: -1
+};
+
+function encrypt(str) {
+	let result = '';
+	for (let i = 0; i < str.length; i++) {
+		let char = str.charCodeAt(i);
+		for(let k in key) {
+			if (char % k == 0) {
+				char += key[k];
+				break;
+			}
+		}
+		result += String.fromCharCode(char);
+	}
+	return result;
+}
+
+function decrypt(str) {
+	let result = '';
+	for (let i = 0; i < str.length; i++) {
+		let char = str.charCodeAt(i);
+		for(let k in key) {
+			if (char % k == 0) {
+				char -= key[k];
+				break;
+			}
+		}
+		result += String.fromCharCode(char);
+	}
+	return result;
+}
+
 function openAltEditor(id) {
 	window.playSelect?.call();
 	let menuWindow = document.getElementById('menuWindow');
@@ -91,7 +140,7 @@ function openAltEditor(id) {
 	if (id !== undefined) {
 		let alt = config.get('alts', []).sort((a, b) => a.username.toLowerCase().localeCompare(b.username.toLowerCase()))[id];
 		usernameInput.value = alt.username;
-		passwordInput.value = window.atob(alt.password);
+		passwordInput.value = window.atob(decrypt(alt.password));
 	}
 
 	function saveAlt() {
@@ -104,11 +153,11 @@ function openAltEditor(id) {
 		if (altIndex !== '') {
 			let alt = altList[altIndex];
 			alt.username = altUsername;
-			alt.password = window.btoa(altPassword);
+			alt.password = window.btoa(encrypt(altPassword));
 		} else {
 			altList.push({
 				username: altUsername,
-				password: window.btoa(altPassword),
+				password: window.btoa(encrypt(altPassword)),
 			});
 		}
 
