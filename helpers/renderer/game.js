@@ -64,8 +64,22 @@ document.addEventListener('DOMContentLoaded', async function() {
     loadRPCEditor();
     injectSettings();
     injectChatCategorizer();
+    modEsportsBtn();
     rpc();
 });
+
+function modEsportsBtn() {
+    let title = document.getElementById('menuBtnEsports');
+    switch(config.get('esportsBtn', 'doNothing')) {
+        case 'hide':
+            title.parentElement.style.display = 'none';
+            break;
+        case 'hostComp':
+            title.parentElement.setAttribute('onclick', 'openHostWindow(false,1)');
+            title.textContent = 'Host Comp Game';
+            break;
+    }
+}
 
 function rpc() {
     function sendRPC() {

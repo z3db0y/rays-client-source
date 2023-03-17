@@ -32,6 +32,18 @@
             "onclick": "editMsgFilter()"
         },
         {
+            "name": "Esports Button",
+            "description": "Choose what to do to the esports button.",
+            "type": "select",
+            "id": "esportsBtn",
+            "options": [
+                { "name": "Do nothing", "value": "doNothing" },
+                { "name": "Hide", "value": "hide" },
+                { "name": "Host comp game", "value": "hostComp" }
+            ],
+            "refresh": true
+        },
+        {
             "name": "TradeAssistant",
             "description": "A tool to help you trade.",
             "type": "toggle",

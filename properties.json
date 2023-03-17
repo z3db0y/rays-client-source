@@ -47,7 +47,6 @@
             "other": true
         },
         "msgFilter": [],
-        "alts": [],
         "rpc": {
             "type": "anon",
             "buttons": [
@@ -109,7 +108,8 @@
                 "progressThickness": 2,
                 "progressColor": "#ffffff"
             }
-        }
+        },
+        "esportsBtn": "doNothing"
     },
     "windowOpts": {
         "autoHideMenuBar": true,
