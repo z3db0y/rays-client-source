@@ -113,7 +113,8 @@
     },
     "windowOpts": {
         "autoHideMenuBar": true,
-        "show": false
+        "show": false,
+        "simpleFullscreen": true
     },
     "matchmaker": {
         "gamemodes": {

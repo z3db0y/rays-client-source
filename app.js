@@ -47,7 +47,14 @@ function destroySplash(win) {
     app.on('window-all-closed', allClosed);
     win.close();
     app.off('window-all-closed', allClosed);
-    app.on('window-all-closed', () => { app.quit(); });
+    
+    app.on('window-all-closed', app.quit);
+    // Ensure process exits when supposed to
+    app.on('before-quit', () => {
+        mainWindow.removeAllListeners('close');
+        mainWindow.close();
+    });
+
     console.log('Splash screen destroyed.');
 }
 
@@ -108,6 +115,7 @@ async function init() {
 if(config.get('uncapFrames')) {
     app.commandLine.appendSwitch('disable-frame-rate-limit');
     app.commandLine.appendSwitch('disable-gpu-vsync');
+    app.commandLine.appendSwitch('max-gum-fps', '9999');
 }
 app.commandLine.appendSwitch('no-sandbox');
 app.commandLine.appendSwitch('ui-disable-partial-swap');
@@ -116,6 +124,21 @@ app.commandLine.appendSwitch('disable-features', 'HardwareMediaKeyHandling,Media
 app.commandLine.appendSwitch('no-sandbox');
 app.commandLine.appendSwitch('enable-quic');
 app.commandLine.appendSwitch('high-resolution-timer');
+app.commandLine.appendSwitch('disable-accelerated-video-decode', 'false');
+app.commandLine.appendSwitch('disable-accelerated-video-encode', 'false');
+app.commandLine.appendSwitch('disable-print-preview');
+app.commandLine.appendSwitch('disable-metrics-repo');
+app.commandLine.appendSwitch('disable-metrics');
+app.commandLine.appendSwitch('disable-breakpad');
+app.commandLine.appendSwitch('disable-component-update');
+app.commandLine.appendSwitch('disable-bundled-ppapi-flash');
+app.commandLine.appendSwitch('disable-2d-canvas-clip-aa');
+app.commandLine.appendSwitch('disable-hang-monitor');
+app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
+app.commandLine.appendSwitch('high-dpi-support', '1');
+app.commandLine.appendSwitch('ignore-gpu-blacklist');
+app.commandLine.appendSwitch('disable-background-timer-throttling');
+app.commandLine.appendSwitch('disable-renderer-backgrounding');
 if(!config.get('hardwareAcceleration', true)) app.commandLine.appendSwitch('disable-gpu');
 if(config.get('angleBackend', 'default') !== 'default') app.commandLine.appendSwitch('use-angle', config.get('angleBackend', 'default'));
 if(config.get('webgl2', false)) app.commandLine.appendSwitch('enable-webgl2-compute-context');
