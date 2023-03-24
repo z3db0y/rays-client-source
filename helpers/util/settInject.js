@@ -1,4 +1,4 @@
-const { ipcRenderer } = require('electron');
+const { ipcRenderer, remote } = require('electron');
 const path = require('path');
 const defaultSettings = require(path.join(__dirname, '../../properties.json')).defaultSettings;
 const config = new (require('electron-store'))();
@@ -37,6 +37,21 @@ module.exports = function () {
         };
         document.addEventListener('keydown', listener);
     };
+
+    let onNewText = false;
+    window.clientDirPick = function (el) {
+        let dir = remote.dialog.showOpenDialogSync(null, {
+            properties: ['openDirectory']
+        });
+        if (dir) {
+            config.set(el.id, dir);
+            if(onNewText) return;
+            onNewText = true;
+            let oldText = el.innerText;
+            el.innerText = 'Saved!';
+            setTimeout(() => (el.innerText = oldText, onNewText = false), 1000);
+        }
+    }
 
     window.resetClientControl = function (id) { config.set(id, getter(defaultSettings, id) || 'Unbound'); document.getElementById(id).innerText = getter(defaultSettings, id) || 'Unbound'; }
     window.unbindClientControl = function (id) { config.set(id, 'Unbound'); document.getElementById(id).innerText = 'Unbound'; }
@@ -94,6 +109,9 @@ module.exports = function () {
                                 break;
                             case 'control':
                                 settHTML += `<div><span class="keyIcon" style="cursor:pointer;vertical-align:middle;margin:0 4px" onclick="clientControlInput(this)" id="${sett.id.replace(/"/g, '\\"')}">${config.get(sett.id, 'Unbound').length == 1 ? config.get(sett.id).toUpperCase() : config.get(sett.id, 'Unbound')}</span><span class="material-icons" style="font-size:40px;color:var(--red);vertical-align:middle;cursor:pointer" onclick="unbindClientControl('${sett.id.replace(/"/g, '\\"').replace(/'/g, "\\'")}')" id="${sett.id.replace(/"/g, '\\"')}">delete_forever</span><span class="material-icons" style="font-size:40px;color:var(--yellow);vertical-align:middle;cursor:pointer" onclick="resetClientControl('${sett.id.replace(/"/g, '\\"').replace(/'/g, "\\'")}')" id="${sett.id.replace(/"/g, '\\"')}">refresh</span></div></div>`;
+                                break;
+                            case 'directory':
+                                settHTML += `<div onclick="clientDirPick(this)" id="${sett.id && sett.id.replace(/"/g, '\\"')}" style="width: auto; display: inline-table" class="settingsBtn">${sett.label}</div></div>`;
                                 break;
                             case 'custom':
                                 settHTML += sett.customHTML + '</div>';

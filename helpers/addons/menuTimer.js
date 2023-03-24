@@ -1,23 +1,24 @@
+const { ipcRenderer } = require('electron');
+
 module.exports = () => {
-    const config = new (require('electron-store'))();
-    if(!config.get('menuTimer', false)) return;
-    let timerVal = document.getElementById('timerVal');
-    let instructions = document.getElementById('instructions');
-    let v;
+  const config = new (require('electron-store'))();
+  if (!config.get('menuTimer', false)) return;
 
-    Object.defineProperty(timerVal, 'textContent', {
-        set: function(val) {
-            this.innerText = val;
-            ([...instructions.childNodes].find(x => x.nodeType == 3) || instructions).textContent = val;
-            v = val;
-        }
-    });
+  const enableRecordingToggle = document.getElementById('record.enable');
+  const overlay = document.createElement('div');
+  overlay.style.position = 'fixed';
+  overlay.style.bottom = '10px';
+  overlay.style.right = '10px';
+  overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+  overlay.style.color = 'white';
+  overlay.style.padding = '10px';
+  overlay.style.borderRadius = '5px';
+  overlay.style.display = 'none';
+  overlay.innerHTML = 'Game recording is on';
 
-    let oSetter = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML').set;
-    Object.defineProperty(instructions, 'innerHTML', {
-        set: function(val) {
-            oSetter.call(this, val);
-            ([...instructions.childNodes].find(x => x.nodeType == 3) || this).textContent = v;
-        }
-    });
-}
+  document.body.appendChild(overlay);
+
+  enableRecordingToggle.addEventListener('click', () => {
+    overlay.style.display = enableRecordingToggle.checked ? 'block' : 'none';
+  });
+};

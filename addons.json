@@ -349,5 +349,77 @@
                 { "name": "RGB", "value": "rgb" }
             ]
         }
+    ],
+    "Game recording": [
+        {
+            "name": "Enable",
+            "id": "record.enable",
+            "type": "toggle",
+            "description": "Records your gameplay and saves it to a file or sends it to a Discord webhook.",
+            "refresh": true
+        },
+        {
+            "name": "Record on game load",
+            "id": "record.onGameLoad",
+            "type": "toggle",
+            "description": "Automatically starts recording when you load into the client.",
+            "refresh": true
+        },
+        {
+            "name": "Output",
+            "type": "select",
+            "id": "record.output",
+            "options": [
+                { "name": "Save to File", "value": "file" },
+                { "name": "Send to Discord webhook", "value": "webhook" }
+            ]
+        },
+        {
+            "name": "Output directory",
+            "type": "directory",
+            "id": "record.outputDirectory",
+            "description": "The directory where the recorded files will be saved.",
+            "label": "Select"
+        },
+        {
+            "name": "Webhook URL",
+            "type": "input",
+            "id": "record.webhookURL",
+            "description": "The URL of the Discord webhook to send the recorded files to.",
+            "placeholder": "https://discord.com/api/webhooks/..."
+        },
+        {
+            "name": "Record Desktop Audio",
+            "type": "toggle",
+            "description": "Records the desktop audio.",
+            "id": "record.desktopAudio",
+            "refresh" : true
+        },
+        {
+            "name": "Recording Limit (mega bytes)",
+            "type": "slider",
+            "id": "record.mbLimit",
+            "min": 0,
+            "max": 200,
+            "step": 1
+        },
+        {
+            "name": "Start recording",
+            "type": "control",
+            "id": "record.startKey",
+            "description": "The key to start recording."
+        },
+        {
+            "name": "Stop recording",
+            "type": "control",
+            "id": "record.stopKey",
+            "description": "The key to stop recording."
+        },
+        {
+            "name": "Pause recording",
+            "type": "control",
+            "id": "record.pauseKey",
+            "description": "The key to pause recording."
+        }
     ]
 }
