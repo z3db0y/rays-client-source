@@ -261,11 +261,15 @@ module.exports = _ => {
     }
 
     function getInitalBadges() {
-        let playerEls = [...map([...leaderboard.children[0].children[0].children[0].children].slice(2), child => child.children[0].children[0].lastChild), ...map([...oldLeaderboard.children[0].children], child => child.children[child.children.length - 2])];
-        
-        for(let i = 0; i < playerEls.length; i++) {
-            let playerName = playerNode?.textContent.trim();
-            ipcRenderer.send('getBadges', playerName);
+        try {
+            let playerEls = [...map([...leaderboard.children[0].children[0].children[0].children].slice(2), child => child.children[0].children[0].lastChild), ...map([...oldLeaderboard.children[0].children], child => child.children[child.children.length - 2])];
+            
+            for(let i = 0; i < playerEls.length; i++) {
+                let playerName = playerNode?.textContent.trim();
+                ipcRenderer.send('getBadges', playerName);
+            }
+        } catch {
+            setTimeout(getInitalBadges, 100);
         }
     }
     getInitalBadges();
