@@ -117,7 +117,10 @@ module.exports = _ => {
             let playerCard = playerCards[i];
             let playerName = playerCard.querySelector('.death-row-user-text').textContent.trim();
             let player = find(badges, x => x.uname == playerName);
-            if(!player) continue;
+            if(!player) {
+                ipcRenderer.send('getBadges', playerName); // Get badges for player if not found
+                continue;
+            }
             let customCard = player.deathCard;
             if(!customCard) continue;
             let playerBG = playerCard.querySelector('.death-row-bottom-bg');
@@ -256,4 +259,14 @@ module.exports = _ => {
         cardName.style.color = '#fff53d';
         if(anim) cardName.classList.add('rainbow');
     }
+
+    function getInitalBadges() {
+        let playerEls = [...map([...leaderboard.children[0].children[0].children[0].children].slice(2), child => child.children[0].children[0].lastChild), ...map([...oldLeaderboard.children[0].children], child => child.children[child.children.length - 2])];
+        
+        for(let i = 0; i < playerEls.length; i++) {
+            let playerName = playerNode?.textContent.trim();
+            ipcRenderer.send('getBadges', playerName);
+        }
+    }
+    getInitalBadges();
 };
