@@ -93,7 +93,7 @@ module.exports = _ => {
         for(let i = 0; i < playerCards.length; i++) {
             let playerCard = playerCards[i];
             let playerName = playerCard.querySelector('.death-row-user-text').textContent.trim();
-            let player = find(badges, x => x.uname == playerName);
+            let player = find(badges, x => x[i == 0 ? 'name' : 'uname'] == playerName);
             window.log(badges, playerName, player);
             if(!player) continue;
             let customCard = player.deathCard;
