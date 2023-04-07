@@ -157,6 +157,26 @@
             "id": "twitch.separateChat"
         },
         {
+            "name": "On message delete",
+            "type": "select",
+            "id": "twitch.messageDeleteAction",
+            "options": [
+                { "name": "Do nothing", "value": "none" },
+                { "name": "Hide message", "value": "hide" },
+                { "name": "Strike through message", "value": "strike" },
+                { "name": "Replace message with \"[deleted]\"", "value": "replace" }
+            ]
+        },
+        {
+            "name": "On chat clear",
+            "type": "select",
+            "id": "twitch.clearChatAction",
+            "options": [
+                { "name": "Do nothing", "value": "none" },
+                { "name": "Hide messages", "value": "clear" }
+            ]
+        },
+        {
             "name": "Chat emotes (Twitch)",
             "type": "toggle",
             "id": "twitch.emotes.twitch"

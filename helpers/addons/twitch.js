@@ -290,7 +290,7 @@ async function injectEmoteSets(message, tags, token) {
 }
 
 async function main() {
-    const chatMsg = '<div data-tab="-1" class="twitchMsg"><div class="chatItem" style="color: ${COLOR}">${USERNAME}: <span class="chatMsg">${MESSAGE}</span></div><br></div>';
+    const chatMsg = '<div id="tw-${ID}" data-tab="-1" class="twitchMsg"><div class="chatItem" style="color: ${COLOR}">${USERNAME}: <span class="chatMsg">${MESSAGE}</span></div><br></div>';
 
     const TMI = require('tmi.js');
     const { ipcMain, BrowserWindow, ipcRenderer } = require('electron');
@@ -349,8 +349,15 @@ async function main() {
                 BrowserWindow.getAllWindows()[0].webContents.send('twitchChatMessage', chatMsg.parse({
                     COLOR: color,
                     USERNAME: author,
-                    MESSAGE: message
+                    MESSAGE: message,
+                    ID: tags['id']
                 }));
+            });
+            client.on('messagedeleted', (channel, username, deletedMessage, tags) => {
+                BrowserWindow.getAllWindows()[0].webContents.send('twitchChatMessageDelete', tags['target-msg-id']);
+            });
+            client.on('clearchat', (channel) => {
+                BrowserWindow.getAllWindows()[0].webContents.send('twitchChatClear');
             });
         } else {
             if(client) client.disconnect();
@@ -643,6 +650,26 @@ module.exports = () => {
     }
 
     ipcRenderer.on('twitchChatMessage', (_, message) => (chat.insertAdjacentHTML('beforeend', message), chat.scrollTop = chat.scrollHeight));
+    ipcRenderer.on('twitchChatMessageDelete', (_, id) => {
+        let action = config.get('twitch.messageDeleteAction', 'hide');
+        let msg = document.getElementById('tw-' + id);
+        if(msg) {
+            let c = msg.querySelector('.chatMsg');
+            if(action == 'hide') {
+                msg.remove();
+            } else if(action == 'strike') {
+                c.style.textDecoration = 'line-through';
+                msg.style.opacity = 0.5;
+            } else if(action == 'replace') {
+                c.innerHTML = '[deleted]';
+                c.style.fontStyle = 'italic';
+            }
+        }
+    });
+    ipcRenderer.on('twitchChatClear', _ => {
+        let action = config.get('twitch.clearChatAction', 'clear');
+        if(action == 'clear') chat.innerHTML = '';
+    });
     ipcRenderer.on('getTwitchCommandVars', async (event) => {
         if(!player) await updatePlayer();
         if(player && window.localStorage.getItem('krunker_username') != player.player_name) await updatePlayer();

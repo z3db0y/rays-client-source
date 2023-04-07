@@ -71,7 +71,9 @@
             },
             "commands": [],
             "sendOnShiftEnter": false,
-            "separateChat": false
+            "separateChat": false,
+            "messageDeleteAction": "hide",
+            "clearChatAction": "clear"
         },
         "keystrokes": {
             "enable": false,

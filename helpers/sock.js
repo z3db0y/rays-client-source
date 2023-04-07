@@ -137,7 +137,8 @@ class Client {
 
     close() {
         console.log('Disconnected from server, reconnecting in 5 seconds...');
-        setTimeout(() => {
+        if(this.connectTimeout) return;
+        this.connectTimeout = setTimeout(() => {
             this.connect();
         }, 5000);
     }

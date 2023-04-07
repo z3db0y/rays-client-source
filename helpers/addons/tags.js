@@ -242,6 +242,7 @@ module.exports = _ => {
         let anim = !(localStorage.getItem('kro_setngss_disableRarityAnim') == 'true');
 
         let div = document.getElementById('menuWindow').querySelector('div[onclick="showWindow(52)"]');
+        if(!div) return;
         let cardName = div.querySelector('.custLabel');
         let rnd = div.querySelector('.selRandom');
         
