@@ -220,9 +220,10 @@ ipcMain.on('updateDisplayName', (ev, name, name2) => {
     let cardUrl = card ? card.url : null;
 
     if(!rpc.user) return (lastDisplayName = name, lastUsername = name2, lastCardUrl = cardUrl);
-    if(lastDisplayName == name) return;
+    if(lastDisplayName == name && lastCardUrl == cardUrl) return;
     lastDisplayName = name;
     lastUsername = name2;
+    lastCardUrl = cardUrl;
     client.updateDisplayName(rpc.user.id, name, name2, cardUrl);
 });
 let getBadges = (ev, name) => {
