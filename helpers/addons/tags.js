@@ -17,7 +17,7 @@ module.exports = _ => {
 
     let badges = [];
     let clans = [];
-    let ownBadges = [];
+    let self = [];
     let deathCards = [];
     let customDeathCards = config.get('customDeathCards', []);
 
@@ -26,10 +26,9 @@ module.exports = _ => {
         badges.push(data);
     });
 
-    ipcRenderer.send('getOwnBadges');
-    ipcRenderer.on('getOwnBadges', (event, data) => {
-        ownBadges = data;
-        updateMenuTag();
+    ipcRenderer.send('getSelf');
+    ipcRenderer.on('getSelf', (event, data) => {
+        self = data;
     });
 
     ipcRenderer.send('getClans');
@@ -46,27 +45,6 @@ module.exports = _ => {
     function find(array, func) {
         for(var i = 0; i < array.length; i++) if(func(array[i])) return array[i];
     }
-
-    function updateMenuTag() {
-        if(applyBadges) {
-            for(var badge of ownBadges) {
-                let badgeElement = document.createElement('img');
-                badgeElement.src = badge;
-                badgeElement.style.height = '24px';
-                badgeElement.style.verticalAlign = 'middle';
-                if(!menuName.innerHTML.includes(badgeElement.outerHTML)) menuName.insertAdjacentElement('beforeend', badgeElement);
-            }
-        }
-        if(applyClans) {
-            let playerClan = menuName.querySelector('span.menuClassPlayerClan')?.textContent.trim().slice(1, -1).toLowerCase();
-            let clan = clans ? find(clans, x => x.name.toLowerCase() === playerClan) : null;
-            if(!clan?.style && !clan?.addonHTML) return;
-
-            for(var key in clan.style) menuName.querySelector('span.menuClassPlayerClan').style[key] = clan.style[key];
-            if(clan.addonHTML && !menuName.innerHTML.includes(clan.addonHTML)) menuName.querySelector('span.menuClassPlayerClan').insertAdjacentHTML('afterend', clan.addonHTML);
-        }
-    }
-    new MutationObserver(updateMenuTag).observe(menuName, { childList: true });
 
     let newLeaderDisplay = document.getElementById('newLeaderDisplay');
 
@@ -159,7 +137,7 @@ module.exports = _ => {
         addCustomBtn.setAttribute('onmouseenter', 'playTick()');
         addCustomBtn.style.cssText = 'border:5px solid lightgrey';
         addCustomBtn.innerHTML = `<div style="color: #fff;margin-top: 50%; transform: translateY(-25%)">ADD<br>CUSTOM</div>`;
-        firstEl.insertAdjacentElement('beforebegin', addCustomBtn);
+        if(self && self.isPremium) firstEl.insertAdjacentElement('beforebegin', addCustomBtn);
 
         addCustomBtn.addEventListener('click', () => {
             window.windows[40].newPop();
@@ -185,8 +163,9 @@ module.exports = _ => {
             });
         });
 
-        for(let i = 0; i < customDeathCards.length; i++) {
+        if(self && self.isPremium) for(let i = 0; i < customDeathCards.length; i++) {
             let selectCard = () => {
+                if(!self || !self.isPremium) return;
                 config.set('deathCard', [1, i]);
                 window.selectPlayerCard(-1000); // Unselect in-game card & go back to customize window
             };

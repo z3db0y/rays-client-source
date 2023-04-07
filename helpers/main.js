@@ -1,4 +1,4 @@
-const { BrowserWindow, screen, app, ipcMain, dialog } = require('electron');
+const { BrowserWindow, screen, app, ipcMain, dialog, ipcRenderer } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const properties = require(path.join(__dirname, '../properties.json'));
@@ -150,9 +150,8 @@ rpc.on('ready', () => {
     console.log('RPC: ready');
     if(lastDisplayName) client.updateDisplayName(rpc.user.id, lastDisplayName, lastUsername, lastCardUrl);
 
-    let self = client.users.find(x => x[0] == rpc.user.id);
-    if(!self) return;
-    mainWindow.webContents.send('getOwnBadges', self[2].sort((a, b) => client.badges.find(x => x.id == b).p - client.badges.find(x => x.id == a).p).map(x => client.url + client.badges.find(y => y.id == x).n + '.png'));
+    let self = client.list.find(c => c.uname == lastUsername);
+    if(self) mainWindow.webContents.send('getSelf', self);
 });
 
 rpc.on('ACTIVITY_JOIN', ({ secret }) => mainWindow.loadURL('https://krunker.io/?game=' + secret, { 'userAgent': USER_AGENT }));
@@ -221,6 +220,7 @@ ipcMain.on('updateDisplayName', (ev, name, name2) => {
 
     if(!rpc.user) return (lastDisplayName = name, lastUsername = name2, lastCardUrl = cardUrl);
     if(lastDisplayName == name && lastCardUrl == cardUrl) return;
+    console.log('set display name');
     lastDisplayName = name;
     lastUsername = name2;
     lastCardUrl = cardUrl;
@@ -232,14 +232,12 @@ let getBadges = (ev, name) => {
 };
 ipcMain.on('getBadges', getBadges);
 
-let getOwnBadges = (ev) => {
-    if(!client.initSent) return setTimeout(() => getOwnBadges(ev), 1000);
-    if(!rpc.user) return ev.sender.send('getOwnBadges', []);
-    let self = client.users.find(x => x[0] == rpc.user.id);
-    if(!self) return ev.sender.send('getOwnBadges', []);
-    ev.sender.send('getOwnBadges', self[2].sort((a, b) => client.badges.find(x => x.id == b).p - client.badges.find(x => x.id == a).p).map(x => client.url + client.badges.find(y => y.id == x).n + '.png'));
+let getSelf = (ev) => {
+    if(!client.initSent) return setTimeout(() => getSelf(ev), 1000);
+    let self = client.list.find(x => x.uname == lastUsername);
+    if(self) ev.sender.send('getSelf', self);
 };
-ipcMain.on('getOwnBadges', getOwnBadges);
+ipcMain.on('getSelf', getSelf);
 
 let getClans = (ev) => {
     if(!client.initSent) return setTimeout(() => getClans(ev), 1000);
@@ -248,16 +246,15 @@ let getClans = (ev) => {
 ipcMain.on('getClans', getClans);
 
 let getDeathCards = (ev) => {
-    if(!client.initSent) return setTimeout(() => getDeathCards(ev), 1000);
+    if(!client.deathCards) return setTimeout(() => getDeathCards(ev), 1000);
     ev.sender.send('getDeathCards', client.deathCards);
 };
 ipcMain.on('getDeathCards', getDeathCards);
 
 let updateUser = _ => {
-    if(!rpc.user) return mainWindow.webContents.send('getOwnBadges', []);
-    let self = client.users.find(x => x[0] == rpc.user.id);
-    if(!self) return;
-    mainWindow.webContents.send('getOwnBadges', self[2].sort((a, b) => client.badges.find(x => x.id == b).p - client.badges.find(x => x.id == a).p).map(x => client.url + client.badges.find(y => y.id == x).n + '.png'));
+    if(!rpc.user) return;
+    let self = client.list.find(x => x.uname == lastUsername);
+    if(self) mainWindow.webContents.send('getSelf', self);
     mainWindow.webContents.send('getBadges', client.list.find(x => x.name == lastDisplayName) || { name: lastDisplayName });
 };
 client.on('userUpdate', updateUser);

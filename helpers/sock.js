@@ -45,11 +45,15 @@ class Client {
             if (!badges.length) return;
             if(!user[1]) return;
 
+            let minPremiumP = this.badges.sort((a, b) => a.p - b.p).find(x => x.pr);
+            minPremiumP = minPremiumP ? minPremiumP.p : 0;
+
             this.list.push({
                 name: user[1],
                 uname: user[3],
                 badges: badges.sort((a, b) => b.p - a.p).map(b => this.url + b.n + '.png'),
-                deathCard: user[4]
+                deathCard: user[4],
+                isPremium: badges.sort((a, b) => b.p - a.p)[0].p >= minPremiumP
             });
         });
     }
@@ -137,7 +141,7 @@ class Client {
 
     close() {
         console.log('Disconnected from server, reconnecting in 5 seconds...');
-        if(this.connectTimeout) return;
+        if(this.connectTimeout) clearTimeout(this.connectTimeout);
         this.connectTimeout = setTimeout(() => {
             this.connect();
         }, 5000);

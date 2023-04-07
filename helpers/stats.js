@@ -34,7 +34,7 @@ class Stats {
                 break;
             case 'error':
                 console.log('KRUNKER server error', args);
-                if(this.connectTimeout) return;
+                if(this.connectTimeout) clearTimeout(this.connectTimeout);
                 this.connectTimeout = setTimeout(() => {
                     this.connect();
                 }, 5000);
@@ -98,7 +98,7 @@ class Stats {
 
     close() {
         console.log('Disconnected from KRUNKER server, reconnecting in 5 seconds...');
-        if(this.connectTimeout) return;
+        if(this.connectTimeout) clearTimeout(this.connectTimeout);
         this.connectTimeout = setTimeout(() => {
             this.connect();
         }, 5000);
