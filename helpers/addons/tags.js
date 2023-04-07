@@ -34,7 +34,6 @@ module.exports = _ => {
     ipcRenderer.send('getClans');
     ipcRenderer.on('getClans', (event, data) => {
         clans = data;
-        updateMenuTag();
     });
 
     ipcRenderer.send('getDeathCards');
