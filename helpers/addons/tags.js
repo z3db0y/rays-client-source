@@ -13,7 +13,7 @@ module.exports = _ => {
     let applyBadges = config.get('badges', true);
     let applyClans = config.get('clans', true);
 
-    if(!applyBadges && !applyClans) return;
+    // if(!applyBadges && !applyClans) return; // TODO: potentially add toggle for death cards
 
     let badges = [];
     let clans = [];
@@ -117,10 +117,8 @@ module.exports = _ => {
             let playerCard = playerCards[i];
             let playerName = playerCard.querySelector('.death-row-user-text').textContent.trim();
             let player = find(badges, x => x.uname == playerName);
-            if(!player) {
-                ipcRenderer.send('getBadges', playerName); // Get badges for player if not found
-                continue;
-            }
+            window.log(badges, playerName, player);
+            if(!player) continue;
             let customCard = player.deathCard;
             if(!customCard) continue;
             let playerBG = playerCard.querySelector('.death-row-bottom-bg');
@@ -259,18 +257,4 @@ module.exports = _ => {
         cardName.style.color = '#fff53d';
         if(anim) cardName.classList.add('rainbow');
     }
-
-    function getInitalBadges() {
-        try {
-            let playerEls = [...map([...leaderboard.children[0].children[0].children[0].children].slice(2), child => child.children[0].children[0].lastChild), ...map([...oldLeaderboard.children[0].children], child => child.children[child.children.length - 2])];
-            
-            for(let i = 0; i < playerEls.length; i++) {
-                let playerName = playerNode?.textContent.trim();
-                ipcRenderer.send('getBadges', playerName);
-            }
-        } catch {
-            setTimeout(getInitalBadges, 100);
-        }
-    }
-    getInitalBadges();
 };
