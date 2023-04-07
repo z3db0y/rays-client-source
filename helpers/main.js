@@ -140,6 +140,7 @@ rpcLogin();
 
 let lastDisplayName;
 let lastUsername;
+let lastCardUrl;
 const client = new Client();
 
 rpc.on('close', () => setTimeout(rpcLogin, 10000));
@@ -147,7 +148,7 @@ rpc.on('close', () => setTimeout(rpcLogin, 10000));
 rpc.on('ready', () => {
     rpc.subscribe('ACTIVITY_JOIN');
     console.log('RPC: ready');
-    if(lastDisplayName) client.updateDisplayName(rpc.user.id, lastDisplayName);
+    if(lastDisplayName) client.updateDisplayName(rpc.user.id, lastDisplayName, lastUsername, lastCardUrl);
 
     let self = client.users.find(x => x[0] == rpc.user.id);
     if(!self) return;
@@ -213,11 +214,16 @@ ipcMain.on('rpc', (ev, activity) => {
 });
 
 ipcMain.on('updateDisplayName', (ev, name, name2) => {
-    if(!rpc.user) return (lastDisplayName = name, lastUsername = name2);
+    let cardT = config.get('deathCard', [-1, -1])[0];
+    let cardI = config.get('deathCard', [-1, -1])[1];
+    let card = cardT == -1 ? {} : cardT == 1 ? config.get('customDeathCards', [])[cardI] : client.deathCards[cardI];
+    let cardUrl = card ? card.url : null;
+
+    if(!rpc.user) return (lastDisplayName = name, lastUsername = name2, lastCardUrl = cardUrl);
     if(lastDisplayName == name) return;
     lastDisplayName = name;
     lastUsername = name2;
-    client.updateDisplayName(rpc.user.id, name, name2);
+    client.updateDisplayName(rpc.user.id, name, name2, cardUrl);
 });
 let getBadges = (ev, name) => {
     if(!client.initSent) return setTimeout(() => getBadges(ev, name), 1000);
@@ -239,6 +245,12 @@ let getClans = (ev) => {
     ev.sender.send('getClans', client.clans);
 };
 ipcMain.on('getClans', getClans);
+
+let getDeathCards = (ev) => {
+    if(!client.initSent) return setTimeout(() => getDeathCards(ev), 1000);
+    ev.sender.send('getDeathCards', client.deathCards);
+};
+ipcMain.on('getDeathCards', getDeathCards);
 
 let updateUser = _ => {
     if(!rpc.user) return mainWindow.webContents.send('getOwnBadges', []);

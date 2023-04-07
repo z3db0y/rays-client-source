@@ -21,9 +21,11 @@ ipcRenderer.on('krUsername', () => {
     ipcRenderer.send('krUsername', localStorage.getItem('krunker_username'));
 });
 
-function loadAddons() {
+function loadAddons(dev = false) {
     fs.readdirSync(path.join(__dirname, '../addons')).forEach(file => {
-        if(file.endsWith('.js')) require(path.join(__dirname, '../addons', file))();
+        if(file.endsWith('.js')) {
+            if(!dev || file.startsWith('DEVONLY_')) require(path.join(__dirname, '../addons', file))();
+        }
     });
 }
 
@@ -54,6 +56,7 @@ function injectLoadingScreen() {
 loadChangelog();
 injectLoadingScreen();
 loadServerBrowserUtil();
+loadAddons(true);
 document.addEventListener('DOMContentLoaded', async function() {
     loadAddons();
     loadGameFixes();
@@ -93,7 +96,9 @@ function rpc() {
                 comp: document.getElementById('uiBase')?.classList?.contains('onCompMenu') || false
             }, getGameActivity())) : null;
         }).catch(_ => {});
-        if(document.getElementById('signedInHeaderBar')?.style.display !== 'none') window.getGameActivity ? ipcRenderer.send('updateDisplayName', getGameActivity().user, window.localStorage.getItem('krunker_username')) : null;
+        if(document.getElementById('signedInHeaderBar')?.style.display !== 'none') {
+            window.getGameActivity ? ipcRenderer.send('updateDisplayName', getGameActivity().user, window.localStorage.getItem('krunker_username')) : null;
+        }
     }
     setInterval(sendRPC, 10e3);
     sendRPC();

@@ -18,6 +18,7 @@ class Client {
         this.connect();
         this.url = 'https://cdn.z3db0y.com/rays-badges/';
         this.badges = [];
+        this.deathCards = [];
         this.users = [];
         this.list = [];
         this.initSent = false;
@@ -25,9 +26,9 @@ class Client {
         this._queue = [];
     }
 
-    updateDisplayName(discordId, name, username) {
-        if(!this.seed) return setTimeout(() => this.updateDisplayName(discordId, name, username), 1000);
-        this.initSent ? this.send('u', name, username) : this.send('init', discordId, name, crypto.createHmac('sha256', this.seed).update(getSocketKey()).digest('hex'), username);
+    updateDisplayName(discordId, name, username, cardUrl) {
+        if(!this.seed) return setTimeout(() => this.updateDisplayName(discordId, name, username, cardUrl), 1000);
+        this.initSent ? this.send('u', name, username, cardUrl) : this.send('init', discordId, name, crypto.createHmac('sha256', this.seed || '').update(getSocketKey()).digest('hex'), username, cardUrl);
         this.initSent = true;
     }
 
@@ -47,7 +48,8 @@ class Client {
             this.list.push({
                 name: user[1],
                 uname: user[3],
-                badges: badges.sort((a, b) => b.p - a.p).map(b => this.url + b.n + '.png')
+                badges: badges.sort((a, b) => b.p - a.p).map(b => this.url + b.n + '.png'),
+                deathCard: user[4]
             });
         });
     }
@@ -77,6 +79,10 @@ class Client {
             case 'init':
                 this.seed = args[0];
                 this.badges = args[1];
+                this.deathCards = args[2] ? args[2].map(card => { return {
+                    name: card.n,
+                    url: card.u
+                }}) : [];
                 break;
             case 'au':
                 this.users = args;
@@ -109,7 +115,7 @@ class Client {
     }
 
     connect() {
-        if(this.ws) this.ws.destroy();
+        if(this.ws) this.ws.terminate();
         this.ws = new ws('wss://api.z3db0y.com/rays/ws', {
             agent: new Agent({
                 rejectUnauthorized: false

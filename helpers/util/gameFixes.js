@@ -14,3 +14,13 @@ function applyServerBrowserFix() {
     };
 }
 applyServerBrowserFix();
+
+// Fix to allow closing 2FA window
+function apply2FAFix() {
+    let pop = document.getElementById('twoFAPop');
+    let win = document.getElementById('twoFAWindow');
+    if(!pop || !win) return setTimeout(apply2FAFix, 100);
+    win.onclick = e => e.stopPropagation();
+    pop.onclick = () => pop.style.display = 'none';
+}
+apply2FAFix();

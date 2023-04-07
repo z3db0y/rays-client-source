@@ -66,7 +66,7 @@ class Stats {
     }
 
     connect() {
-        if(this.ws) this.ws.destroy();
+        if(this.ws) this.ws.terminate();
         this.ws = new ws('wss://social.krunker.io/ws', {
             agent: new Agent({
                 rejectUnauthorized: false
