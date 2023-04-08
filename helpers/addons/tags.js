@@ -54,8 +54,10 @@ module.exports = _ => {
     }
 
     new MutationObserver(_ => {
-        let playerEls = [...map([...leaderboard.children[0].children[0].children[0].children].slice(2), child => child.children[0].children[0].lastChild), ...map([...oldLeaderboard.children[0].children], child => child.children[child.children.length - 2])];
-        
+        // let playerEls = [...map([...leaderboard.children[0].children[0].children[0].children].slice(2), child => child.children[0].children[0].lastChild), ...map([...oldLeaderboard.children[0].children], child => child.children[child.children.length - 2])];
+        let playerEls = [...map([...leaderboard.getElementsByTagName('tbody')], t => map([...t.children].slice(2), child => child.children[0].children[0].lastChild)).flat(), ...map([...oldLeaderboard.children[0].children], child => child.children[child.children.length - 2])];
+        window.log(playerEls);
+
         for(let i = 0; i < playerEls.length; i++) {
             let playerEl = playerEls[i];
             let playerNode = find([...playerEl.childNodes], x => x.nodeType == 3);

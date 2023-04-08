@@ -80,6 +80,8 @@ class Client {
                 this.send('po');
                 break;
             case 'pir':
+                this.ping = args[0];
+                this._events.emit('ping');
                 break;
             case 'init':
                 this.seed = args[0];
@@ -121,7 +123,6 @@ class Client {
 
     connect() {
         if(this.ws) this.ws.terminate();
-        this.initSent = false;
         this.ws = new ws('wss://api.z3db0y.com/rays/ws', {
             agent: new Agent({
                 rejectUnauthorized: false
@@ -135,6 +136,7 @@ class Client {
 
     open() {
         console.log('Connected to server');
+        this.initSent = false;
         this._queue.forEach(packet => {
             this.send(...packet);
             this._queue.splice(this._queue.indexOf(packet), 1);
