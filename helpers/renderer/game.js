@@ -328,3 +328,56 @@ window.openMatchmakerRegions = () => {
         config.set('betterMatchmaker.regions', newRegions);
     });
 };
+
+window.openFlagEditor = () => {
+    openMatchmakerUI();
+
+    let matchmakerSett = document.getElementById('matchmakerSett');
+    let flags = config.get('flags', {});
+    for(let flag in flags) {
+        let sett = document.createElement('div');
+        sett.classList = 'settName';
+        sett.innerHTML = `${flag} <label class="switch" style="margin-left:10px"><input type="checkbox"><span class="slider" style="width: 65px"><span class="grooves"></span></span></label>`;
+        sett.getElementsByTagName('input')[0].checked = flags[flag];
+        sett.getElementsByTagName('input')[0].addEventListener('change', e => {
+            flags = config.get('flags', {});
+            flags[flag] = e.target.checked;
+            config.set('flags', flags);
+        });
+
+        matchmakerSett.appendChild(sett);
+    }
+
+    document.getElementById('allOn').addEventListener('click', () => {
+        [...document.getElementById('matchmakerSett').getElementsByTagName('input')].forEach(input => {
+            input.checked = true;
+        });
+        flags = config.get('flags', {});
+        for(let flag in flags) {
+            flags[flag] = true;
+        }
+        config.set('flags', flags);
+    });
+
+    document.getElementById('allOff').addEventListener('click', () => {
+        [...document.getElementById('matchmakerSett').getElementsByTagName('input')].forEach(input => {
+            input.checked = false;
+        });
+        flags = config.get('flags', {});
+        for(let flag in flags) {
+            flags[flag] = false;
+        }
+        config.set('flags', flags);
+    });
+
+    document.getElementById('togAll').addEventListener('click', () => {
+        [...document.getElementById('matchmakerSett').getElementsByTagName('input')].forEach(input => {
+            input.checked = !input.checked;
+        });
+        flags = config.get('flags', {});
+        for(let flag in flags) {
+            flags[flag] = !flags[flag];
+        }
+        config.set('flags', flags);
+    });
+};

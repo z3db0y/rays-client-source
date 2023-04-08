@@ -82,6 +82,14 @@
             "restart": true
         },
         {
+            "name": "Chromium flag editor",
+            "description": "Edit Chromium flags.",
+            "type": "button",
+            "onclick": "openFlagEditor()",
+            "label": "Open",
+            "restart": true
+        },
+        {
             "name": "Client changelog",
             "type": "button",
             "onclick": "openChangelog()",

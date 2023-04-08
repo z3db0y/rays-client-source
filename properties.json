@@ -92,8 +92,41 @@
             }
         },
         "esportsBtn": "doNothing",
-        "deathCard": [-1, -1],
-        "customDeathCards": []
+        "deathCard": [
+            -1,
+            -1
+        ],
+        "customDeathCards": [],
+        "flags": {
+            "renderer-process-limit=100": true,
+            "max-active-webgl-contexts=100": true,
+            "disable-dev-shm-usage": true,
+            "enable-gpu-rasterization": true,
+            "enable-oop-rasterization": true,
+            "enable-webgl": true,
+            "enable-javascript-harmony": true,
+            "enable-future-v8-vm-features": true,
+            "enable-quic": true,
+            "enable-accelerated-2d-canvas": true,
+            "enable-highres-timer": true,
+            "disable-accelerated-video-decode=false": true,
+            "disable-accelerated-video-encode=false": true,
+            "disable-print-preview": true,
+            "disable-metrics-repo": true,
+            "disable-metrics": true,
+            "disable-breakpad": true,
+            "disable-logging": true,
+            "no-sandbox": true,
+            "disable-component-update": true,
+            "disable-bundled-ppapi-flash": true,
+            "disable-2d-canvas-clip-aa": true,
+            "disable-hang-monitor": true,
+            "autoplay-policy=no-user-gesture-required": true,
+            "high-dpi-support=1": true,
+            "ignore-gpu-blacklist": true,
+            "disable-background-timer-throttling": true,
+            "disable-renderer-backgrounding": true
+        }
     },
     "windowOpts": {
         "autoHideMenuBar": true,
@@ -172,7 +205,7 @@
             "Sydney": "au-syd",
             "Tokyo": "jb-hnd",
             "Miami": "us-fl",
-            "Singapore":  "sgp",
+            "Singapore": "sgp",
             "New York": "us-nj",
             "India": "blr",
             "Dallas": "us-tx",
