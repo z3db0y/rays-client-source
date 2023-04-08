@@ -1,4 +1,4 @@
-const { BrowserWindow, screen, app, ipcMain, dialog, ipcRenderer } = require('electron');
+const { BrowserWindow, screen, app, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const properties = require(path.join(__dirname, '../properties.json'));
@@ -26,6 +26,7 @@ let mainWindow = new BrowserWindow(Object.assign({}, windowOpts, {
     minWidth: 800,
     minHeight: 600,
     fullscreen: config.get('window.fullscreen', false),
+    simpleFullscreen: true,
     x: config.get('window.x', 0),
     y: config.get('window.y', 0),
     title: '[RAYS] Client',
