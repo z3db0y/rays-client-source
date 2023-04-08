@@ -28,7 +28,8 @@ class Client {
 
     updateDisplayName(discordId, name, username, cardUrl) {
         if(!this.seed) return setTimeout(() => this.updateDisplayName(discordId, name, username, cardUrl), 1000);
-        this.initSent ? this.send('u', name, username, cardUrl) : this.send('init', discordId, name, crypto.createHmac('sha256', this.seed || '').update(getSocketKey()).digest('hex'), username, cardUrl);
+        let s = this.initSent ? this.send('u', name, username, cardUrl) : this.send('init', discordId, name, crypto.createHmac('sha256', this.seed || '').update(getSocketKey()).digest('hex'), username, cardUrl);
+        if(!s) return setTimeout(() => this.updateDisplayName(discordId, name, username, cardUrl), 1000);
         this.initSent = true;
     }
 
@@ -148,10 +149,13 @@ class Client {
     }
 
     send(arg, ...data) {
+        let success = true;
         try { this.ws.send(msgpack.encode([arg, ...data])); }
         catch {
             this._queue.push([arg, ...data]);
+            success = false;
         }
+        return success;
     }
 }
 
