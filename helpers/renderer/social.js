@@ -5,7 +5,6 @@ let clans = [];
 
 ipcRenderer.on('getBadges', (event, data) => {
     badges = data;
-    badges.push({ uname: 'zomballr', badges: ['https://cdn.z3db0y.com/rays-badges/dev.png'] })
 });
 
 ipcRenderer.on('getClans', (event, data) => {
@@ -36,37 +35,36 @@ function waitFor(o) {
                 clearInterval(check);
                 resolve(o());
             }
-        }, 100);
+        }, 10);
     });
 };
 
-waitFor(_ => window.updateWindow).then(updateWindow => {
-    window.updateWindow = function() {
-        let _r = updateWindow.apply(this, arguments);
-        setTimeout(() => onWindowUpdate(arguments[0]));
-        return _r;
-    };
+// waitFor(_ => window.updateWindow).then(updateWindow => {
+//     window.updateWindow = function() {
+//         let _r = updateWindow.apply(this, arguments);
+//         setTimeout(() => onWindowUpdate(arguments[0]));
+//         return _r;
+//     };
+// });
+
+// waitFor(_ => window.switchFeedTab).then(switchFeedTab => {
+//     window.switchFeedTab = function() {
+//         let _r = switchFeedTab.apply(this, arguments);
+//         setTimeout(() => onFeedSwitchTab(arguments[0]));
+//         return _r;
+//     };
+// });
+
+waitFor(_ => document.getElementById('loadMessage')).then(_ => {
+    new MutationObserver((mutations) => {
+        if (mutations[0].target.style.display !== 'none') return;
+        onWindowUpdate();
+    }).observe(document.getElementById('loadMessage'), { attributeFilter: ['style'], attributes: true, attributeOldValue: true });
 });
 
-waitFor(_ => window.switchFeedTab).then(switchFeedTab => {
-    window.switchFeedTab = function() {
-        let _r = switchFeedTab.apply(this, arguments);
-        setTimeout(() => onFeedSwitchTab(arguments[0]));
-        return _r;
-    };
-});
-
-function onWindowUpdate (type) {
-    switch(type) {
-        case 'profile':
-            break;
-        case 'feed':
-            onFeedSwitchTab();
-            break;
-        case 'leaders':
-            modLeaderboard();
-            break;
-    }
+function onWindowUpdate () {
+    onFeedSwitchTab();
+    modLeaderboard();
 }
 
 async function onFeedSwitchTab () {

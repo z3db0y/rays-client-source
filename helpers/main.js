@@ -105,9 +105,7 @@ function onNewWindow(ev, url) {
             title: '[RAYS] Client',
             icon: path.join(__dirname, '../assets/icon.png'),
             webPreferences: {
-                webSecurity: false,
-                preload: fs.existsSync(path.join(__dirname, '/renderer/' + getURLType(url) + '.js')) ? path.join(__dirname, '/renderer/' + getURLType(url) + '.js') : null,
-                enableRemoteModule: true
+                preload: fs.existsSync(path.join(__dirname, '/renderer/' + getURLType(url) + '.js')) ? path.join(__dirname, '/renderer/' + getURLType(url) + '.js') : null
             }
         }));
         win.setMenu(null);
