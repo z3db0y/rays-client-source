@@ -121,6 +121,7 @@ class Client {
 
     connect() {
         if(this.ws) this.ws.terminate();
+        this.initSent = false;
         this.ws = new ws('wss://api.z3db0y.com/rays/ws', {
             agent: new Agent({
                 rejectUnauthorized: false
