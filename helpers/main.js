@@ -226,9 +226,10 @@ ipcMain.on('updateDisplayName', (ev, name, name2) => {
     lastCardUrl = cardUrl;
     client.updateDisplayName(rpc.user.id, name, name2, cardUrl);
 });
-let getBadges = (ev, name) => {
-    if(!client.initSent) return setTimeout(() => getBadges(ev, name), 1000);
-    ev.sender.send('getBadges', client.list.find(x => x.name == name) || { name });
+let getBadges = (ev) => {
+    if(!client.list || !client.list.length) return setTimeout(() => getBadges(ev), 1000);
+    console.log('clist', client.list);
+    ev.sender.send('getBadges', client.list);
 };
 ipcMain.on('getBadges', getBadges);
 

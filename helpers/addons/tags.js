@@ -22,9 +22,9 @@ module.exports = _ => {
     let customDeathCards = config.get('customDeathCards', []);
 
     ipcRenderer.on('getBadges', (event, data) => {
-        if(badges.find(x => x.name === data.name)) badges.splice(badges.findIndex(x => x.name === data.name), 1);
-        badges.push(data);
+        badges = data;
     });
+    ipcRenderer.send('getBadges');
 
     ipcRenderer.send('getSelf');
     ipcRenderer.on('getSelf', (event, data) => {
@@ -56,15 +56,13 @@ module.exports = _ => {
     new MutationObserver(_ => {
         let playerEls = [...map([...leaderboard.children[0].children[0].children[0].children].slice(2), child => child.children[0].children[0].lastChild), ...map([...oldLeaderboard.children[0].children], child => child.children[child.children.length - 2])];
         
-        let players = [];
         for(let i = 0; i < playerEls.length; i++) {
             let playerEl = playerEls[i];
             let playerNode = find([...playerEl.childNodes], x => x.nodeType == 3);
             let playerName = playerNode?.textContent.trim();
-            players.push(playerName);
             let player = find(badges, x => x.name == playerName);
             let playerBadges = badges ? player?.badges || [] : [];
-            if(!player) ipcRenderer.send('getBadges', playerName); // Get badges for player if not found
+            if(!player) continue;
 
             if(applyBadges) {
                 playerBadges.forEach(badge => {
@@ -81,8 +79,6 @@ module.exports = _ => {
             for(var key in clan.style) playerEl.querySelector('span').style[key] = clan.style[key];
             if(clan.addonHTML && !playerEl.innerHTML.includes(clan.addonHTML)) playerEl.querySelector('span').insertAdjacentHTML('afterend', clan.addonHTML);
         }
-
-        badges = badges.filter(x => players.includes(x.name)); // GC badges
     }).observe(newLeaderDisplay, { childList: true });
 
     let deathUIHolder = document.getElementById('deathUIHolder');
