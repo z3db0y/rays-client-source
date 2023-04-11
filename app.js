@@ -155,6 +155,7 @@ for(let i = 0; i < flags.length; i++) {
     if(flagConf[flag.join('=')] == false) continue;
     app.commandLine.appendSwitch(flag[0], flag[1]);
 }
+app.commandLine.appendSwitch('disable-features', 'HardwareMediaKeyHandling,MediaSessionService');
 
 if(!config.get('hardwareAcceleration', true)) app.commandLine.appendSwitch('disable-gpu');
 if(config.get('angleBackend', 'default') !== 'default') app.commandLine.appendSwitch('use-angle', config.get('angleBackend', 'default'));
