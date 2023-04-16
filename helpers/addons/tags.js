@@ -55,7 +55,6 @@ module.exports = _ => {
 
     new MutationObserver(_ => {
         let playerEls = [...map([...leaderboard.getElementsByTagName('tbody')], t => map([...t.children].slice(2), child => child.children[0].children[0].lastChild)).flat(), ...map([...oldLeaderboard.children[0].children], child => child.children[child.children.length - 2])];
-        window.log(playerEls);
 
         for(let i = 0; i < playerEls.length; i++) {
             let playerEl = playerEls[i];
@@ -63,9 +62,8 @@ module.exports = _ => {
             let playerName = playerNode?.textContent.trim();
             let player = find(badges, x => x.name == playerName);
             let playerBadges = badges ? player?.badges || [] : [];
-            if(!player) continue;
 
-            if(applyBadges) {
+            if(player && applyBadges) {
                 playerBadges.forEach(badge => {
                     let html = `<img class="badge" src="${badge}" style="height: 23px; margin-top: 3px; vertical-align: middle">`;
                     if(!playerEl.parentElement.innerHTML.includes(html)) playerEl.insertAdjacentHTML('beforebegin', html);
