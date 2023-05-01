@@ -24,6 +24,7 @@ module.exports = () => {
         streamerEls.forEach((el, i) => {
             if(filteredFeatured[i]) {
                 if(el.children[1].children[0].classList.contains('raysBadge')) el.children[1].children[0].remove();
+                el.setAttribute('onclick', `onTwitchClick('${filteredFeatured[i].username}')`);
                 el.children[0].src = filteredFeatured[i].pfp;
                 el.children[1].children[0].innerText = filteredFeatured[i].username;
                 el.children[1].children[0].style.display = '';
