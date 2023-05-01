@@ -42,6 +42,13 @@
                 { "name": "Host comp game", "value": "hostComp" }
             ],
             "refresh": true
+        },
+        {
+            "name": "Hide bundle popups",
+            "description": "Hides bundle popups on game load.",
+            "type": "toggle",
+            "id": "hideBundlePop",
+            "refresh": true
         }
     ],
     "Discord Rich Presence": [

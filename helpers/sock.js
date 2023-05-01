@@ -43,7 +43,6 @@ class Client {
                     badges.push(badgeData);
                 }
             }) : null;
-            if (!badges.length) return;
             if(!user[1]) return;
 
             let minPremiumP = this.badges.sort((a, b) => a.p - b.p).find(x => x.pr);
@@ -54,7 +53,7 @@ class Client {
                 uname: user[3],
                 badges: badges.sort((a, b) => b.p - a.p).map(b => this.url + b.n + '.png'),
                 deathCard: user[4],
-                isPremium: badges.sort((a, b) => b.p - a.p)[0].p >= minPremiumP
+                isPremium: badges.length ? badges.sort((a, b) => b.p - a.p)[0].p >= minPremiumP : false
             });
         });
     }

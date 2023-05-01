@@ -126,7 +126,8 @@
             "ignore-gpu-blacklist": true,
             "disable-background-timer-throttling": true,
             "disable-renderer-backgrounding": true
-        }
+        },
+        "hideBundePop": true
     },
     "windowOpts": {
         "autoHideMenuBar": true,

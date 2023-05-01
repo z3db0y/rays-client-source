@@ -217,13 +217,12 @@ ipcMain.on('updateDisplayName', (ev, name, name2) => {
     let card = cardT == -1 ? {} : cardT == 1 ? config.get('customDeathCards', [])[cardI] : client.deathCards[cardI];
     let cardUrl = card ? card.url : null;
 
-    if(!rpc.user) return (lastDisplayName = name, lastUsername = name2, lastCardUrl = cardUrl);
     if(lastDisplayName == name && lastCardUrl == cardUrl && client.initSent) return;
     console.log('set display name');
     lastDisplayName = name;
     lastUsername = name2;
     lastCardUrl = cardUrl;
-    client.updateDisplayName(rpc.user.id, name, name2, cardUrl);
+    client.updateDisplayName(rpc.user ? rpc.user.id : null, name, name2, cardUrl);
 });
 let getBadges = (ev) => {
     if(!client.list || !client.list.length) return setTimeout(() => getBadges(ev), 1000);
@@ -251,13 +250,11 @@ let getDeathCards = (ev) => {
 ipcMain.on('getDeathCards', getDeathCards);
 
 let updateUser = _ => {
-    if(!rpc.user) return;
     let self = client.list.find(x => x.uname == lastUsername);
     if(self) mainWindow.webContents.send('getSelf', self);
     mainWindow.webContents.send('getBadges', client.list);
 };
 client.on('userUpdate', updateUser);
-client.on('ping', () => console.log('Socket ping update:', client.ping));
 
 ipcMain.on('config.onDidAnyChange', ev => (ev.sender.send('config.onDidAnyChange'), controls = Object.assign({
     fullscreen: 'F11',
