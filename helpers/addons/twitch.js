@@ -605,10 +605,9 @@ function formatTime(ms, seconds = false) {
 }
 
 module.exports = () => {
-    if(!window.windows) return setTimeout(module.exports, 100);
+    if(!window.windows || !windows[0]) return setTimeout(module.exports, 100);
 
     let chat = document.getElementById('chatList_custom');
-    window.log('Twitch Chat Loaded', config.get('twitch.separateChat', false) ? 'Separate' : 'Integrated');
     if(config.get('twitch.separateChat', false)) {
         chat = document.createElement('div');
         chat.style.marginBottom = '6px';
@@ -642,7 +641,6 @@ module.exports = () => {
                 let l = (_, id, data) => (id == n && (data.stats = JSON.parse(data.player_stats), player = data, resolve(data), ipcRenderer.off('krunkerws.getPlayerAsync', l)));
                 ipcRenderer.on('krunkerws.getPlayerAsync', l);
             } catch(e) {
-                window.log('Error getting player data', e);
                 resolve(null);
             }
             ipcRenderer.send('krunkerws.getPlayerAsync', n);

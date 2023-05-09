@@ -24,11 +24,10 @@ let insertCopyLinkBtns = () => {
 };
 
 let hookIn = () => {
-    if(!window.windows) return setTimeout(hookIn, 100);
+    if(!window.windows || !window.windows[1]) return setTimeout(hookIn, 100);
     let win = window.windows[1];
     let oGen = win.gen;
     win.gen = function gen() {
-        window.log('gen');
         setTimeout(insertCopyLinkBtns);
         return oGen.apply(this, arguments);
     };

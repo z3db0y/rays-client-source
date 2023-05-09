@@ -6,7 +6,7 @@ window.equip = false;
 
 // Fix for server browser input
 function applyServerBrowserFix() {
-    if(!window['windows']) return setTimeout(applyServerBrowserFix, 100);
+    if(!window['windows'] || !window['windows'][1]) return setTimeout(applyServerBrowserFix, 100);
     let o = window['windows'][1].genList;
     window['windows'][1].genList = function () {
         let s = this['serverSearch'];

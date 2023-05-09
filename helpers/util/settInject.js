@@ -9,7 +9,7 @@ function getter(obj, path) {
 
 module.exports = function () {
     // wait for "windows" to be a valid object and easy CSS injection
-    if (typeof windows === 'undefined' || !windows[0].tabs.basic.find(x => x.name === 'CSS')) {
+    if (typeof windows === 'undefined' || !windows[0] || !windows[0].tabs.basic.find(x => x.name === 'CSS')) {
         return new Promise(resolve => setTimeout(() => resolve(module.exports()), 100));
     }
 

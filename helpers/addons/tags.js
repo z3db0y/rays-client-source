@@ -105,7 +105,6 @@ module.exports = _ => {
     let winHooked = false;
     let hookShowWin = () => {
         if(!window.windows || !window.windows[51]) return setTimeout(hookShowWin, 100);
-        window.log('hooking showWindow');
         if(winHooked) return;
         winHooked = true;
         let oldGen = window.windows[51].gen;

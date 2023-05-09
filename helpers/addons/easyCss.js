@@ -14,7 +14,7 @@ module.exports = async () => {
         } catch {}
     }
     // wait for "windows" to be a valid object
-    if (typeof windows === 'undefined') {
+    if (typeof windows === 'undefined' || !windows[0]) {
         return new Promise(resolve => setTimeout(() => resolve(module.exports()), 100));
     }
 
