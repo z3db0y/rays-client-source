@@ -123,7 +123,6 @@ window.clearCache = () => {
 
 window.exportClientSettings = () => {
     let settings = Object.assign(defaultSettings, config.store);
-    delete settings['alts'];
     if(settings['twitch'] && settings['twitch'].token) delete settings['twitch'].token;
     if(settings['spotify'] && settings['spotify'].tokens) delete settings['spotify'].tokens;
     let data = JSON.stringify(settings);

@@ -51,6 +51,24 @@
             "refresh": true
         }
     ],
+    "StatTrack": [
+        {
+            "name": "Enable",
+            "description": "StatTrack is a feature that saved your games and shows you your stats.",
+            "type": "toggle",
+            "id": "statTrack.enabled",
+            "refresh": true
+        },
+        {
+            "name": "History size",
+            "description": "The maximum amount of games to save.",
+            "type": "slider",
+            "id": "statTrack.maxGames",
+            "min": 1,
+            "max": 100,
+            "step": 1
+        }
+    ],
     "Discord Rich Presence": [
         {
             "name": "Presence Type",

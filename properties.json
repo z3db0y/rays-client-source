@@ -127,7 +127,11 @@
             "disable-background-timer-throttling": true,
             "disable-renderer-backgrounding": true
         },
-        "hideBundePop": true
+        "hideBundePop": true,
+        "statTrack": {
+            "enabled": false,
+            "maxGames": 10
+        }
     },
     "windowOpts": {
         "autoHideMenuBar": true,
