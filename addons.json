@@ -1,6 +1,13 @@
 {
     "Basic": [
         {
+            "name": "Minimap Hider",
+            "description": "Hides the minimap.",
+            "type": "toggle",
+            "id": "minimapHider",
+            "refresh": true
+        },
+        {
             "name": "Menu timer",
             "description": "Shows the game timer instead of CLICK TO PLAY.",
             "type": "toggle",
