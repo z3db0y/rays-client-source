@@ -183,5 +183,6 @@ btn.id = 'customizeButton';
 btn.onclick = openAltManager;
 btn.setAttribute('onmouseenter', 'playTick()');
 document.getElementById('menuClassContainer').appendChild(btn);
+window.customizeButton = document.getElementById('customizeButton');
 
 document.addEventListener('keydown', e => (e.key == config.get('controls.altmanager', 'Unbound')) && (document.exitPointerLock(), openAltManager()));
