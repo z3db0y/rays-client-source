@@ -1,11 +1,9 @@
 module.exports = _ => {
     if(
-        !document.getElementById('menuClassNameTag') ||
-        !document.getElementById('newLeaderDisplay')
+        !document.getElementById('centerLeaderDisplay')
     ) return setTimeout(module.exports, 100);
-    const leaderboard = document.getElementById('newLeaderDisplay');
-    const oldLeaderboard = document.getElementById('leaderDisplay');
-    const menuName = document.getElementById('menuClassNameTag');
+    const leaderboard = document.getElementById('centerLeaderDisplay');
+    const oldLeaderboard = document.getElementById('leaderboardHolder');
 
     const { ipcRenderer } = require('electron');
     const config = new (require('electron-store'))();
@@ -45,8 +43,6 @@ module.exports = _ => {
         for(var i = 0; i < array.length; i++) if(func(array[i])) return array[i];
     }
 
-    let newLeaderDisplay = document.getElementById('newLeaderDisplay');
-
     function map(array, func) {
         let newa = [];
         for(var i = 0; i < array.length; i++) newa.push(func(array[i]));
@@ -78,7 +74,7 @@ module.exports = _ => {
             for(var key in clan.style) playerEl.querySelector('span').style[key] = clan.style[key];
             if(clan.addonHTML && !playerEl.innerHTML.includes(clan.addonHTML)) playerEl.querySelector('span').insertAdjacentHTML('afterend', clan.addonHTML);
         }
-    }).observe(newLeaderDisplay, { childList: true });
+    }).observe(leaderboard, { childList: true });
 
     let deathUIHolder = document.getElementById('deathUIHolder');
     new MutationObserver(_ => {
