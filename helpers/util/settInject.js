@@ -82,7 +82,7 @@ module.exports = function () {
                                 settHTML += `<div style="margin-left: auto"><label class="switch" style="margin-left:10px"><input type="checkbox" id="${sett.id.replace(/"/g, '\\"')}" ${config.get(sett.id, false) ? 'checked' : ''} onclick="setClientSetting(this.id, this.checked)"><span class="slider" style="width: 65px"><span class="grooves"></span></span></label><div onclick="${sett.onclick && sett.onclick.replace(/"/g, '\\"')}" style="width: auto; display: inline-table" class="settingsBtn">${sett.label}</div></div></div>`;
                                 break;
                             case 'input':
-                                settHTML += `<input type="input" id="${sett.id.replace(/"/g, '\\"')}" placeholder="${sett.placeholder.replace(/"/g, '\\"')}" oninput="setClientSetting(this.id, this.value)" class="inputGrey2" value="${config.get(sett.id, '').replace(/"/g, '\\"')}"></div>`;
+                                settHTML += `<input type="${sett.subtype || 'text'}" id="${sett.id.replace(/"/g, '\\"')}" placeholder="${sett.placeholder.replace(/"/g, '\\"')}" oninput="setClientSetting(this.id, this.value)" class="inputGrey2" value="${config.get(sett.id, '').replace(/"/g, '\\"')}"></div>`;
                                 break;
                             case 'select':
                                 settHTML += `<select id="${sett.id.replace(/"/g, '\\"')}" onchange="setClientSetting(this.id, (isNaN(parseInt(this.value)) ? this.value : parseInt(this.value)))" class="inputGrey2"">`;

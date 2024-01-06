@@ -58,6 +58,8 @@ injectLoadingScreen();
 loadServerBrowserUtil();
 loadAddons(true);
 document.addEventListener('DOMContentLoaded', async function() {
+    if(window.location.protocol == 'file:') return disconnected();
+
     loadAddons();
     loadGameFixes();
     injectClientStylesheet();
@@ -380,3 +382,20 @@ window.openFlagEditor = () => {
         config.set('flags', flags);
     });
 };
+
+function disconnected() {
+    let resetProxy = document.getElementById('resetProxy');
+    let refresh = document.getElementById('refresh');
+
+    resetProxy.onclick = () => {
+        config.set('proxy.enabled', false);
+        resetProxy.disabled = true;
+        resetProxy.textContent = 'Proxy disabled!';
+        setTimeout(() => {
+            resetProxy.textContent = 'Reset proxy';
+            resetProxy.disabled = false;
+        }, 2000);
+    };
+
+    refresh.onclick = () => window.location = 'https://krunker.io';
+}

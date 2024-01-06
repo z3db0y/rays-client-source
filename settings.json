@@ -110,6 +110,22 @@
             "label": "Edit"
         }
     ],
+    "Ad block": [
+        {
+            "name": "Enabled",
+            "description": "Block ads from showing up in the game.",
+            "type": "toggle",
+            "id": "adblock",
+            "refresh": true
+        },
+        {
+            "name": "Host URLs",
+            "description": "Hosts file to use for ad blocking.",
+            "type": "input",
+            "id": "adblockURL",
+            "placeholder": "URL"
+        }
+    ],
     "Style": [
         {
             "name": "Custom Badges",

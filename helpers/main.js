@@ -2,6 +2,7 @@ const { BrowserWindow, screen, app, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const properties = require(path.join(__dirname, '../properties.json'));
+const loadProxy = require(path.join(__dirname, '/util/proxy.js'));
 const windowOpts = properties.windowOpts;
 const config = new (require('electron-store'))({ defaults: properties.defaultSettings });
 
@@ -43,6 +44,8 @@ console.log('Main window created. Size: ' + mainWindow.getSize()[0] + 'x' + main
 if(config.get('window.maximized', false)) mainWindow.maximize();
 mainWindow.loadURL('https://krunker.io', { 'userAgent': USER_AGENT });
 mainWindow.on('page-title-updated', (ev) => ev.preventDefault());
+mainWindow.webContents.on('did-start-loading', () => loadProxy());
+mainWindow.webContents.on('did-fail-load', (ev, ec, edesc, url, isMainFrame) => isMainFrame && mainWindow.loadFile(path.join(__dirname, '/../html/disconnected.html')));
 mainWindow.once('ready-to-show', () => {
     mainWindow.show();
 });

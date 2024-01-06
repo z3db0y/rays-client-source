@@ -76,6 +76,38 @@
             "step": 1
         }
     ],
+    "Proxy": [
+        {
+            "name": "Enable",
+            "description": "Use configured proxy server.",
+            "type": "toggle",
+            "id": "proxy.enabled",
+            "refresh": true
+        },
+        {
+            "name": "Protocol",
+            "description": "The protocol to use for the proxy server.",
+            "type": "input",
+            "id": "proxy.protocol",
+            "placeholder": "http"
+        },
+        {
+            "name": "Host",
+            "description": "The hostname of the proxy server.",
+            "type": "input",
+            "subtype": "password",
+            "id": "proxy.host",
+            "placeholder": "0.0.0.0"
+        },
+        {
+            "name": "Port",
+            "description": "The port of the proxy server.",
+            "type": "input",
+            "subtype": "number",
+            "id": "proxy.port",
+            "placeholder": "8080"
+        }
+    ],
     "Discord Rich Presence": [
         {
             "name": "Presence Type",

@@ -4,7 +4,8 @@ const path = require('path');
 const properties = require(path.join(__dirname, '/properties.json'));
 const Updater = require(path.join(__dirname, '/helpers/updater.js'));
 const config = new (require('electron-store'))({ defaults: properties.defaultSettings });
-const loadSwapper = require(path.join(__dirname, '/helpers/resourceSwapper.js'));
+const swapper = require(path.join(__dirname, '/helpers/resourceSwapper.js'));
+const adblock = require(path.join(__dirname, '/helpers/adblock.js'));
 const swapDir = path.normalize(`${app.getPath('documents')}/KrunkerResourceSwapper`);
 
 const SPLASH_FILE = path.join(__dirname, '/html/splash.html');
@@ -101,11 +102,25 @@ async function init() {
         console.debug('No update available.');
         setTimeout(() => {
             destroySplash(splash);
-            if(config.get('resourceSwapper')) {
-                if(!fs.existsSync(swapDir)) fs.mkdirSync(swapDir);
-                loadSwapper(session, swapDir);
-                console.log('Loaded resource swapper. (dir: ' + swapDir + ')');
-            }
+
+            session.defaultSession.webRequest.onBeforeRequest(async (details, callback) => {
+                if(config.get('resourceSwapper', false)) {
+                    let swapperResult = swapper(swapDir, details);
+                    if(swapperResult.cancel || swapperResult.redirectURL) {
+                        return callback(swapperResult);
+                    }
+                };
+
+                if(config.get('adblock', false)) {
+                    let adblockResult = await adblock(details);
+                    if(adblockResult.cancel || adblockResult.redirectURL) {
+                        return callback(adblockResult);
+                    }
+                }
+
+                callback({ cancel: false });
+            });
+
             launchKrunker();
         }, 1000);
     }

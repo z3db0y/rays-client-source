@@ -1,0 +1,84 @@
+<video src="../assets/splash.mkv" id="v" width="100%" height="100%" muted></video>
+<video src="../assets/loop.mkv" id="v1" width="100%" height="100%" loop muted style="display: none;"></video>
+<div class="cont">
+    <h1>Failed to connect to Krunker.io</h1>
+    <span>
+        <button id="resetProxy">Disable proxy</button>
+        <button id="refresh">Refresh</button>
+    </span>
+</div>
+<style>
+    @font-face {
+        font-family: F;
+        src: url('../assets/font.ttf');
+    }
+
+    * { font-family: F; font-weight: 100; -webkit-app-region: drag; user-select: none; }
+
+    html, body {
+        height: 100%;
+        margin: 0;
+        background: #000;
+    }
+
+    video {
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        object-fit: cover;
+        opacity: 0.5;
+    }
+
+    .cont {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 20px;
+        color: #fff;
+        z-index: 1;
+        font-size: 50px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        text-align: center;
+    }
+
+    button {
+        background: #fff1;
+        border: none;
+        outline: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 20px;
+        color: #fff;
+        cursor: pointer;
+        transition: .5s;
+    }
+
+    button:hover {
+        background: #fff5;
+    }
+
+    button:disabled {
+        opacity: .5;
+        cursor: not-allowed;
+    }
+</style>
+<script>
+    var v = document.getElementById('v');
+    var v1 = document.getElementById('v1');
+    v.onloadeddata = function() {
+        v.onended = function() {
+            v.style.display = 'none';
+            v1.style.display = 'block';
+            v1.play();
+        }
+        v.play();
+    }
+</script>
