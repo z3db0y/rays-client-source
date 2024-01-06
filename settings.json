@@ -142,13 +142,6 @@
             "refresh": true
         },
         {
-            "name": "Ad blocker",
-            "description": "Removes banner ads from the game.",
-            "type": "toggle",
-            "id": "adBlock",
-            "refresh": true
-        },
-        {
             "name": "Loading screen background",
             "description": "Changes the loading screen background.",
             "type": "input",

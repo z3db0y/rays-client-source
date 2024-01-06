@@ -33,7 +33,6 @@ function injectClientStylesheet() {
     let style = document.createElement('style');
     style.textContent = fs.readFileSync(path.join(__dirname, '../../html/styles.css')).toString();
     document.head.appendChild(style);
-    if(config.get('adBlock', false)) document.body.classList.add('adBlock');
     if(config.get('kpdPingAddon', false)) document.body.classList.add('kpdPingAddon');
 }
 
